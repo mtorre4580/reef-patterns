@@ -31,10 +31,10 @@ export const CommandPaletteProvider = ({ children }: { children: ReactNode }) =>
   const [isOpen, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const search = useMemo(
-    () => createPatternSearch(patterns, (id) => t(`categories.${id}.label`)),
-    [t],
+    () => createPatternSearch(patterns, locale, (id) => t(`categories.${id}.label`)),
+    [t, locale],
   );
 
   useEffect(() => {
@@ -95,7 +95,10 @@ export const CommandPaletteProvider = ({ children }: { children: ReactNode }) =>
               >
                 <Compass aria-hidden className="size-4 text-kelp" />
                 <span className="flex-1">
-                  {p.name} <span className="text-kelp">· {p.nameEs}</span>
+                  {p.name}
+                  {p.localName[locale] !== p.name && (
+                    <span className="text-kelp"> · {p.localName[locale]}</span>
+                  )}
                 </span>
                 <span className="text-xs text-kelp">{t(`categories.${p.category}.label`)}</span>
               </Command.Item>

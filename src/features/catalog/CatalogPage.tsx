@@ -12,10 +12,10 @@ import { ZoneSection } from './ZoneSection';
 
 export const CatalogPage = () => {
   useDocumentTitle(null);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const search = useMemo(
-    () => createPatternSearch(patterns, (id) => t(`categories.${id}.label`)),
-    [t],
+    () => createPatternSearch(patterns, locale, (id) => t(`categories.${id}.label`)),
+    [t, locale],
   );
   const { filters, update } = useCatalogFilters();
 

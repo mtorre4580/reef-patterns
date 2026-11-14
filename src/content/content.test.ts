@@ -31,11 +31,17 @@ describe('content', () => {
   });
 
   it('detects problems in invalid content', () => {
-    const broken = { ...patterns[0]!, rank: 3, related: ['no-such-id'] };
+    const broken = {
+      ...patterns[0]!,
+      rank: 3,
+      related: ['no-such-id'],
+      summary: { ...patterns[0]!.summary, 'pt-BR': '' },
+    };
     broken.example = { ...broken.example, code: 'const = ;' };
     const messages = validatePatterns([broken]).map((i) => i.message);
     expect(messages.some((m) => m.includes('rank'))).toBe(true);
     expect(messages.some((m) => m.includes('no-such-id'))).toBe(true);
-    expect(messages.some((m) => m.includes('no parsea'))).toBe(true);
+    expect(messages.some((m) => m.includes('does not parse'))).toBe(true);
+    expect(messages).toContain('summary is missing in pt-BR');
   });
 });

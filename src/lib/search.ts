@@ -1,10 +1,11 @@
 import Fuse, { type IFuseOptions } from 'fuse.js';
 import type { CategoryId, Pattern } from '@/content/types';
+import type { Locale } from '@/i18n/locales';
 
 interface SearchDoc {
   pattern: Pattern;
   name: string;
-  nameEs: string;
+  localName: string;
   summary: string;
   category: string;
 }
@@ -12,7 +13,7 @@ interface SearchDoc {
 const options: IFuseOptions<SearchDoc> = {
   keys: [
     { name: 'name', weight: 3 },
-    { name: 'nameEs', weight: 2 },
+    { name: 'localName', weight: 2 },
     { name: 'category', weight: 1 },
     { name: 'summary', weight: 0.6 },
   ],
@@ -34,13 +35,14 @@ export interface PatternSearch {
 /** Fuzzy index over name, localized name, category and summary. Ignores diacritics. */
 export function createPatternSearch(
   patterns: Pattern[],
+  locale: Locale = 'en',
   categoryLabel: (id: CategoryId) => string = (id) => id,
 ): PatternSearch {
   const docs = patterns.map<SearchDoc>((pattern) => ({
     pattern,
     name: normalize(pattern.name),
-    nameEs: normalize(pattern.nameEs),
-    summary: normalize(pattern.summary),
+    localName: normalize(pattern.localName[locale]),
+    summary: normalize(pattern.summary[locale]),
     category: normalize(categoryLabel(pattern.category)),
   }));
   const fuse = new Fuse(docs, options);

@@ -49,7 +49,7 @@ const Chip = ({
 /** Filters + helm + result. The challenge is picked before animating. */
 export const HelmPanel = ({ onChoose, rng = defaultRng }: HelmPanelProps) => {
   const { completed } = useProgress();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [filters, setFilters] = useState<HelmFilters>(defaultHelmFilters);
   const [spin, setSpin] = useState<(HelmSpin & { challenge: Challenge }) | null>(null);
   const [settledKey, setSettledKey] = useState<number | null>(null);
@@ -84,7 +84,7 @@ export const HelmPanel = ({ onChoose, rng = defaultRng }: HelmPanelProps) => {
   const spinning = !!spin && settledKey !== spin.key;
   // Split the sentence around the pattern name so it can be rendered in bold
   const [resultBefore, resultAfter] = result
-    ? t('helm.result', { pattern: '\u0000', title: result.title }).split('\u0000')
+    ? t('helm.result', { pattern: '\u0000', title: result.title[locale] }).split('\u0000')
     : ['', ''];
 
   return (

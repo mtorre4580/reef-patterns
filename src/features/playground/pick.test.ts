@@ -5,13 +5,13 @@ import { pickChallenge } from './pick';
 const make = (id: string): Challenge => ({
   id,
   patternId: id.split('-')[0]!,
-  title: id,
+  title: { en: id, es: id, 'pt-BR': id },
   difficulty: 'facil',
-  story: '',
-  instructions: '',
+  story: { en: '', es: '', 'pt-BR': '' },
+  instructions: { en: '', es: '', 'pt-BR': '' },
   starterCode: '',
   tests: [],
-  hints: [],
+  hints: { en: [], es: [], 'pt-BR': [] },
   solution: '',
 });
 

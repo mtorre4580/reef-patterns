@@ -18,9 +18,9 @@ const issues = [
 ];
 
 if (issues.length > 0) {
-  console.error(`✗ ${issues.length} problema(s) en el contenido:\n`);
+  console.error(`✗ ${issues.length} content issue(s):\n`);
   for (const issue of issues) console.error(`  ${issue.where}: ${issue.message}`);
   process.exit(1);
 }
 
-console.log(`✓ ${patterns.length} patrones y ${challenges.length} challenges válidos`);
+console.log(`✓ ${patterns.length} patterns and ${challenges.length} challenges are valid`);

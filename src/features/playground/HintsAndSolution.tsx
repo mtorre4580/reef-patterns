@@ -14,9 +14,10 @@ interface HintsAndSolutionProps {
 /** One hint at a time and the solution behind a confirmation. Resets when the challenge changes. */
 export const HintsAndSolution = ({ challenge, onUseSolution }: HintsAndSolutionProps) => {
   const [shown, setShown] = useState(0);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const hints = challenge.hints[locale];
   const [solutionVisible, setSolutionVisible] = useState(false);
-  const remaining = challenge.hints.length - shown;
+  const remaining = hints.length - shown;
 
   return (
     <section
@@ -25,7 +26,7 @@ export const HintsAndSolution = ({ challenge, onUseSolution }: HintsAndSolutionP
     >
       {shown > 0 && (
         <ol className="flex flex-col gap-2">
-          {challenge.hints.slice(0, shown).map((hint, i) => (
+          {hints.slice(0, shown).map((hint, i) => (
             <li key={i} className="flex gap-2 rounded-control bg-reef/60 px-3 py-2 text-sm">
               <Lightbulb aria-hidden className="mt-0.5 size-4 shrink-0 text-cat-frontend" />
               <span>
@@ -46,7 +47,7 @@ export const HintsAndSolution = ({ challenge, onUseSolution }: HintsAndSolutionP
           <Lightbulb aria-hidden />
           {remaining === 0
             ? t('hints.noMore')
-            : t('hints.show', { n: shown + 1, total: challenge.hints.length })}
+            : t('hints.show', { n: shown + 1, total: hints.length })}
         </Button>
         {!solutionVisible && (
           <ConfirmDialog
