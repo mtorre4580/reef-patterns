@@ -1,14 +1,18 @@
-import { Play, RotateCcw } from 'lucide-react';
+import { CheckCircle2, Play, RotateCcw, ShipWheel } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 import type { Challenge, Pattern } from '@/content/types';
 import { useTheme } from '@/app/ThemeProvider';
 import { Button } from '@/components/ui/button';
+import { Dialog } from '@/components/ui/dialog';
+import { useProgress } from '@/features/progress';
+import { allPassed } from '@/lib/runner';
 import { Kbd } from '@/components/ui/kbd';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { cn } from '@/lib/utils';
 import { ChallengeBrief } from './ChallengeBrief';
 import { CodeEditor } from './CodeEditor';
+import { HelmPanel } from './HelmPanel';
 import { HintsAndSolution } from './HintsAndSolution';
 import { resolveChallenge } from './resolveChallenge';
 import { ResultsPanel } from './ResultsPanel';
@@ -25,10 +29,30 @@ const mobileTabs: { id: MobileTab; label: string }[] = [
 
 export function PlaygroundPage() {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
   const resolution = resolveChallenge(params);
+  const choose = useCallback(
+    (c: Challenge) => navigate(`/playground?challenge=${c.id}`),
+    [navigate],
+  );
   useDocumentTitle(
     resolution.kind === 'challenge' ? `${resolution.challenge.title} · Playground` : 'Playground',
   );
+
+  if (resolution.kind === 'landing') {
+    return (
+      <div className="mx-auto flex max-w-md flex-col gap-6 px-4 py-10 sm:py-14">
+        <div className="text-center">
+          <h1 className="text-2xl font-semibold tracking-tight">Girá el timón</h1>
+          <p className="mt-2 text-kelp">
+            Elegí zonas o categorías y dejá que el timón te asigne un challenge. Primero salen los
+            que todavía no resolviste.
+          </p>
+        </div>
+        <HelmPanel onChoose={choose} />
+      </div>
+    );
+  }
 
   if (resolution.kind === 'no-challenges') {
     return (
@@ -40,7 +64,7 @@ export function PlaygroundPage() {
             : 'Todavía no hay challenges cargados.'}
         </p>
         <Button asChild variant="primary" className="mt-8">
-          <Link to="/playground">Ver otro challenge</Link>
+          <Link to="/playground">Girar el timón</Link>
         </Button>
       </div>
     );
@@ -51,20 +75,32 @@ export function PlaygroundPage() {
       key={resolution.challenge.id}
       challenge={resolution.challenge}
       pattern={resolution.pattern}
+      onChoose={choose}
     />
   );
 }
 
-function Workspace({ challenge, pattern }: { challenge: Challenge; pattern: Pattern }) {
+interface WorkspaceProps {
+  challenge: Challenge;
+  pattern: Pattern;
+  onChoose: (challenge: Challenge) => void;
+}
+
+function Workspace({ challenge, pattern, onChoose }: WorkspaceProps) {
   const { theme } = useTheme();
+  const { completed, markCompleted } = useProgress();
+  const [helmOpen, setHelmOpen] = useState(false);
+  const solved = completed.has(challenge.id);
   const { code, setCode, reset } = useDraft(challenge);
   const runner = useRunner();
   const [mobileTab, setMobileTab] = useState<MobileTab>('brief');
 
   const run = useCallback(() => {
     setMobileTab((t) => (t === 'code' ? 'results' : t));
-    void runner.run(challenge, code);
-  }, [runner, challenge, code]);
+    void runner.run(challenge, code).then((result) => {
+      if (result && allPassed(result)) markCompleted(challenge.id);
+    });
+  }, [runner, challenge, code, markCompleted]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -114,6 +150,18 @@ function Workspace({ challenge, pattern }: { challenge: Challenge; pattern: Patt
               panel('brief'),
             )}
           >
+            <div className="mb-3 flex items-center justify-between gap-2">
+              {solved ? (
+                <span className="inline-flex items-center gap-1.5 text-xs text-anemone">
+                  <CheckCircle2 aria-hidden className="size-4" /> Resuelto
+                </span>
+              ) : (
+                <span className="text-xs text-kelp">Pendiente</span>
+              )}
+              <Button variant="secondary" size="sm" onClick={() => setHelmOpen(true)}>
+                <ShipWheel aria-hidden /> Girar el timón
+              </Button>
+            </div>
             <ChallengeBrief challenge={challenge} pattern={pattern} />
           </section>
 
@@ -163,6 +211,20 @@ function Workspace({ challenge, pattern }: { challenge: Challenge; pattern: Patt
           <HintsAndSolution challenge={challenge} onUseSolution={setCode} />
         </section>
       </div>
+
+      <Dialog
+        open={helmOpen}
+        onOpenChange={setHelmOpen}
+        title="Girá el timón"
+        description="El timón elige un challenge entre los filtros activos, priorizando los pendientes."
+      >
+        <HelmPanel
+          onChoose={(c) => {
+            setHelmOpen(false);
+            onChoose(c);
+          }}
+        />
+      </Dialog>
     </div>
   );
 }

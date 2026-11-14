@@ -3,7 +3,8 @@ import type { Challenge, Pattern } from '@/content/types';
 
 export type Resolution =
   | { kind: 'challenge'; challenge: Challenge; pattern: Pattern }
-  | { kind: 'no-challenges'; pattern: Pattern | null };
+  | { kind: 'no-challenges'; pattern: Pattern | null }
+  | { kind: 'landing' };
 
 /** Decide qué challenge mostrar a partir de ?challenge= o ?pattern=. */
 export function resolveChallenge(params: URLSearchParams): Resolution {
@@ -19,8 +20,6 @@ export function resolveChallenge(params: URLSearchParams): Resolution {
     return { kind: 'no-challenges', pattern };
   }
 
-  const first = [...challengesByPattern.values()][0]?.[0];
-  if (first)
-    return { kind: 'challenge', challenge: first, pattern: patternsById.get(first.patternId)! };
-  return { kind: 'no-challenges', pattern: null };
+  // Sin parámetros: el usuario gira el timón para elegir
+  return { kind: 'landing' };
 }

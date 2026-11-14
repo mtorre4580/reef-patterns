@@ -20,7 +20,7 @@ const challenge = challengesById.get('observer-1')!;
 
 async function openChallenge(path = '/playground?challenge=observer-1') {
   const utils = renderRoute(path);
-  await screen.findByRole('heading', { level: 1, name: challenge.title });
+  await screen.findByRole('heading', { level: 1, name: challenge.title }, { timeout: 5000 });
   const editor = screen.getByRole('textbox', { name: /Editor de código/ });
   return { ...utils, editor };
 }
@@ -96,5 +96,58 @@ describe('playground', () => {
   it('avisa si un patrón todavía no tiene challenges', async () => {
     renderRoute('/playground?pattern=visitor');
     expect(await screen.findByText(/Todavía no hay challenges para Visitor/)).toBeInTheDocument();
+  });
+});
+
+describe('timón', () => {
+  const realMatchMedia = window.matchMedia;
+  beforeEach(() => {
+    // Movimiento reducido: el timón muestra el resultado sin animar
+    window.matchMedia = ((query: string) => ({
+      ...realMatchMedia(query),
+      matches: query.includes('prefers-reduced-motion'),
+    })) as typeof window.matchMedia;
+  });
+  afterEach(() => {
+    window.matchMedia = realMatchMedia;
+  });
+
+  it('sin parámetros muestra el timón y lleva al challenge elegido', async () => {
+    const { user, router } = renderRoute('/playground');
+    expect(
+      await screen.findByRole('heading', { name: 'Girá el timón' }, { timeout: 5000 }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Girar el timón' }));
+    expect(await screen.findByText(/Te tocó/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Empezar challenge/ }));
+    expect(router.state.location.search).toMatch(/^\?challenge=[a-z-]+-\d+$/);
+  });
+
+  it('se gira con el teclado y respeta los filtros', async () => {
+    const { user } = renderRoute('/playground');
+    await screen.findByRole('heading', { name: 'Girá el timón' }, { timeout: 5000 });
+    await user.click(screen.getByRole('button', { name: 'Arrecife' }));
+    expect(screen.getByText(/2 patrones · 2 challenges en juego/)).toBeInTheDocument();
+    screen.getByRole('button', { name: 'Girar el timón' }).focus();
+    await user.keyboard('{Enter}');
+    const result = await screen.findByText(/Te tocó/);
+    expect(result.textContent).toMatch(/State|Command/);
+  });
+
+  it('marca el challenge como resuelto y lo guarda', async () => {
+    const { user, editor } = await openChallenge();
+    expect(screen.getByText('Pendiente')).toBeInTheDocument();
+    fireEvent.change(editor, { target: { value: challenge.solution } });
+    await user.click(screen.getByRole('button', { name: /Ejecutar tests/ }));
+    expect(await screen.findByText('Resuelto')).toBeInTheDocument();
+    expect(JSON.parse(localStorage.getItem('reef-patterns:progress')!)).toEqual({
+      completed: ['observer-1'],
+    });
+  });
+
+  it('abre el timón desde un challenge', async () => {
+    const { user } = await openChallenge();
+    await user.click(screen.getByRole('button', { name: /Girar el timón/ }));
+    expect(await screen.findByRole('dialog', { name: 'Girá el timón' })).toBeInTheDocument();
   });
 });

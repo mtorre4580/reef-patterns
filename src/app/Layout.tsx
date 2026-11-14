@@ -1,6 +1,7 @@
 import { Search } from 'lucide-react';
 import { NavLink, Outlet, ScrollRestoration } from 'react-router';
 import { CommandPaletteProvider, useCommandPalette } from '@/features/catalog';
+import { ProgressProvider } from '@/features/progress';
 import { Kbd } from '@/components/ui/kbd';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './ThemeToggle';
@@ -65,18 +66,20 @@ function Header() {
 
 export function Layout() {
   return (
-    <CommandPaletteProvider>
-      <a
-        href="#contenido"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-control focus:bg-lagoon focus:px-3 focus:py-2 focus:text-lagoon-ink"
-      >
-        Saltar al contenido
-      </a>
-      <Header />
-      <main id="contenido" tabIndex={-1} className="outline-none">
-        <Outlet />
-      </main>
-      <ScrollRestoration />
-    </CommandPaletteProvider>
+    <ProgressProvider>
+      <CommandPaletteProvider>
+        <a
+          href="#contenido"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-control focus:bg-lagoon focus:px-3 focus:py-2 focus:text-lagoon-ink"
+        >
+          Saltar al contenido
+        </a>
+        <Header />
+        <main id="contenido" tabIndex={-1} className="outline-none">
+          <Outlet />
+        </main>
+        <ScrollRestoration />
+      </CommandPaletteProvider>
+    </ProgressProvider>
   );
 }

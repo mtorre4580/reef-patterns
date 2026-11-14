@@ -245,7 +245,7 @@ ambos temas, `prefers-reduced-motion` desactiva el giro animado (muestra el resu
 - [x] Fase 1 — Contenido
 - [x] Fase 2 — Catálogo
 - [x] Fase 3 — Playground y runner
-- [ ] Fase 4 — Challenges y rueda
+- [x] Fase 4 — Challenges y rueda
 - [ ] Fase 5 — Pulido y deploy
 
 Ver `docs/PLAN.md` para el detalle de cada fase.

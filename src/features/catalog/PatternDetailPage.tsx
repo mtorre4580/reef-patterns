@@ -1,6 +1,6 @@
 import { ArrowLeft, ArrowRight, Check, Minus, Waves } from 'lucide-react';
 import { Link, useParams } from 'react-router';
-import { patterns, patternsById } from '@/content';
+import { challengesByPattern, patterns, patternsById } from '@/content';
 import { tierInfo } from '@/content/tiers';
 import { CategoryBadge } from '@/components/CategoryBadge';
 import { CodeBlock } from '@/components/CodeBlock';
@@ -35,6 +35,7 @@ export function PatternDetailPage() {
   }
 
   const zone = tierInfo(pattern.tier);
+  const challengeCount = challengesByPattern.get(pattern.id)?.length ?? 0;
   const prev = patterns[pattern.rank - 2];
   const next = patterns[pattern.rank];
 
@@ -58,12 +59,21 @@ export function PatternDetailPage() {
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{pattern.name}</h1>
         <p className="text-kelp">{pattern.nameEs}</p>
         <p className="text-lg text-foam">{pattern.summary}</p>
-        <div className="mt-2">
-          <Button asChild variant="primary">
-            <Link to={`/playground?pattern=${pattern.id}`}>
-              <Waves aria-hidden /> Practicar este patrón
-            </Link>
-          </Button>
+        <div className="mt-2 flex items-center gap-3">
+          {challengeCount > 0 ? (
+            <>
+              <Button asChild variant="primary">
+                <Link to={`/playground?pattern=${pattern.id}`}>
+                  <Waves aria-hidden /> Practicar este patrón
+                </Link>
+              </Button>
+              <span className="text-sm text-kelp">
+                {challengeCount === 1 ? '1 challenge' : `${challengeCount} challenges`}
+              </span>
+            </>
+          ) : (
+            <span className="text-sm text-kelp">Challenges de este patrón: próximamente.</span>
+          )}
         </div>
       </header>
 

@@ -2,6 +2,7 @@ import type { RouteObject } from 'react-router';
 import { CatalogPage, PatternDetailPage } from '@/features/catalog';
 import { Layout } from './Layout';
 import { NotFoundPage } from './NotFoundPage';
+import { PageLoading } from './PageLoading';
 
 export const routes: RouteObject[] = [
   {
@@ -12,6 +13,7 @@ export const routes: RouteObject[] = [
       { path: 'patterns/:id', element: <PatternDetailPage /> },
       {
         path: 'playground',
+        HydrateFallback: PageLoading,
         // Carga diferida: el catálogo nunca descarga Monaco ni el runner
         lazy: async () => ({ Component: (await import('@/features/playground')).PlaygroundPage }),
       },
