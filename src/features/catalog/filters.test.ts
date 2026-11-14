@@ -1,13 +1,13 @@
 import { patterns } from '@/content';
 import { matchesFilters, parseFilters, serializeFilters, toggleItem } from './filters';
 
-describe('filtros del catálogo', () => {
-  it('parsea la URL e ignora valores inválidos', () => {
-    const f = parseFilters(new URLSearchParams('cat=frontend,nada&tier=2,9,1&gof=1&q=hook'));
+describe('catalog filters', () => {
+  it('parses the URL and ignores invalid values', () => {
+    const f = parseFilters(new URLSearchParams('cat=frontend,nope&tier=2,9,1&gof=1&q=hook'));
     expect(f).toEqual({ categories: ['frontend'], tiers: [1, 2], gofOnly: true, query: 'hook' });
   });
 
-  it('serializa de ida y vuelta', () => {
+  it('round-trips through serialization', () => {
     const f = {
       categories: ['creacional' as const],
       tiers: [3 as const],
@@ -19,13 +19,13 @@ describe('filtros del catálogo', () => {
     expect(parseFilters(params)).toEqual(f);
   });
 
-  it('combina categoría, nivel y GoF', () => {
+  it('combines category, tier and GoF', () => {
     const f = parseFilters(new URLSearchParams('cat=creacional&tier=1&gof=1'));
     const ids = patterns.filter((p) => matchesFilters(p, f)).map((p) => p.id);
     expect(ids).toEqual(['factory-method', 'singleton', 'builder']);
   });
 
-  it('toggleItem agrega y quita', () => {
+  it('toggleItem adds and removes', () => {
     expect(toggleItem([1, 2], 2)).toEqual([1]);
     expect(toggleItem([1], 2)).toEqual([1, 2]);
   });

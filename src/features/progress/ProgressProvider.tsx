@@ -33,6 +33,6 @@ export const ProgressProvider = ({ children }: { children: ReactNode }) => {
 
 export function useProgress(): ProgressContextValue {
   const ctx = useContext(ProgressContext);
-  if (!ctx) throw new Error('useProgress debe usarse dentro de <ProgressProvider>');
+  if (!ctx) throw new Error('useProgress must be used inside <ProgressProvider>');
   return ctx;
 }

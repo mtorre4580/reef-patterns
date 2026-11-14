@@ -16,33 +16,33 @@ async function audit(container: Element) {
   );
 }
 
-describe('accesibilidad (axe)', () => {
-  it('catálogo sin violaciones', async () => {
+describe('accessibility (axe)', () => {
+  it('catalog has no violations', async () => {
     const { container } = renderRoute('/');
     await screen.findByRole('heading', { level: 1 });
     expect(await audit(container)).toEqual([]);
   });
 
-  it('detalle de patrón sin violaciones', async () => {
+  it('pattern detail has no violations', async () => {
     const { container } = renderRoute('/patterns/strategy');
     await screen.findByRole('heading', { level: 1, name: 'Strategy' });
     expect(await audit(container)).toEqual([]);
   });
 
-  it('playground sin violaciones', async () => {
+  it('playground has no violations', async () => {
     const { container } = renderRoute('/playground?challenge=observer-1');
     await screen.findByRole('heading', { level: 1 }, { timeout: 5000 });
     expect(await audit(container)).toEqual([]);
   });
 
-  it('timón sin violaciones', async () => {
+  it('helm has no violations', async () => {
     const { container } = renderRoute('/playground');
-    await screen.findByRole('heading', { name: 'Girá el timón' }, { timeout: 5000 });
+    await screen.findByRole('heading', { name: 'Spin the helm' }, { timeout: 5000 });
     expect(await audit(container)).toEqual([]);
   });
 
-  it('404 sin violaciones', async () => {
-    const { container } = renderRoute('/no-existe');
+  it('404 has no violations', async () => {
+    const { container } = renderRoute('/no-such-page');
     await screen.findByRole('heading', { level: 1 });
     expect(await audit(container)).toEqual([]);
   });

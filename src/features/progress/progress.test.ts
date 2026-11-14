@@ -2,20 +2,20 @@ import { patterns } from '@/content';
 import type { Challenge } from '@/content/types';
 import { completedZones, parseProgress, progressReducer } from './progress';
 
-describe('progreso', () => {
-  it('marca completados sin duplicar', () => {
+describe('progress', () => {
+  it('marks solved challenges without duplicates', () => {
     let state = progressReducer({ completed: [] }, { type: 'complete', challengeId: 'a-1' });
     state = progressReducer(state, { type: 'complete', challengeId: 'a-1' });
     expect(state.completed).toEqual(['a-1']);
     expect(progressReducer(state, { type: 'reset' }).completed).toEqual([]);
   });
 
-  it('tolera datos corruptos en localStorage', () => {
-    expect(parseProgress('basura')).toEqual({ completed: [] });
+  it('tolerates corrupted localStorage data', () => {
+    expect(parseProgress('garbage')).toEqual({ completed: [] });
     expect(parseProgress({ completed: ['x', 3] })).toEqual({ completed: ['x'] });
   });
 
-  it('detecta zonas completadas', () => {
+  it('detects completed zones', () => {
     const ch = (id: string, patternId: string) => ({ id, patternId }) as Challenge;
     const map = new Map([
       ['strategy', [ch('strategy-1', 'strategy')]],

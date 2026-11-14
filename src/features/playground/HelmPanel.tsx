@@ -2,14 +2,14 @@ import { Award, Compass } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { challengesByPattern, patterns } from '@/content';
 import { categories } from '@/content/categories';
-import { tierInfo, tiers } from '@/content/tiers';
+import { tiers } from '@/content/tiers';
 import type { CategoryId, Challenge, Tier } from '@/content/types';
 import { Helm, type HelmSpin } from '@/components/Helm';
 import { Button } from '@/components/ui/button';
 import { useProgress, completedZones } from '@/features/progress';
 import { defaultRng, type Rng } from '@/lib/random';
 import { cn } from '@/lib/utils';
-import { difficultyLabel } from './labels';
+import { useI18n } from '@/i18n';
 import { pickChallenge } from './pick';
 import { buildPool, defaultHelmFilters, type HelmFilters } from './pool';
 
@@ -49,6 +49,7 @@ const Chip = ({
 /** Filters + helm + result. The challenge is picked before animating. */
 export const HelmPanel = ({ onChoose, rng = defaultRng }: HelmPanelProps) => {
   const { completed } = useProgress();
+  const { t } = useI18n();
   const [filters, setFilters] = useState<HelmFilters>(defaultHelmFilters);
   const [spin, setSpin] = useState<(HelmSpin & { challenge: Challenge }) | null>(null);
   const [settledKey, setSettledKey] = useState<number | null>(null);
@@ -81,31 +82,35 @@ export const HelmPanel = ({ onChoose, rng = defaultRng }: HelmPanelProps) => {
   const result = spin && settledKey === spin.key ? spin.challenge : null;
   const resultPattern = result ? patterns.find((p) => p.id === result.patternId) : null;
   const spinning = !!spin && settledKey !== spin.key;
+  // Split the sentence around the pattern name so it can be rendered in bold
+  const [resultBefore, resultAfter] = result
+    ? t('helm.result', { pattern: '\u0000', title: result.title }).split('\u0000')
+    : ['', ''];
 
   return (
     <div className="flex flex-col gap-5">
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 text-xs text-kelp">Zonas</legend>
+        <legend className="mb-2 text-xs text-kelp">{t('helm.zones')}</legend>
         <div className="flex flex-wrap gap-1.5">
-          {tiers.map((t) => (
+          {tiers.map((tier) => (
             <Chip
-              key={t.tier}
-              pressed={filters.tiers.includes(t.tier)}
-              onClick={() => update({ tiers: toggle<Tier>(filters.tiers, t.tier) })}
+              key={tier.tier}
+              pressed={filters.tiers.includes(tier.tier)}
+              onClick={() => update({ tiers: toggle<Tier>(filters.tiers, tier.tier) })}
             >
-              {t.zone}
+              {t(`tiers.${tier.tier}.zone`)}
             </Chip>
           ))}
           <Chip
             pressed={filters.pendingOnly}
             onClick={() => update({ pendingOnly: !filters.pendingOnly })}
           >
-            Solo pendientes
+            {t('helm.pendingOnly')}
           </Chip>
         </div>
       </fieldset>
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 text-xs text-kelp">Categorías</legend>
+        <legend className="mb-2 text-xs text-kelp">{t('helm.categories')}</legend>
         <div className="flex flex-wrap gap-1.5">
           {categories.map((c) => (
             <Chip
@@ -113,7 +118,7 @@ export const HelmPanel = ({ onChoose, rng = defaultRng }: HelmPanelProps) => {
               pressed={filters.categories.includes(c.id)}
               onClick={() => update({ categories: toggle<CategoryId>(filters.categories, c.id) })}
             >
-              {c.label}
+              {t(`categories.${c.id}.label`)}
             </Chip>
           ))}
         </div>
@@ -129,9 +134,10 @@ export const HelmPanel = ({ onChoose, rng = defaultRng }: HelmPanelProps) => {
             spinning={spinning}
           />
           <p className="text-center text-xs text-kelp">
-            {sectors.length} {sectors.length === 1 ? 'patrón' : 'patrones'} · {pool.length}{' '}
-            {pool.length === 1 ? 'challenge' : 'challenges'} en juego. Hacé clic en el timón o
-            enfocalo y presioná Enter.
+            {t('helm.inPlay', {
+              patterns: t('helm.patterns', { count: sectors.length }),
+              challenges: t('helm.challenges', { count: pool.length }),
+            })}
           </p>
         </>
       ) : (
@@ -139,7 +145,7 @@ export const HelmPanel = ({ onChoose, rng = defaultRng }: HelmPanelProps) => {
           role="status"
           className="rounded-panel border border-line p-6 text-center text-sm text-kelp"
         >
-          No quedan challenges con estos filtros. Probá con otras zonas o categorías.
+          {t('helm.none')}
         </p>
       )}
 
@@ -147,12 +153,16 @@ export const HelmPanel = ({ onChoose, rng = defaultRng }: HelmPanelProps) => {
         {result && resultPattern && (
           <div className="flex flex-col items-center gap-3 rounded-panel border border-lagoon/40 bg-lagoon/10 p-4 text-center">
             <p className="text-sm">
-              Te tocó <strong>{resultPattern.name}</strong>: {result.title}
-              <span className="text-kelp"> · {difficultyLabel[result.difficulty]}</span>
-              {completed.has(result.id) && <span className="text-kelp"> (ya resuelto)</span>}
+              {resultBefore}
+              <strong>{resultPattern.name}</strong>
+              {resultAfter}
+              <span className="text-kelp"> · {t(`difficulty.${result.difficulty}`)}</span>
+              {completed.has(result.id) && (
+                <span className="text-kelp">{t('helm.alreadySolved')}</span>
+              )}
             </p>
             <Button variant="primary" size="sm" onClick={() => onChoose(result)} autoFocus>
-              <Compass aria-hidden /> Empezar challenge
+              <Compass aria-hidden /> {t('helm.start')}
             </Button>
           </div>
         )}
@@ -160,7 +170,7 @@ export const HelmPanel = ({ onChoose, rng = defaultRng }: HelmPanelProps) => {
 
       <div className="flex flex-col gap-2 border-t border-line pt-4">
         <p className="text-xs text-kelp">
-          Progreso: {completed.size} de {totalChallenges} challenges resueltos
+          {t('helm.progress', { done: completed.size, total: totalChallenges })}
         </p>
         {zones.length > 0 && (
           <ul className="flex flex-wrap gap-2">
@@ -169,7 +179,8 @@ export const HelmPanel = ({ onChoose, rng = defaultRng }: HelmPanelProps) => {
                 key={tier}
                 className="inline-flex items-center gap-1.5 rounded-control border border-anemone/40 px-2 py-1 text-xs text-anemone"
               >
-                <Award aria-hidden className="size-3.5" /> Zona {tierInfo(tier).zone} completada
+                <Award aria-hidden className="size-3.5" />{' '}
+                {t('helm.zoneDone', { zone: t(`tiers.${tier}.zone`) })}
               </li>
             ))}
           </ul>

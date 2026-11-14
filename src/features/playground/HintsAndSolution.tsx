@@ -4,6 +4,7 @@ import type { Challenge } from '@/content/types';
 import { CodeBlock } from '@/components/CodeBlock';
 import { ConfirmDialog } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/i18n';
 
 interface HintsAndSolutionProps {
   challenge: Challenge;
@@ -13,18 +14,22 @@ interface HintsAndSolutionProps {
 /** One hint at a time and the solution behind a confirmation. Resets when the challenge changes. */
 export const HintsAndSolution = ({ challenge, onUseSolution }: HintsAndSolutionProps) => {
   const [shown, setShown] = useState(0);
+  const { t } = useI18n();
   const [solutionVisible, setSolutionVisible] = useState(false);
   const remaining = challenge.hints.length - shown;
 
   return (
-    <section aria-label="Ayuda" className="flex flex-col gap-3 border-t border-line p-4">
+    <section
+      aria-label={t('playground.help')}
+      className="flex flex-col gap-3 border-t border-line p-4"
+    >
       {shown > 0 && (
         <ol className="flex flex-col gap-2">
           {challenge.hints.slice(0, shown).map((hint, i) => (
             <li key={i} className="flex gap-2 rounded-control bg-reef/60 px-3 py-2 text-sm">
               <Lightbulb aria-hidden className="mt-0.5 size-4 shrink-0 text-cat-frontend" />
               <span>
-                <span className="sr-only">Pista {i + 1}: </span>
+                <span className="sr-only">{t('hints.hint', { n: i + 1 })}</span>
                 {hint}
               </span>
             </li>
@@ -40,18 +45,18 @@ export const HintsAndSolution = ({ challenge, onUseSolution }: HintsAndSolutionP
         >
           <Lightbulb aria-hidden />
           {remaining === 0
-            ? 'No hay más pistas'
-            : `Ver pista (${shown + 1} de ${challenge.hints.length})`}
+            ? t('hints.noMore')
+            : t('hints.show', { n: shown + 1, total: challenge.hints.length })}
         </Button>
         {!solutionVisible && (
           <ConfirmDialog
-            title="¿Ver la solución?"
-            description="Vale la pena intentarlo un rato más. Si la ves ahora, el challenge igual se puede marcar como resuelto cuando pasen los tests."
-            confirmLabel="Ver solución"
+            title={t('hints.confirmTitle')}
+            description={t('hints.confirmBody')}
+            confirmLabel={t('hints.confirm')}
             onConfirm={() => setSolutionVisible(true)}
             trigger={
               <Button variant="ghost" size="sm">
-                <Eye aria-hidden /> Ver solución
+                <Eye aria-hidden /> {t('hints.showSolution')}
               </Button>
             }
           />
@@ -59,10 +64,10 @@ export const HintsAndSolution = ({ challenge, onUseSolution }: HintsAndSolutionP
       </div>
       {solutionVisible && (
         <div className="flex flex-col gap-2">
-          <CodeBlock code={challenge.solution} label="Solución" />
+          <CodeBlock code={challenge.solution} label={t('code.solution')} />
           <div>
             <Button variant="secondary" size="sm" onClick={() => onUseSolution(challenge.solution)}>
-              Copiar al editor
+              {t('hints.useSolution')}
             </Button>
           </div>
         </div>

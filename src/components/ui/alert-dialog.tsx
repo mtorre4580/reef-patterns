@@ -1,5 +1,6 @@
 import { AlertDialog as Primitive } from 'radix-ui';
 import type { ReactNode } from 'react';
+import { useI18n } from '@/i18n';
 import { buttonVariants } from './button-variants';
 
 interface ConfirmDialogProps {
@@ -18,6 +19,7 @@ export const ConfirmDialog = ({
   confirmLabel,
   onConfirm,
 }: ConfirmDialogProps) => {
+  const { t } = useI18n();
   return (
     <Primitive.Root>
       <Primitive.Trigger asChild>{trigger}</Primitive.Trigger>
@@ -30,7 +32,7 @@ export const ConfirmDialog = ({
           </Primitive.Description>
           <div className="mt-6 flex justify-end gap-2">
             <Primitive.Cancel className={buttonVariants({ variant: 'ghost' })}>
-              Cancelar
+              {t('common.cancel')}
             </Primitive.Cancel>
             <Primitive.Action
               className={buttonVariants({ variant: 'primary' })}

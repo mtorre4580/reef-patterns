@@ -1,4 +1,5 @@
 import type { AstCheck, ChallengeTest } from '@/content/types';
+import type { Locale } from '@/i18n/locales';
 
 export type LogLevel = 'log' | 'info' | 'warn' | 'error';
 
@@ -19,6 +20,8 @@ export interface RunRequest {
   tests: ChallengeTest[];
   checks?: AstCheck[];
   timeoutMs?: number;
+  /** Language for assertion and runner messages (English by default) */
+  locale?: Locale;
 }
 
 export interface RunResult {
@@ -29,4 +32,3 @@ export interface RunResult {
 }
 
 export const DEFAULT_TIMEOUT_MS = 2000;
-export const TIMEOUT_MESSAGE = 'Tiempo agotado: ¿hay un bucle infinito?';

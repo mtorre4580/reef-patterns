@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
 import { Dialog as Primitive } from 'radix-ui';
 import type { ReactNode } from 'react';
+import { useI18n } from '@/i18n';
 
 interface DialogProps {
   open: boolean;
@@ -11,6 +12,7 @@ interface DialogProps {
 }
 
 export const Dialog = ({ open, onOpenChange, title, description, children }: DialogProps) => {
+  const { t } = useI18n();
   return (
     <Primitive.Root open={open} onOpenChange={onOpenChange}>
       <Primitive.Portal>
@@ -26,7 +28,7 @@ export const Dialog = ({ open, onOpenChange, title, description, children }: Dia
           )}
           <div className="mt-4">{children}</div>
           <Primitive.Close
-            aria-label="Cerrar"
+            aria-label={t('common.close')}
             className="absolute top-4 right-4 rounded-control p-1 text-kelp hover:bg-reef hover:text-foam"
           >
             <X className="size-4" />

@@ -21,85 +21,91 @@ const challenge = challengesById.get('observer-1')!;
 async function openChallenge(path = '/playground?challenge=observer-1') {
   const utils = renderRoute(path);
   await screen.findByRole('heading', { level: 1, name: challenge.title }, { timeout: 5000 });
-  const editor = screen.getByRole('textbox', { name: /Editor de código/ });
+  const editor = screen.getByRole('textbox', { name: /Code editor/ });
   return { ...utils, editor };
 }
 
 describe('playground', () => {
-  it('muestra el enunciado y el código inicial', async () => {
+  it('shows the brief and the starter code', async () => {
     const { editor } = await openChallenge();
     expect(editor).toHaveValue(challenge.starterCode);
     expect(
       screen.getByText(
-        `${challenge.tests.length} tests sin ejecutar. Probá con Ejecutar o ⌘/Ctrl + Enter.`,
+        `${challenge.tests.length} tests not run yet. Try Run tests or ⌘/Ctrl + Enter.`,
       ),
     ).toBeInTheDocument();
   });
 
-  it('ejecuta los tests y reporta fallos del starter', async () => {
+  it('runs the tests and reports starter failures', async () => {
     const { user } = await openChallenge();
-    await user.click(screen.getByRole('button', { name: /Ejecutar tests/ }));
-    expect(await screen.findByText(/de 5 pasaron/)).toBeInTheDocument();
-    expect(screen.getAllByText(/Falló:/).length).toBeGreaterThan(0);
+    await user.click(screen.getByRole('button', { name: /Run tests/ }));
+    expect(await screen.findByText(/of 5 passed/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Failed:/).length).toBeGreaterThan(0);
   });
 
-  it('se resuelve de punta a punta con la solución', async () => {
+  it('is solved end to end with the solution', async () => {
     const { user, editor } = await openChallenge();
     fireEvent.change(editor, { target: { value: challenge.solution } });
     await user.keyboard('{Control>}{Enter}{/Control}');
-    expect(await screen.findByText('¡Todo en verde! 5 de 5 pasaron.')).toBeInTheDocument();
+    expect(await screen.findByText('All green! 5 of 5 passed.')).toBeInTheDocument();
   });
 
-  it('autoguarda el borrador y Reiniciar lo descarta', async () => {
+  it('autosaves the draft and Reset discards it', async () => {
     const { user, editor } = await openChallenge();
     fireEvent.change(editor, { target: { value: '// my attempt' } });
     await waitFor(() => expect(localStorage.getItem(draftKey('observer-1'))).toBe('// my attempt'));
-    await user.click(screen.getByRole('button', { name: /Reiniciar/ }));
-    expect(screen.getByRole('textbox', { name: /Editor de código/ })).toHaveValue(
-      challenge.starterCode,
-    );
+    await user.click(screen.getByRole('button', { name: /Reset/ }));
+    expect(screen.getByRole('textbox', { name: /Code editor/ })).toHaveValue(challenge.starterCode);
     expect(localStorage.getItem(draftKey('observer-1'))).toBeNull();
   });
 
-  it('recupera el borrador guardado', async () => {
+  it('restores the saved draft', async () => {
     localStorage.setItem(draftKey('observer-1'), '// saved earlier');
     const { editor } = await openChallenge();
     expect(editor).toHaveValue('// saved earlier');
   });
 
-  it('muestra las pistas de a una', async () => {
+  it('shows hints one at a time', async () => {
     const { user } = await openChallenge();
-    await user.click(screen.getByRole('button', { name: 'Ver pista (1 de 3)' }));
-    expect(screen.getByText(/Pista 1:/)).toBeInTheDocument();
-    expect(screen.queryByText(/Pista 2:/)).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Ver pista (2 de 3)' }));
-    expect(screen.getByText(/Pista 2:/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Show hint (1 of 3)' }));
+    expect(screen.getByText(/Hint 1:/)).toBeInTheDocument();
+    expect(screen.queryByText(/Hint 2:/)).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Show hint (2 of 3)' }));
+    expect(screen.getByText(/Hint 2:/)).toBeInTheDocument();
   });
 
-  it('pide confirmación antes de mostrar la solución', async () => {
+  it('asks for confirmation before showing the solution', async () => {
     const { user, editor } = await openChallenge();
-    await user.click(screen.getByRole('button', { name: 'Ver solución' }));
-    const dialog = await screen.findByRole('alertdialog', { name: '¿Ver la solución?' });
+    await user.click(screen.getByRole('button', { name: 'Show solution' }));
+    const dialog = await screen.findByRole('alertdialog', { name: 'Show the solution?' });
     expect(dialog).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Ver solución' }));
-    await user.click(await screen.findByRole('button', { name: 'Copiar al editor' }));
+    await user.click(screen.getByRole('button', { name: 'Show solution' }));
+    await user.click(await screen.findByRole('button', { name: 'Copy to editor' }));
     expect(editor).toHaveValue(challenge.solution);
   });
 
-  it('resuelve el challenge a partir del patrón', async () => {
+  it('resolves the challenge from the pattern', async () => {
     renderRoute('/playground?pattern=observer');
     expect(
       await screen.findByRole('heading', { level: 1, name: challenge.title }),
     ).toBeInTheDocument();
   });
 
-  it('avisa si un patrón todavía no tiene challenges', async () => {
+  it('localizes runner messages', async () => {
+    const { user } = renderRoute('/playground?challenge=observer-1', 'es');
+    await screen.findByRole('heading', { level: 1, name: challenge.title }, { timeout: 5000 });
+    await user.click(screen.getByRole('button', { name: /Ejecutar tests/ }));
+    expect(await screen.findByText(/de 5 pasaron/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Se esperaba/).length).toBeGreaterThan(0);
+  });
+
+  it('says when a pattern has no challenges yet', async () => {
     renderRoute('/playground?pattern=visitor');
-    expect(await screen.findByText(/Todavía no hay challenges para Visitor/)).toBeInTheDocument();
+    expect(await screen.findByText(/There are no challenges for Visitor yet/)).toBeInTheDocument();
   });
 });
 
-describe('timón', () => {
+describe('helm', () => {
   const realMatchMedia = window.matchMedia;
   beforeEach(() => {
     // Reduced motion: the helm shows the result without animating
@@ -112,42 +118,42 @@ describe('timón', () => {
     window.matchMedia = realMatchMedia;
   });
 
-  it('sin parámetros muestra el timón y lleva al challenge elegido', async () => {
+  it('without params shows the helm and opens the chosen challenge', async () => {
     const { user, router } = renderRoute('/playground');
     expect(
-      await screen.findByRole('heading', { name: 'Girá el timón' }, { timeout: 5000 }),
+      await screen.findByRole('heading', { name: 'Spin the helm' }, { timeout: 5000 }),
     ).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Girar el timón' }));
-    expect(await screen.findByText(/Te tocó/)).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: /Empezar challenge/ }));
+    await user.click(screen.getByRole('button', { name: 'Spin the helm' }));
+    expect(await screen.findByText(/You got/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Start challenge/ }));
     expect(router.state.location.search).toMatch(/^\?challenge=[a-z-]+-\d+$/);
   });
 
-  it('se gira con el teclado y respeta los filtros', async () => {
+  it('spins with the keyboard and respects the filters', async () => {
     const { user } = renderRoute('/playground');
-    await screen.findByRole('heading', { name: 'Girá el timón' }, { timeout: 5000 });
-    await user.click(screen.getByRole('button', { name: 'Arrecife' }));
-    expect(screen.getByText(/2 patrones · 2 challenges en juego/)).toBeInTheDocument();
-    screen.getByRole('button', { name: 'Girar el timón' }).focus();
+    await screen.findByRole('heading', { name: 'Spin the helm' }, { timeout: 5000 });
+    await user.click(screen.getByRole('button', { name: 'Reef' }));
+    expect(screen.getByText(/2 patterns · 2 challenges in play/)).toBeInTheDocument();
+    screen.getByRole('button', { name: 'Spin the helm' }).focus();
     await user.keyboard('{Enter}');
-    const result = await screen.findByText(/Te tocó/);
+    const result = await screen.findByText(/You got/);
     expect(result.textContent).toMatch(/State|Command/);
   });
 
-  it('marca el challenge como resuelto y lo guarda', async () => {
+  it('marks the challenge as solved and saves it', async () => {
     const { user, editor } = await openChallenge();
-    expect(screen.getByText('Pendiente')).toBeInTheDocument();
+    expect(screen.getByText('Unsolved')).toBeInTheDocument();
     fireEvent.change(editor, { target: { value: challenge.solution } });
-    await user.click(screen.getByRole('button', { name: /Ejecutar tests/ }));
-    expect(await screen.findByText('Resuelto')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Run tests/ }));
+    expect(await screen.findByText('Solved')).toBeInTheDocument();
     expect(JSON.parse(localStorage.getItem('reef-patterns:progress')!)).toEqual({
       completed: ['observer-1'],
     });
   });
 
-  it('abre el timón desde un challenge', async () => {
+  it('opens the helm from a challenge', async () => {
     const { user } = await openChallenge();
-    await user.click(screen.getByRole('button', { name: /Girar el timón/ }));
-    expect(await screen.findByRole('dialog', { name: 'Girá el timón' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Spin the helm/ }));
+    expect(await screen.findByRole('dialog', { name: 'Spin the helm' })).toBeInTheDocument();
   });
 });

@@ -1,5 +1,6 @@
 import { motion, useReducedMotion } from 'motion/react';
 import { useEffect, useState } from 'react';
+import { useI18n } from '@/i18n';
 import { cn } from '@/lib/utils';
 import { polar, sectorCenter, targetRotation } from './helm-geometry';
 
@@ -41,6 +42,7 @@ export const Helm = ({
   className,
 }: HelmProps) => {
   const reduceMotion = useReducedMotion();
+  const { t } = useI18n();
   const [rotation, setRotation] = useState(0);
   const [appliedKey, setAppliedKey] = useState<number | null>(null);
   const count = Math.max(sectors.length, 1);
@@ -66,7 +68,7 @@ export const Helm = ({
         type="button"
         onClick={onSpin}
         disabled={disabled || spinning}
-        aria-label={spinning ? 'Girando el timón' : 'Girar el timón'}
+        aria-label={spinning ? t('helm.spinning') : t('helm.spin')}
         className="group absolute inset-0 rounded-full disabled:cursor-not-allowed"
       >
         <motion.div
@@ -152,7 +154,7 @@ export const Helm = ({
           </svg>
         </motion.div>
         <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[0.7rem] font-semibold text-lagoon">
-          {spinning ? '…' : 'Girar'}
+          {spinning ? '…' : t('helm.hub')}
         </span>
       </button>
       {/* Fixed pointer */}

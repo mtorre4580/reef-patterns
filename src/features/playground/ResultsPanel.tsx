@@ -1,6 +1,7 @@
 import { CheckCircle2, CircleDashed, Loader2, ShieldCheck, XCircle } from 'lucide-react';
 import type { LogEntry, RunResult } from '@/lib/runner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useI18n, type TranslationKey } from '@/i18n';
 import { cn } from '@/lib/utils';
 import type { RunStatus } from './useRunner';
 
@@ -17,28 +18,34 @@ const logColor: Record<LogEntry['level'], string> = {
   error: 'text-coral',
 };
 
-function summary(status: RunStatus, result: RunResult | null, total: number) {
-  if (status === 'running') return 'Ejecutando tests…';
-  if (!result) return `${total} tests sin ejecutar. Probá con Ejecutar o ⌘/Ctrl + Enter.`;
+const summary = (
+  t: (key: TranslationKey, params?: Record<string, string | number>) => string,
+  status: RunStatus,
+  result: RunResult | null,
+  total: number,
+): string => {
+  if (status === 'running') return t('results.running');
+  if (!result) return t('results.notRun', { count: total });
   const passed = result.results.filter((r) => r.passed).length;
   const all = result.results.length;
-  if (result.timedOut) return 'Tiempo agotado: ¿hay un bucle infinito?';
+  if (result.timedOut) return t('results.timeout');
   return passed === all
-    ? `¡Todo en verde! ${passed} de ${all} pasaron.`
-    : `${passed} de ${all} pasaron.`;
-}
+    ? t('results.allGreen', { passed, total: all })
+    : t('results.partial', { passed, total: all });
+};
 
 export const ResultsPanel = ({ status, result, testNames }: ResultsPanelProps) => {
+  const { t } = useI18n();
   const passed = result?.results.filter((r) => r.passed).length ?? 0;
   const total = result?.results.length ?? testNames.length;
   const allGreen = !!result && passed === total && total > 0;
 
   return (
     <Tabs defaultValue="results" className="flex flex-col">
-      <TabsList aria-label="Panel de salida" className="sticky top-0 z-[1] bg-trench">
-        <TabsTrigger value="results">Resultados</TabsTrigger>
+      <TabsList aria-label={t('results.panel')} className="sticky top-0 z-[1] bg-trench">
+        <TabsTrigger value="results">{t('results.results')}</TabsTrigger>
         <TabsTrigger value="console">
-          Consola
+          {t('results.console')}
           {!!result?.logs.length && (
             <span className="rounded bg-reef px-1.5 font-mono text-xs text-kelp">
               {result.logs.length}
@@ -51,7 +58,7 @@ export const ResultsPanel = ({ status, result, testNames }: ResultsPanelProps) =
             allGreen ? 'text-anemone' : 'text-kelp',
           )}
         >
-          {result ? `${passed} de ${total} tests` : ''}
+          {result ? t('results.testsCount', { passed, total }) : ''}
         </span>
       </TabsList>
 
@@ -61,7 +68,7 @@ export const ResultsPanel = ({ status, result, testNames }: ResultsPanelProps) =
           aria-atomic="true"
           className={cn('mb-4 text-sm', allGreen ? 'text-anemone' : 'text-kelp')}
         >
-          {summary(status, result, testNames.length)}
+          {summary(t, status, result, testNames.length)}
         </p>
         <ul className="flex flex-col gap-2" aria-busy={status === 'running'}>
           {result
@@ -77,12 +84,14 @@ export const ResultsPanel = ({ status, result, testNames }: ResultsPanelProps) =
                       <XCircle aria-hidden className="mt-0.5 size-4 shrink-0 text-coral" />
                     )}
                     <span className="flex-1">
-                      <span className="sr-only">{r.passed ? 'Aprobado: ' : 'Falló: '}</span>
+                      <span className="sr-only">
+                        {r.passed ? t('results.passed') : t('results.failed')}
+                      </span>
                       {r.name}
                     </span>
                     {r.kind === 'check' && (
                       <span className="inline-flex items-center gap-1 text-xs text-kelp">
-                        <ShieldCheck aria-hidden className="size-3.5" /> Regla
+                        <ShieldCheck aria-hidden className="size-3.5" /> {t('results.rule')}
                       </span>
                     )}
                   </div>
@@ -123,7 +132,7 @@ export const ResultsPanel = ({ status, result, testNames }: ResultsPanelProps) =
             ))}
           </ol>
         ) : (
-          <p className="text-sm text-kelp">Lo que imprimas con console.log aparece acá.</p>
+          <p className="text-sm text-kelp">{t('results.consoleEmpty')}</p>
         )}
       </TabsContent>
     </Tabs>

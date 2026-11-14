@@ -32,6 +32,7 @@ computadoras de buceo, etc.).
 | Animación | Motion (`motion/react`) | Respetar `prefers-reduced-motion` |
 | Routing | React Router (modo librería) | |
 | Búsqueda | Fuse.js + paleta de comandos `cmdk` (⌘K) | |
+| i18n | Propia: Context + diccionarios tipados en `src/i18n` | en (default), es, pt-BR; sin dependencias |
 | Editor | Monaco vía `@monaco-editor/react` | Cargado con `React.lazy`; Monaco local, no CDN |
 | Resaltado de código (solo lectura) | Shiki | Tema propio “Abyss Reef” |
 | Ejecución de challenges | Web Worker + mini librería de asserts propia | Ver “Runner” |
@@ -76,6 +77,7 @@ src/
     runner/            # worker, asserts, chequeos AST, tipos de resultado
     search.ts
     random.ts          # rng inyectable para la rueda
+  i18n/               # I18nProvider, useI18n, LanguageSwitcher, messages/{en,es,pt-BR}.ts
   styles/theme.css
   test/                # setup de Vitest y helpers
 scripts/
@@ -206,7 +208,13 @@ ambos temas, `prefers-reduced-motion` desactiva el giro animado (muestra el resu
   dosificadoras de kalkwasser o métodos tipo Triton, skimmer, ATO, iluminación, corales SPS/LPS/
   blandos, fragging) y buceo (computadora de buceo, paradas de seguridad, plan de inmersión,
   equipo, log de inmersiones). Cada ejemplo cuenta una situación concreta, no clases `Foo`/`Bar`.
-- UI en español rioplatense neutro (“buscá”, “probá”), sentence case.
+- **i18n**: la UI está en inglés por defecto y se puede cambiar a español (`es`) y portugués
+  (`pt-BR`) desde el header; la elección se guarda en `reef-patterns:locale`. Ningún texto visible
+  va hardcodeado en un componente: todo sale de `useI18n().t('clave')`. Las claves viven en
+  `src/i18n/messages/en.ts` (fuente de verdad); `es.ts` y `pt-BR.ts` deben tener exactamente las
+  mismas claves (lo garantiza el tipo `Messages`). Plurales con `{ one, other }` + `{count}`.
+- Tono: inglés claro; español rioplatense neutro (“buscá”, “probá”); portugués de Brasil. Sentence
+  case en los tres.
 - Componentes: un componente por archivo, nombre en PascalCase, props tipadas, sin `default
   export` salvo carga lazy.
 - **Los componentes se definen siempre como arrow functions** asignadas a `const`

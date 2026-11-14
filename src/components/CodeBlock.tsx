@@ -1,6 +1,7 @@
 import { Check, Copy } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/i18n';
 import { highlightJs } from '@/lib/highlight';
 
 interface CodeBlockProps {
@@ -10,7 +11,8 @@ interface CodeBlockProps {
 }
 
 /** Read-only code block highlighted with Shiki (Abyss Reef theme). */
-export const CodeBlock = ({ code, label = 'Código de ejemplo', className }: CodeBlockProps) => {
+export const CodeBlock = ({ code, label, className }: CodeBlockProps) => {
+  const { t } = useI18n();
   const [html, setHtml] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -42,14 +44,14 @@ export const CodeBlock = ({ code, label = 'Código de ejemplo', className }: Cod
       )}
     >
       <figcaption className="flex items-center justify-between border-b border-line px-4 py-2 text-xs text-kelp">
-        <span>{label} · JavaScript</span>
+        <span>{label ?? t('code.example')} · JavaScript</span>
         <button
           type="button"
           onClick={copy}
           className="inline-flex items-center gap-1 rounded-control px-2 py-1 hover:bg-reef hover:text-foam"
         >
           {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-          {copied ? 'Copiado' : 'Copiar'}
+          {copied ? t('code.copied') : t('code.copy')}
         </button>
       </figcaption>
       {html ? (

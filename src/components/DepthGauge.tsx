@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { TierInfo } from '@/content/tiers';
 import { scrollToId } from '@/lib/scrollToId';
+import { useI18n } from '@/i18n';
 import { cn } from '@/lib/utils';
 import { computeDepth, MAX_GAUGE_DEPTH, zoneElementId, type DepthReading } from './depth';
 
@@ -10,6 +11,7 @@ interface DepthGaugeProps {
 
 /** Side depth gauge: marks the current zone and darkens the background with depth. */
 export const DepthGauge = ({ zones }: DepthGaugeProps) => {
+  const { t } = useI18n();
   const [reading, setReading] = useState<DepthReading>({
     depth: zones[0]?.minDepth ?? 0,
     zone: zones[0] ?? null,
@@ -46,24 +48,25 @@ export const DepthGauge = ({ zones }: DepthGaugeProps) => {
   }, [zones]);
 
   const meters = Math.round(reading.depth);
+  const zoneName = reading.zone ? t(`tiers.${reading.zone.tier}.zone`) : '';
   const position = Math.min(1, reading.depth / MAX_GAUGE_DEPTH);
 
   return (
     <aside
-      aria-label="Profundímetro"
+      aria-label={t('gauge.label')}
       className="fixed top-24 right-6 bottom-10 z-10 hidden w-24 flex-col items-end lg:flex"
     >
       <div
         role="meter"
-        aria-label="Profundidad"
+        aria-label={t('gauge.meter')}
         aria-valuemin={0}
         aria-valuemax={MAX_GAUGE_DEPTH}
         aria-valuenow={meters}
-        aria-valuetext={`${meters} m, ${reading.zone?.zone ?? ''}`}
+        aria-valuetext={`${meters} m, ${zoneName}`}
         className="mb-3 text-right"
       >
         <p className="font-mono text-lg text-foam tabular-nums">{meters} m</p>
-        <p className="text-xs text-kelp">{reading.zone?.zone}</p>
+        <p className="text-xs text-kelp">{zoneName}</p>
       </div>
 
       <div className="relative flex-1 pr-1">
@@ -88,7 +91,10 @@ export const DepthGauge = ({ zones }: DepthGaugeProps) => {
                   reading.zone?.tier === zone.tier ? 'text-biolum' : 'text-kelp',
                 )}
               >
-                {zone.minDepth} m<span className="sr-only">, ir a {zone.zone}</span>
+                {zone.minDepth} m
+                <span className="sr-only">
+                  {t('gauge.goTo', { zone: t(`tiers.${zone.tier}.zone`) })}
+                </span>
               </button>
             </li>
           ))}

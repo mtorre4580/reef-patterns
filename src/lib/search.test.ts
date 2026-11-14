@@ -4,19 +4,19 @@ import { createPatternSearch } from './search';
 const search = createPatternSearch(patterns);
 
 describe('createPatternSearch', () => {
-  it('devuelve todo con una consulta vacía', () => {
+  it('returns everything for an empty query', () => {
     expect(search.search('  ')).toHaveLength(patterns.length);
   });
 
-  it('encuentra por nombre en inglés con errores de tipeo', () => {
+  it('finds by English name despite typos', () => {
     expect(search.search('obsrver')[0]?.id).toBe('observer');
   });
 
-  it('encuentra por nombre en español sin tildes', () => {
+  it('finds by Spanish name without diacritics', () => {
     expect(search.search('fabrica abstracta')[0]?.id).toBe('abstract-factory');
   });
 
-  it('encuentra por categoría', () => {
+  it('finds by category', () => {
     const ids = search.search('resiliencia').map((p) => p.id);
     expect(ids).toContain('circuit-breaker');
   });
