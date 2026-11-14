@@ -179,7 +179,7 @@ function Workspace({ challenge, pattern, onChoose }: WorkspaceProps) {
                 label={`Editor de código para ${challenge.title}`}
               />
             </div>
-            <div className="flex items-center gap-2 border-t border-line p-3">
+            <div className="flex items-center justify-between gap-2 border-t border-line p-3">
               <Button variant="ghost" size="sm" onClick={() => (reset(), runner.clear())}>
                 <RotateCcw aria-hidden /> Reiniciar
               </Button>

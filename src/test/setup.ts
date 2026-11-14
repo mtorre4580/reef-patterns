@@ -40,3 +40,7 @@ if (!Element.prototype.scrollIntoView) {
 
 // jsdom no implementa scrollTo (lo usa ScrollRestoration)
 window.scrollTo = (() => {}) as typeof window.scrollTo;
+
+// axe intenta usar canvas; jsdom no lo implementa
+HTMLCanvasElement.prototype.getContext = (() =>
+  null) as typeof HTMLCanvasElement.prototype.getContext;
