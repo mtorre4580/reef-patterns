@@ -1,4 +1,4 @@
-/** Acceso a localStorage siempre envuelto en try/catch (modo privado, cuotas, SSR). */
+/** localStorage access always wrapped in try/catch (private mode, quotas, SSR). */
 export const storage = {
   get(key: string): string | null {
     try {
@@ -11,14 +11,14 @@ export const storage = {
     try {
       window.localStorage.setItem(key, value);
     } catch {
-      // sin persistencia: seguimos sin romper la UI
+      // no persistence: keep going without breaking the UI
     }
   },
   remove(key: string): void {
     try {
       window.localStorage.removeItem(key);
     } catch {
-      // ignorar
+      // ignore
     }
   },
   getJson<T>(key: string, fallback: T): T {

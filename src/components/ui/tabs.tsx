@@ -4,16 +4,19 @@ import { cn } from '@/lib/utils';
 
 export const Tabs = TabsPrimitive.Root;
 
-export function TabsList({ className, ...props }: ComponentProps<typeof TabsPrimitive.List>) {
+export const TabsList = ({ className, ...props }: ComponentProps<typeof TabsPrimitive.List>) => {
   return (
     <TabsPrimitive.List
       className={cn('flex items-center gap-1 border-b border-line px-2', className)}
       {...props}
     />
   );
-}
+};
 
-export function TabsTrigger({ className, ...props }: ComponentProps<typeof TabsPrimitive.Trigger>) {
+export const TabsTrigger = ({
+  className,
+  ...props
+}: ComponentProps<typeof TabsPrimitive.Trigger>) => {
   return (
     <TabsPrimitive.Trigger
       className={cn(
@@ -23,8 +26,11 @@ export function TabsTrigger({ className, ...props }: ComponentProps<typeof TabsP
       {...props}
     />
   );
-}
+};
 
-export function TabsContent({ className, ...props }: ComponentProps<typeof TabsPrimitive.Content>) {
+export const TabsContent = ({
+  className,
+  ...props
+}: ComponentProps<typeof TabsPrimitive.Content>) => {
   return <TabsPrimitive.Content className={cn('outline-none', className)} {...props} />;
-}
+};

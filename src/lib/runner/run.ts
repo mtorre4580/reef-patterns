@@ -13,8 +13,8 @@ export const createRunnerWorker: CreateWorker = () =>
   new Worker(new URL('./runner.worker.ts', import.meta.url), { type: 'module' });
 
 /**
- * Ejecuta el código del usuario en un worker nuevo. Si no responde a tiempo, lo termina y
- * reporta todos los tests como fallidos por timeout.
+ * Runs the user code in a fresh worker. If it does not answer in time, terminates it and
+ * reports every test as failed by timeout.
  */
 export function runInWorker(request: RunRequest, createWorker?: CreateWorker): Promise<RunResult> {
   const timeoutMs = request.timeoutMs ?? DEFAULT_TIMEOUT_MS;

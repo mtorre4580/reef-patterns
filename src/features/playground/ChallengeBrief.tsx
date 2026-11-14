@@ -10,7 +10,7 @@ interface ChallengeBriefProps {
   headingLevel?: 1 | 2;
 }
 
-export function ChallengeBrief({ challenge, pattern, headingLevel = 1 }: ChallengeBriefProps) {
+export const ChallengeBrief = ({ challenge, pattern, headingLevel = 1 }: ChallengeBriefProps) => {
   const Heading = headingLevel === 1 ? 'h1' : 'h2';
   return (
     <div className="flex flex-col gap-3">
@@ -28,4 +28,4 @@ export function ChallengeBrief({ challenge, pattern, headingLevel = 1 }: Challen
       </div>
     </div>
   );
-}
+};

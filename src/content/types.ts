@@ -1,28 +1,28 @@
 export type CategoryId =
   'creacional' | 'estructural' | 'comportamiento' | 'arquitectura' | 'resiliencia' | 'frontend';
 
-/** 1 Esencial … 4 Poco común */
+/** 1 Essential … 4 Rare */
 export type Tier = 1 | 2 | 3 | 4;
 
 export interface PatternExample {
   title: string;
   scenario: string;
-  /** JavaScript ES2023, sin dependencias ni APIs del DOM. */
+  /** JavaScript ES2023, no dependencies, no DOM APIs. */
   code: string;
 }
 
 export interface Pattern {
-  /** kebab-case, estable: se usa en URLs */
+  /** kebab-case, stable: used in URLs */
   id: string;
-  /** orden global 1..N, sin huecos */
+  /** global order 1..N, no gaps */
   rank: number;
-  /** nombre canónico en inglés */
+  /** canonical English name */
   name: string;
   nameEs: string;
   category: CategoryId;
   tier: Tier;
   gof: boolean;
-  /** una oración */
+  /** one sentence */
   summary: string;
   when: string;
   pros: string[];

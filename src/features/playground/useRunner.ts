@@ -17,7 +17,7 @@ export function useRunner(createWorker?: CreateWorker) {
         { code, tests: challenge.tests, checks: challenge.checks },
         createWorker,
       );
-      if (id !== runId.current) return null; // una ejecución más nueva ganó
+      if (id !== runId.current) return null; // a newer run won
       setResult(next);
       setStatus('done');
       return next;

@@ -3,7 +3,7 @@ import { shikiThemes } from './editor-theme';
 
 let highlighter: Promise<HighlighterCore> | null = null;
 
-/** Carga Shiki una sola vez, con solo JavaScript y el motor de regex en JS (sin wasm). */
+/** Loads Shiki once, with only JavaScript and the JS regex engine (no wasm). */
 function getHighlighter(): Promise<HighlighterCore> {
   highlighter ??= Promise.all([
     import('shiki/core'),

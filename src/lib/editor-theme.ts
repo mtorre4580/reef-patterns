@@ -1,6 +1,6 @@
 /**
- * Tema “Abyss Reef”, compartido por Shiki (resaltado de solo lectura) y Monaco (editor).
- * Se define una paleta por modo y de ella se derivan ambos formatos.
+ * “Abyss Reef” theme, shared by Shiki (read-only highlighting) and Monaco (editor).
+ * One palette per mode; both formats are derived from it.
  */
 
 export interface CodePalette {
@@ -102,7 +102,7 @@ export const shikiThemes = {
   light: toShikiTheme('abyss-reef-light', abyssReefLight, 'light'),
 };
 
-/** Tokens de Monarch (lenguaje JS de Monaco) → clave de la paleta */
+/** Monarch tokens (Monaco JS language) → palette key */
 const monacoTokens: [string, keyof CodePalette, string?][] = [
   ['comment', 'comment', 'italic'],
   ['keyword', 'keyword'],

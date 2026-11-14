@@ -3,10 +3,10 @@ import type { CodeEditorProps } from './editor-types';
 
 const MonacoEditor = lazy(() => import('./MonacoEditor'));
 
-export function CodeEditor(props: CodeEditorProps) {
+export const CodeEditor = (props: CodeEditorProps) => {
   return (
     <Suspense fallback={<p className="p-4 text-sm text-kelp">Cargando editor…</p>}>
       <MonacoEditor {...props} />
     </Suspense>
   );
-}
+};

@@ -10,14 +10,14 @@ interface ConfirmDialogProps {
   onConfirm: () => void;
 }
 
-/** Diálogo de confirmación accesible (Radix AlertDialog) con el tema del sitio. */
-export function ConfirmDialog({
+/** Accessible confirmation dialog (Radix AlertDialog) with the site theme. */
+export const ConfirmDialog = ({
   trigger,
   title,
   description,
   confirmLabel,
   onConfirm,
-}: ConfirmDialogProps) {
+}: ConfirmDialogProps) => {
   return (
     <Primitive.Root>
       <Primitive.Trigger asChild>{trigger}</Primitive.Trigger>
@@ -43,4 +43,4 @@ export function ConfirmDialog({
       </Primitive.Portal>
     </Primitive.Root>
   );
-}
+};

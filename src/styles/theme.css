@@ -3,14 +3,14 @@
 @import '@fontsource-variable/geist-mono';
 
 /*
- * Tokens de Reef Patterns. Valores oscuros por defecto (abismo + bioluminiscencia);
- * el modo claro (arena + laguna) los redefine en [data-theme='light'].
+ * Reef Patterns tokens. Dark values by default (abyss + bioluminescence);
+ * light mode (sand + lagoon) redefines them under [data-theme='light'].
  */
 @theme {
   --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
 
-  /* Escala modular 1.25 */
+  /* 1.25 modular scale */
   --text-xs: 0.8rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
@@ -26,7 +26,7 @@
   --color-trench: #0c1f2b;
   --color-reef: #12293a;
   --color-current: #1f3b4b;
-  /* alias utilizable: `border-current` en Tailwind es currentColor */
+  /* usable alias: `border-current` in Tailwind means currentColor */
   --color-line: var(--color-current);
   --color-foam: #e4f1f3;
   --color-kelp: #9ab3bb;
@@ -79,7 +79,7 @@
 
 :root {
   color-scheme: dark;
-  /* 0 en la superficie, 1 en el abismo. Lo actualiza el DepthGauge. */
+  /* 0 at the surface, 1 in the abyss. Updated by DepthGauge. */
   --depth: 0;
 }
 :root[data-theme='light'] {
@@ -115,7 +115,7 @@
   }
 }
 
-/* Shiki con temas duales: los spans traen --shiki-light y --shiki-dark */
+/* Shiki dual themes: spans carry --shiki-light and --shiki-dark */
 .shiki,
 .shiki span {
   color: var(--shiki-dark);
@@ -126,7 +126,7 @@
   color: var(--shiki-light);
 }
 
-/* View Transitions entre catálogo y detalle */
+/* View Transitions between catalog and detail */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: 200ms;

@@ -7,11 +7,11 @@ afterEach(() => {
   try {
     localStorage.clear();
   } catch {
-    // jsdom sin storage: ignorar
+    // jsdom without storage: ignore
   }
 });
 
-// jsdom no implementa matchMedia
+// jsdom does not implement matchMedia
 if (!window.matchMedia) {
   window.matchMedia = (query: string) =>
     ({
@@ -26,7 +26,7 @@ if (!window.matchMedia) {
     }) as MediaQueryList;
 }
 
-// cmdk usa ResizeObserver y scrollIntoView, que jsdom no implementa
+// cmdk uses ResizeObserver and scrollIntoView, which jsdom does not implement
 if (!('ResizeObserver' in window)) {
   (window as unknown as { ResizeObserver: unknown }).ResizeObserver = class {
     observe() {}
@@ -38,9 +38,9 @@ if (!Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = () => {};
 }
 
-// jsdom no implementa scrollTo (lo usa ScrollRestoration)
+// jsdom does not implement scrollTo (used by ScrollRestoration)
 window.scrollTo = (() => {}) as typeof window.scrollTo;
 
-// axe intenta usar canvas; jsdom no lo implementa
+// axe tries to use canvas; jsdom does not implement it
 HTMLCanvasElement.prototype.getContext = (() =>
   null) as typeof HTMLCanvasElement.prototype.getContext;

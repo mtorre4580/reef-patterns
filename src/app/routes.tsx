@@ -14,7 +14,7 @@ export const routes: RouteObject[] = [
       {
         path: 'playground',
         HydrateFallback: PageLoading,
-        // Carga diferida: el catálogo nunca descarga Monaco ni el runner
+        // Lazy route: the catalog never downloads Monaco or the runner
         lazy: async () => ({ Component: (await import('@/features/playground')).PlaygroundPage }),
       },
       { path: '*', element: <NotFoundPage /> },

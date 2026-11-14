@@ -25,9 +25,12 @@ pnpm dev
 
 ## Deploy
 
-Vercel (`vercel.json` incluido): importá el repo en Vercel; detecta Vite, instala con pnpm y
-reescribe las rutas del SPA a `index.html`. Si el dominio final no es
-`reef-patterns.vercel.app`, actualizá `canonical` y las URLs de Open Graph en `index.html`.
+GitHub Pages: el workflow `.github/workflows/deploy.yml` construye y publica en cada push a
+`main` (también se puede correr a mano). La app usa `HashRouter` porque Pages no tiene fallback
+de SPA, y Vite construye con `base: '/reef-patterns/'`.
+
+Publicada en <https://mtorre4580.github.io/reef-patterns/> (requiere activar Pages con fuente
+“GitHub Actions” en *Settings → Pages* la primera vez).
 
 Ver [`CLAUDE.md`](./CLAUDE.md) para el contexto técnico y [`docs/PLAN.md`](./docs/PLAN.md) para
 el plan por fases.

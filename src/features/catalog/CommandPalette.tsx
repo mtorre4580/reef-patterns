@@ -28,8 +28,8 @@ export function useCommandPalette(): PaletteContextValue {
   return ctx;
 }
 
-/** Paleta ⌘K / Ctrl+K: ⌘K, escribir y Enter abre cualquier patrón. */
-export function CommandPaletteProvider({ children }: { children: ReactNode }) {
+/** ⌘K / Ctrl+K palette: ⌘K, type, Enter opens any pattern. */
+export const CommandPaletteProvider = ({ children }: { children: ReactNode }) => {
   const [isOpen, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
@@ -114,4 +114,4 @@ export function CommandPaletteProvider({ children }: { children: ReactNode }) {
       </Command.Dialog>
     </PaletteContext.Provider>
   );
-}
+};

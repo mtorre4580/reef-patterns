@@ -26,7 +26,7 @@ export function parseProgress(raw: unknown): ProgressState {
   return { completed: [] };
 }
 
-/** Zonas cuyos challenges están todos resueltos (solo zonas que tienen challenges). */
+/** Zones whose challenges are all solved (only zones that have challenges). */
 export function completedZones(
   patterns: readonly Pattern[],
   challengesByPattern: ReadonlyMap<string, Challenge[]>,

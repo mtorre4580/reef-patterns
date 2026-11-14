@@ -17,7 +17,7 @@ export const emptyFilters: CatalogFilters = {
 
 const splitList = (value: string | null) => (value ? value.split(',').filter(Boolean) : []);
 
-/** Lee los filtros desde la URL (?cat=a,b&tier=1,2&gof=1&q=texto), ignorando valores inválidos. */
+/** Reads filters from the URL (?cat=a,b&tier=1,2&gof=1&q=text), ignoring invalid values. */
 export function parseFilters(params: URLSearchParams): CatalogFilters {
   const categories = splitList(params.get('cat')).filter((c): c is CategoryId =>
     categoriesById.has(c as CategoryId),
@@ -49,7 +49,7 @@ export function hasActiveFilters(filters: CatalogFilters): boolean {
   );
 }
 
-/** Aplica categoría, nivel y GoF. La búsqueda de texto se resuelve aparte con Fuse. */
+/** Applies category, tier and GoF. Text search is handled separately by Fuse. */
 export function matchesFilters(pattern: Pattern, filters: CatalogFilters): boolean {
   if (filters.categories.length && !filters.categories.includes(pattern.category)) return false;
   if (filters.tiers.length && !filters.tiers.includes(pattern.tier)) return false;

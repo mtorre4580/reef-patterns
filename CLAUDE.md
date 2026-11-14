@@ -39,7 +39,7 @@ computadoras de buceo, etc.).
 | Tests | Vitest + React Testing Library + `@testing-library/user-event` + jsdom | |
 | Lint/format | ESLint (flat config) + Prettier | |
 | CI | GitHub Actions | lint, typecheck, test, build |
-| Deploy | Vercel con `BrowserRouter` | `vercel.json` reescribe rutas del SPA a `index.html` |
+| Deploy | GitHub Pages con `HashRouter` (`createHashRouter`) | Workflow `deploy.yml` en cada push a `main`; `base: '/reef-patterns/'` |
 
 ## Comandos
 
@@ -199,15 +199,19 @@ ambos temas, `prefers-reduced-motion` desactiva el giro animado (muestra el resu
 ## Convenciones
 
 - **Código de ejemplos y challenges: JavaScript moderno (ES2023), sin TypeScript, sin
-  dependencias, sin APIs del DOM** (corre en un worker). Identificadores en inglés;
-  comentarios y textos en español.
+  dependencias, sin APIs del DOM** (corre en un worker). Identificadores en inglés.
+- **Todos los comentarios del código van en inglés**, sin excepción: app, scripts, tests y el
+  JS de ejemplos y challenges que ve el usuario. Es el estándar del equipo.
 - Dominio de los ejemplos: acuario de arrecife (sensores de temperatura, salinidad, pH,
   dosificadoras de kalkwasser o métodos tipo Triton, skimmer, ATO, iluminación, corales SPS/LPS/
   blandos, fragging) y buceo (computadora de buceo, paradas de seguridad, plan de inmersión,
   equipo, log de inmersiones). Cada ejemplo cuenta una situación concreta, no clases `Foo`/`Bar`.
 - UI en español rioplatense neutro (“buscá”, “probá”), sentence case.
 - Componentes: un componente por archivo, nombre en PascalCase, props tipadas, sin `default
-  export` salvo rutas lazy.
+  export` salvo carga lazy.
+- **Los componentes se definen siempre como arrow functions** asignadas a `const`
+  (`export const Button = ({ … }: ButtonProps) => …`). Nunca `function Button()`. Para carga
+  lazy: `const MonacoEditor = () => …; export default MonacoEditor;`.
 - Estado: local con hooks; estado compartido con Context + `useReducer`. No agregar librerías de
   estado sin discutirlo.
 - No agregar dependencias nuevas sin justificar en el PR por qué no alcanza con lo existente.
@@ -246,6 +250,6 @@ ambos temas, `prefers-reduced-motion` desactiva el giro animado (muestra el resu
 - [x] Fase 2 — Catálogo
 - [x] Fase 3 — Playground y runner
 - [x] Fase 4 — Challenges y rueda
-- [x] Fase 5 — Pulido y deploy (falta conectar el repo en Vercel)
+- [x] Fase 5 — Pulido y deploy (GitHub Pages)
 
 Ver `docs/PLAN.md` para el detalle de cada fase.

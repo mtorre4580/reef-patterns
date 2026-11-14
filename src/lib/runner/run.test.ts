@@ -2,7 +2,7 @@ import { executeChallenge } from './execute';
 import { runInWorker, type WorkerLike } from './run';
 import { TIMEOUT_MESSAGE, type RunRequest } from './types';
 
-/** Worker simulado que ejecuta el código en el mismo hilo (o nunca responde). */
+/** Fake worker that runs the code on the same thread (or never answers). */
 class FakeWorker implements WorkerLike {
   onmessage: ((event: MessageEvent) => void) | null = null;
   onerror: ((event: ErrorEvent) => void) | null = null;

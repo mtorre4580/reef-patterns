@@ -1,13 +1,14 @@
-import { createBrowserRouter, RouterProvider } from 'react-router';
+import { createHashRouter, RouterProvider } from 'react-router';
 import { routes } from './routes';
 import { ThemeProvider } from './ThemeProvider';
 
-const router = createBrowserRouter(routes);
+// Hash routing: GitHub Pages serves static files and has no SPA fallback
+const router = createHashRouter(routes);
 
-export function App() {
+export const App = () => {
   return (
     <ThemeProvider>
       <RouterProvider router={router} />
     </ThemeProvider>
   );
-}
+};

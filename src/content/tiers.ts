@@ -5,7 +5,7 @@ export interface TierInfo {
   label: string;
   zone: string;
   depth: string;
-  /** profundidad representativa en metros, para el profundímetro */
+  /** representative depth in meters, for the depth gauge */
   minDepth: number;
   maxDepth: number;
 }

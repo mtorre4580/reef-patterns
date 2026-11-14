@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { TierInfo } from '@/content/tiers';
+import { scrollToId } from '@/lib/scrollToId';
 import { cn } from '@/lib/utils';
 import { computeDepth, MAX_GAUGE_DEPTH, zoneElementId, type DepthReading } from './depth';
 
@@ -7,8 +8,8 @@ interface DepthGaugeProps {
   zones: TierInfo[];
 }
 
-/** Profundímetro lateral: marca la zona actual y oscurece el fondo con la profundidad. */
-export function DepthGauge({ zones }: DepthGaugeProps) {
+/** Side depth gauge: marks the current zone and darkens the background with depth. */
+export const DepthGauge = ({ zones }: DepthGaugeProps) => {
   const [reading, setReading] = useState<DepthReading>({
     depth: zones[0]?.minDepth ?? 0,
     zone: zones[0] ?? null,
@@ -79,19 +80,20 @@ export function DepthGauge({ zones }: DepthGaugeProps) {
               className="absolute right-5"
               style={{ top: `calc(${(zone.minDepth / MAX_GAUGE_DEPTH) * 100}% - 0.6em)` }}
             >
-              <a
-                href={`#${zoneElementId(zone.tier)}`}
+              <button
+                type="button"
+                onClick={() => scrollToId(zoneElementId(zone.tier))}
                 className={cn(
                   'block rounded-control px-1 text-right font-mono text-[0.7rem] whitespace-nowrap transition-colors hover:text-foam',
                   reading.zone?.tier === zone.tier ? 'text-biolum' : 'text-kelp',
                 )}
               >
                 {zone.minDepth} m<span className="sr-only">, ir a {zone.zone}</span>
-              </a>
+              </button>
             </li>
           ))}
         </ol>
       </div>
     </aside>
   );
-}
+};

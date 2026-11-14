@@ -4,7 +4,7 @@ import { storage } from '@/lib/storage';
 
 export const draftKey = (challengeId: string) => `reef-patterns:draft:${challengeId}`;
 
-/** Código del challenge con borrador autoguardado en localStorage. */
+/** Challenge code with a draft autosaved to localStorage. */
 export function useDraft(challenge: Challenge | undefined, delayMs = 400) {
   const [code, setCode] = useState(() =>
     challenge ? (storage.get(draftKey(challenge.id)) ?? challenge.starterCode) : '',
@@ -12,7 +12,7 @@ export function useDraft(challenge: Challenge | undefined, delayMs = 400) {
   const [loadedId, setLoadedId] = useState(challenge?.id);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // Cambio de challenge: cargar su borrador (ajuste de estado durante el render)
+  // Challenge changed: load its draft (state adjustment during render)
   if (challenge?.id !== loadedId) {
     setLoadedId(challenge?.id);
     setCode(challenge ? (storage.get(draftKey(challenge.id)) ?? challenge.starterCode) : '');

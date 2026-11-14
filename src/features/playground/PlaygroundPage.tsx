@@ -27,7 +27,7 @@ const mobileTabs: { id: MobileTab; label: string }[] = [
   { id: 'results', label: 'Resultados' },
 ];
 
-export function PlaygroundPage() {
+export const PlaygroundPage = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const resolution = resolveChallenge(params);
@@ -78,7 +78,7 @@ export function PlaygroundPage() {
       onChoose={choose}
     />
   );
-}
+};
 
 interface WorkspaceProps {
   challenge: Challenge;
@@ -86,7 +86,7 @@ interface WorkspaceProps {
   onChoose: (challenge: Challenge) => void;
 }
 
-function Workspace({ challenge, pattern, onChoose }: WorkspaceProps) {
+const Workspace = ({ challenge, pattern, onChoose }: WorkspaceProps) => {
   const { theme } = useTheme();
   const { completed, markCompleted } = useProgress();
   const [helmOpen, setHelmOpen] = useState(false);
@@ -227,4 +227,4 @@ function Workspace({ challenge, pattern, onChoose }: WorkspaceProps) {
       </Dialog>
     </div>
   );
-}
+};

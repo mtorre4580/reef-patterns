@@ -32,7 +32,7 @@ export interface PatternSearch {
   search(query: string): Pattern[];
 }
 
-/** Índice difuso sobre nombre, nombre en español, categoría y resumen. Ignora tildes. */
+/** Fuzzy index over name, localized name, category and summary. Ignores diacritics. */
 export function createPatternSearch(patterns: Pattern[]): PatternSearch {
   const docs = patterns.map<SearchDoc>((pattern) => ({
     pattern,

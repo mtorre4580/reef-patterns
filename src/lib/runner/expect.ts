@@ -1,6 +1,6 @@
 /**
- * Mini librería de asserts del runner. Solo lo necesario:
- * toBe, toEqual (deep), toBeTruthy, toThrow, toHaveBeenCalled, toHaveBeenCalledTimes y fn().
+ * The runner's tiny assertion library. Only what is needed:
+ * toBe, toEqual (deep), toBeTruthy, toThrow, toHaveBeenCalled, toHaveBeenCalledTimes and fn().
  */
 
 export class AssertionError extends Error {
@@ -18,7 +18,7 @@ export interface Spy {
   [SPY]: true;
 }
 
-/** Crea una función espía que registra sus llamadas y opcionalmente delega en `impl`. */
+/** Creates a spy function that records its calls and optionally delegates to `impl`. */
 export function fn(impl?: (...args: unknown[]) => unknown): Spy {
   const spy = function (this: unknown, ...args: unknown[]) {
     spy.calls.push(args);

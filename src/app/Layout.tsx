@@ -3,12 +3,13 @@ import { NavLink, Outlet, ScrollRestoration } from 'react-router';
 import { CommandPaletteProvider, useCommandPalette } from '@/features/catalog';
 import { ProgressProvider } from '@/features/progress';
 import { Kbd } from '@/components/ui/kbd';
+import { scrollToId } from '@/lib/scrollToId';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './ThemeToggle';
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 
-function SearchButton() {
+const SearchButton = () => {
   const { open } = useCommandPalette();
   return (
     <button
@@ -22,7 +23,7 @@ function SearchButton() {
       <Kbd className="hidden sm:inline-flex">{isMac ? '⌘K' : 'Ctrl K'}</Kbd>
     </button>
   );
-}
+};
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
   cn(
@@ -30,7 +31,7 @@ const navClass = ({ isActive }: { isActive: boolean }) =>
     isActive ? 'text-foam' : 'text-kelp hover:text-foam',
   );
 
-function Header() {
+const Header = () => {
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-abyss/85 backdrop-blur-sm">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:gap-4 sm:px-6">
@@ -66,18 +67,19 @@ function Header() {
       </div>
     </header>
   );
-}
+};
 
-export function Layout() {
+export const Layout = () => {
   return (
     <ProgressProvider>
       <CommandPaletteProvider>
-        <a
-          href="#contenido"
+        <button
+          type="button"
+          onClick={() => scrollToId('contenido')}
           className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-control focus:bg-lagoon focus:px-3 focus:py-2 focus:text-lagoon-ink"
         >
           Saltar al contenido
-        </a>
+        </button>
         <Header />
         <main id="contenido" tabIndex={-1} className="outline-none">
           <Outlet />
@@ -86,4 +88,4 @@ export function Layout() {
       </CommandPaletteProvider>
     </ProgressProvider>
   );
-}
+};

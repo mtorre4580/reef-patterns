@@ -8,16 +8,16 @@ import { GofBadge } from '@/components/GofBadge';
 import { Button } from '@/components/ui/button';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+const Section = ({ title, children }: { title: string; children: React.ReactNode }) => {
   return (
     <section className="flex flex-col gap-3">
       <h2 className="text-base font-semibold tracking-tight">{title}</h2>
       {children}
     </section>
   );
-}
+};
 
-export function PatternDetailPage() {
+export const PatternDetailPage = () => {
   const { id = '' } = useParams();
   const pattern = patternsById.get(id);
   useDocumentTitle(pattern?.name ?? 'Patrón no encontrado');
@@ -170,4 +170,4 @@ export function PatternDetailPage() {
       </nav>
     </article>
   );
-}
+};
