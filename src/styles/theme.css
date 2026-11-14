@@ -1,0 +1,124 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+
+/*
+ * Tokens de Reef Patterns. Valores oscuros por defecto (abismo + bioluminiscencia);
+ * el modo claro (arena + laguna) los redefine en [data-theme='light'].
+ */
+@theme {
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Escala modular 1.25 */
+  --text-xs: 0.8rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.563rem;
+  --text-2xl: 1.953rem;
+  --text-3xl: 2.441rem;
+
+  --radius-control: 6px;
+  --radius-panel: 12px;
+
+  --color-abyss: #06131c;
+  --color-trench: #0c1f2b;
+  --color-reef: #12293a;
+  --color-current: #1f3b4b;
+  --color-foam: #e4f1f3;
+  --color-kelp: #9ab3bb;
+  --color-lagoon: #2dd4bf;
+  --color-lagoon-ink: #04201c;
+  --color-biolum: #7df9ff;
+  --color-coral: #ff8a7a;
+  --color-anemone: #5ee39a;
+
+  --color-cat-creacional: #f5b971;
+  --color-cat-estructural: #8ab4ff;
+  --color-cat-comportamiento: #c79bff;
+  --color-cat-arquitectura: #7ee0c3;
+  --color-cat-resiliencia: #ff9fb2;
+  --color-cat-frontend: #ffe17a;
+
+  --animate-fade-in: fade-in 200ms ease-out;
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+:root[data-theme='light'] {
+  --color-abyss: #f6f2e9;
+  --color-trench: #fffdf8;
+  --color-reef: #efe9dc;
+  --color-current: #d6cdbb;
+  --color-foam: #0d2530;
+  --color-kelp: #46595f;
+  --color-lagoon: #0f766e;
+  --color-lagoon-ink: #ffffff;
+  --color-biolum: #0369a1;
+  --color-coral: #b42318;
+  --color-anemone: #157a3b;
+
+  --color-cat-creacional: #a85d06;
+  --color-cat-estructural: #2457c5;
+  --color-cat-comportamiento: #7a3fd0;
+  --color-cat-arquitectura: #0b7a5c;
+  --color-cat-resiliencia: #b8324f;
+  --color-cat-frontend: #8a6a00;
+}
+
+:root {
+  color-scheme: dark;
+  /* 0 en la superficie, 1 en el abismo. Lo actualiza el DepthGauge. */
+  --depth: 0;
+}
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-abyss text-foam font-sans;
+    min-height: 100dvh;
+    background-color: color-mix(in oklab, var(--color-abyss), #000 calc(var(--depth) * 28%));
+    transition: background-color 250ms linear;
+  }
+  :root[data-theme='light'] body {
+    background-color: color-mix(in oklab, var(--color-abyss), #0e4f63 calc(var(--depth) * 10%));
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-biolum);
+    outline-offset: 2px;
+    border-radius: var(--radius-control);
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--color-lagoon) 35%, transparent);
+  }
+  code,
+  pre,
+  kbd {
+    font-family: var(--font-mono);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

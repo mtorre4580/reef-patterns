@@ -241,7 +241,7 @@ ambos temas, `prefers-reduced-motion` desactiva el giro animado (muestra el resu
 
 ## Estado
 
-- [ ] Fase 0 — Setup
+- [x] Fase 0 — Setup
 - [ ] Fase 1 — Contenido
 - [ ] Fase 2 — Catálogo
 - [ ] Fase 3 — Playground y runner
