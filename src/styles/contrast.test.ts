@@ -44,10 +44,10 @@ const pairs: [string, string, number][] = [
 ];
 
 describe.each([
-  ['oscuro', dark],
-  ['claro', light],
+  ['dark', dark],
+  ['light', light],
 ])('contraste WCAG AA en modo %s', (_name, theme) => {
-  it.each(pairs)('%s sobre %s ≥ %d:1', (fg, bg, min) => {
+  it.each(pairs)('%s on %s ≥ %d:1', (fg, bg, min) => {
     expect(theme[fg], fg).toBeDefined();
     expect(ratio(theme[fg]!, theme[bg]!)).toBeGreaterThanOrEqual(min);
   });

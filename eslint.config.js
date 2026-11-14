@@ -22,7 +22,10 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': [
         'warn',
-        { allowConstantExport: true, allowExportNames: ['useTheme', 'useCommandPalette', 'useProgress'] },
+        {
+          allowConstantExport: true,
+          allowExportNames: ['useTheme', 'useCommandPalette', 'useProgress', 'useI18n'],
+        },
       ],
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/consistent-type-imports': 'error',

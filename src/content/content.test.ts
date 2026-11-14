@@ -2,13 +2,13 @@ import { challenges, challengesByPattern, patterns, patternsById, tiers } from '
 import { executeChallenge } from '@/lib/runner/execute';
 import { validateChallengeRuns, validateChallengeShapes, validatePatterns } from './validate';
 
-describe('contenido', () => {
-  it('tiene 52 patrones válidos', () => {
+describe('content', () => {
+  it('has 52 valid patterns', () => {
     expect(patterns).toHaveLength(52);
     expect(validatePatterns(patterns)).toEqual([]);
   });
 
-  it('cubre los cuatro tiers, con 11 esenciales y 29 en tiers 1–2', () => {
+  it('covers the four tiers, with 11 essential and 29 in tiers 1–2', () => {
     for (const { tier } of tiers) {
       expect(patterns.some((p) => p.tier === tier)).toBe(true);
     }
@@ -16,26 +16,26 @@ describe('contenido', () => {
     expect(patterns.filter((p) => p.tier <= 2)).toHaveLength(29);
   });
 
-  it('indexa por id', () => {
+  it('indexes by id', () => {
     expect(patternsById.get('strategy')?.name).toBe('Strategy');
   });
 
-  it('agrupa los challenges por patrón', () => {
+  it('groups challenges by pattern', () => {
     expect(validateChallengeShapes(challenges, new Set(patternsById.keys()))).toEqual([]);
     const total = [...challengesByPattern.values()].reduce((n, list) => n + list.length, 0);
     expect(total).toBe(challenges.length);
   });
 
-  it('cada solución pasa y cada starter falla', async () => {
+  it('every solution passes and every starter fails', async () => {
     expect(await validateChallengeRuns(challenges, executeChallenge)).toEqual([]);
   });
 
-  it('detecta problemas en contenido inválido', () => {
-    const broken = { ...patterns[0]!, rank: 3, related: ['no-existe'] };
+  it('detects problems in invalid content', () => {
+    const broken = { ...patterns[0]!, rank: 3, related: ['no-such-id'] };
     broken.example = { ...broken.example, code: 'const = ;' };
     const messages = validatePatterns([broken]).map((i) => i.message);
     expect(messages.some((m) => m.includes('rank'))).toBe(true);
-    expect(messages.some((m) => m.includes('no-existe'))).toBe(true);
+    expect(messages.some((m) => m.includes('no-such-id'))).toBe(true);
     expect(messages.some((m) => m.includes('no parsea'))).toBe(true);
   });
 });

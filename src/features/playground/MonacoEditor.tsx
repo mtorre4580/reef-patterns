@@ -8,6 +8,7 @@ import {
 import EditorWorker from 'monaco-editor/editor/editor.worker?worker';
 import TsWorker from 'monaco-editor/languages/features/typescript/ts.worker?worker';
 import { useEffect, useRef } from 'react';
+import { useI18n } from '@/i18n';
 import { monacoThemes } from '@/lib/editor-theme';
 import type { CodeEditorProps } from './editor-types';
 
@@ -40,6 +41,7 @@ monaco.editor.defineTheme(
 /** Monaco editor. Default export because it is loaded with React.lazy. */
 const MonacoEditor = ({ value, onChange, onRun, theme, label }: CodeEditorProps) => {
   const runRef = useRef(onRun);
+  const { t } = useI18n();
   useEffect(() => {
     runRef.current = onRun;
   }, [onRun]);
@@ -56,7 +58,7 @@ const MonacoEditor = ({ value, onChange, onRun, theme, label }: CodeEditorProps)
       onChange={(v) => onChange(v ?? '')}
       onMount={handleMount}
       theme={theme === 'dark' ? 'abyss-reef-dark' : 'abyss-reef-light'}
-      loading={<p className="p-4 text-sm text-kelp">Cargando editor…</p>}
+      loading={<p className="p-4 text-sm text-kelp">{t('playground.loadingEditor')}</p>}
       options={{
         fontFamily: "'Geist Mono Variable', ui-monospace, Menlo, monospace",
         fontSize: 13.5,

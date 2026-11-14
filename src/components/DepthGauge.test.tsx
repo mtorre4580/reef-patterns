@@ -2,13 +2,13 @@ import { tiers } from '@/content/tiers';
 import { computeDepth } from './depth';
 
 describe('computeDepth', () => {
-  it('arranca en la superficie', () => {
+  it('starts at the surface', () => {
     const reading = computeDepth(tiers, [{ top: 400, height: 400 }, null, null, null], 300);
     expect(reading.depth).toBe(0);
-    expect(reading.zone?.zone).toBe('Superficie');
+    expect(reading.zone?.tier).toBe(1);
   });
 
-  it('interpola dentro de la zona actual', () => {
+  it('interpolates within the current zone', () => {
     const rects = [
       { top: -800, height: 400 },
       { top: -100, height: 400 },
@@ -16,11 +16,11 @@ describe('computeDepth', () => {
       { top: 700, height: 400 },
     ];
     const reading = computeDepth(tiers, rects, 100);
-    expect(reading.zone?.zone).toBe('Arrecife');
+    expect(reading.zone?.tier).toBe(2);
     expect(reading.depth).toBe(20); // halfway through 10–30 m
   });
 
-  it('no supera la profundidad máxima de la última zona', () => {
+  it('never exceeds the deepest zone', () => {
     const rects = tiers.map(() => ({ top: -2000, height: 100 }));
     expect(computeDepth(tiers, rects, 0).depth).toBe(100);
   });

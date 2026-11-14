@@ -1,6 +1,5 @@
 import Fuse, { type IFuseOptions } from 'fuse.js';
-import type { Pattern } from '@/content/types';
-import { categoryLabel } from '@/content/categories';
+import type { CategoryId, Pattern } from '@/content/types';
 
 interface SearchDoc {
   pattern: Pattern;
@@ -33,7 +32,10 @@ export interface PatternSearch {
 }
 
 /** Fuzzy index over name, localized name, category and summary. Ignores diacritics. */
-export function createPatternSearch(patterns: Pattern[]): PatternSearch {
+export function createPatternSearch(
+  patterns: Pattern[],
+  categoryLabel: (id: CategoryId) => string = (id) => id,
+): PatternSearch {
   const docs = patterns.map<SearchDoc>((pattern) => ({
     pattern,
     name: normalize(pattern.name),

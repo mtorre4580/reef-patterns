@@ -8,6 +8,7 @@ import { Dialog } from '@/components/ui/dialog';
 import { useProgress } from '@/features/progress';
 import { allPassed } from '@/lib/runner';
 import { Kbd } from '@/components/ui/kbd';
+import { useI18n } from '@/i18n';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { cn } from '@/lib/utils';
 import { ChallengeBrief } from './ChallengeBrief';
@@ -21,14 +22,11 @@ import { useRunner } from './useRunner';
 
 type MobileTab = 'brief' | 'code' | 'results';
 
-const mobileTabs: { id: MobileTab; label: string }[] = [
-  { id: 'brief', label: 'Enunciado' },
-  { id: 'code', label: 'Código' },
-  { id: 'results', label: 'Resultados' },
-];
+const mobileTabs: MobileTab[] = ['brief', 'code', 'results'];
 
 export const PlaygroundPage = () => {
   const [params] = useSearchParams();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const resolution = resolveChallenge(params);
   const choose = useCallback(
@@ -36,18 +34,17 @@ export const PlaygroundPage = () => {
     [navigate],
   );
   useDocumentTitle(
-    resolution.kind === 'challenge' ? `${resolution.challenge.title} · Playground` : 'Playground',
+    resolution.kind === 'challenge'
+      ? `${resolution.challenge.title} · ${t('playground.title')}`
+      : t('playground.title'),
   );
 
   if (resolution.kind === 'landing') {
     return (
       <div className="mx-auto flex max-w-md flex-col gap-6 px-4 py-10 sm:py-14">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">Girá el timón</h1>
-          <p className="mt-2 text-kelp">
-            Elegí zonas o categorías y dejá que el timón te asigne un challenge. Primero salen los
-            que todavía no resolviste.
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('playground.landingTitle')}</h1>
+          <p className="mt-2 text-kelp">{t('playground.landingBody')}</p>
         </div>
         <HelmPanel onChoose={choose} />
       </div>
@@ -57,14 +54,14 @@ export const PlaygroundPage = () => {
   if (resolution.kind === 'no-challenges') {
     return (
       <div className="mx-auto max-w-xl px-4 py-24 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Playground</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{t('playground.title')}</h1>
         <p className="mt-3 text-kelp">
           {resolution.pattern
-            ? `Todavía no hay challenges para ${resolution.pattern.name}. Estamos sumando más.`
-            : 'Todavía no hay challenges cargados.'}
+            ? t('playground.noChallengesFor', { pattern: resolution.pattern.name })
+            : t('playground.noChallenges')}
         </p>
         <Button asChild variant="primary" className="mt-8">
-          <Link to="/playground">Girar el timón</Link>
+          <Link to="/playground">{t('playground.spinHelm')}</Link>
         </Button>
       </div>
     );
@@ -93,14 +90,15 @@ const Workspace = ({ challenge, pattern, onChoose }: WorkspaceProps) => {
   const solved = completed.has(challenge.id);
   const { code, setCode, reset } = useDraft(challenge);
   const runner = useRunner();
+  const { t, locale } = useI18n();
   const [mobileTab, setMobileTab] = useState<MobileTab>('brief');
 
   const run = useCallback(() => {
     setMobileTab((t) => (t === 'code' ? 'results' : t));
-    void runner.run(challenge, code).then((result) => {
+    void runner.run(challenge, code, locale).then((result) => {
       if (result && allPassed(result)) markCompleted(challenge.id);
     });
-  }, [runner, challenge, code, markCompleted]);
+  }, [runner, challenge, code, locale, markCompleted]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -119,23 +117,23 @@ const Workspace = ({ challenge, pattern, onChoose }: WorkspaceProps) => {
     <div className="flex h-[calc(100dvh-3.5rem)] flex-col">
       <div
         role="tablist"
-        aria-label="Secciones del playground"
+        aria-label={t('playground.sections')}
         className="flex border-b border-line px-2 lg:hidden"
       >
-        {mobileTabs.map((t) => (
+        {mobileTabs.map((tab) => (
           <button
-            key={t.id}
+            key={tab}
             role="tab"
-            id={`tab-${t.id}`}
-            aria-selected={mobileTab === t.id}
-            aria-controls={`panel-${t.id}`}
-            onClick={() => setMobileTab(t.id)}
+            id={`tab-${tab}`}
+            aria-selected={mobileTab === tab}
+            aria-controls={`panel-${tab}`}
+            onClick={() => setMobileTab(tab)}
             className={cn(
               '-mb-px h-11 flex-1 border-b-2 text-sm',
-              mobileTab === t.id ? 'border-biolum text-foam' : 'border-transparent text-kelp',
+              mobileTab === tab ? 'border-biolum text-foam' : 'border-transparent text-kelp',
             )}
           >
-            {t.label}
+            {t(`playground.${tab}`)}
           </button>
         ))}
       </div>
@@ -144,7 +142,7 @@ const Workspace = ({ challenge, pattern, onChoose }: WorkspaceProps) => {
         <div className="flex min-h-0 flex-col lg:border-r lg:border-line">
           <section
             id="panel-brief"
-            aria-label="Enunciado"
+            aria-label={t('playground.brief')}
             className={cn(
               'overflow-y-auto p-4 sm:p-6 lg:max-h-[38%] lg:border-b lg:border-line',
               panel('brief'),
@@ -153,13 +151,13 @@ const Workspace = ({ challenge, pattern, onChoose }: WorkspaceProps) => {
             <div className="mb-3 flex items-center justify-between gap-2">
               {solved ? (
                 <span className="inline-flex items-center gap-1.5 text-xs text-anemone">
-                  <CheckCircle2 aria-hidden className="size-4" /> Resuelto
+                  <CheckCircle2 aria-hidden className="size-4" /> {t('playground.solved')}
                 </span>
               ) : (
-                <span className="text-xs text-kelp">Pendiente</span>
+                <span className="text-xs text-kelp">{t('playground.pending')}</span>
               )}
               <Button variant="secondary" size="sm" onClick={() => setHelmOpen(true)}>
-                <ShipWheel aria-hidden /> Girar el timón
+                <ShipWheel aria-hidden /> {t('playground.spinHelm')}
               </Button>
             </div>
             <ChallengeBrief challenge={challenge} pattern={pattern} />
@@ -167,7 +165,7 @@ const Workspace = ({ challenge, pattern, onChoose }: WorkspaceProps) => {
 
           <section
             id="panel-code"
-            aria-label="Código"
+            aria-label={t('playground.code')}
             className={cn('flex min-h-0 flex-1 flex-col', panel('code'))}
           >
             <div className="min-h-[240px] flex-1 bg-trench">
@@ -176,12 +174,12 @@ const Workspace = ({ challenge, pattern, onChoose }: WorkspaceProps) => {
                 onChange={setCode}
                 onRun={run}
                 theme={theme}
-                label={`Editor de código para ${challenge.title}`}
+                label={t('playground.editorLabel', { title: challenge.title })}
               />
             </div>
             <div className="flex items-center justify-between gap-2 border-t border-line p-3">
               <Button variant="ghost" size="sm" onClick={() => (reset(), runner.clear())}>
-                <RotateCcw aria-hidden /> Reiniciar
+                <RotateCcw aria-hidden /> {t('playground.reset')}
               </Button>
               <span className="ml-auto hidden text-xs text-kelp sm:inline">
                 <Kbd>⌘/Ctrl</Kbd> + <Kbd>↵</Kbd>
@@ -192,7 +190,7 @@ const Workspace = ({ challenge, pattern, onChoose }: WorkspaceProps) => {
                 onClick={run}
                 disabled={runner.status === 'running'}
               >
-                <Play aria-hidden /> Ejecutar tests
+                <Play aria-hidden /> {t('playground.run')}
               </Button>
             </div>
           </section>
@@ -200,7 +198,7 @@ const Workspace = ({ challenge, pattern, onChoose }: WorkspaceProps) => {
 
         <section
           id="panel-results"
-          aria-label="Resultados"
+          aria-label={t('playground.results')}
           className={cn('flex min-h-0 flex-col overflow-y-auto bg-trench/40', panel('results'))}
         >
           <ResultsPanel
@@ -215,8 +213,8 @@ const Workspace = ({ challenge, pattern, onChoose }: WorkspaceProps) => {
       <Dialog
         open={helmOpen}
         onOpenChange={setHelmOpen}
-        title="Girá el timón"
-        description="El timón elige un challenge entre los filtros activos, priorizando los pendientes."
+        title={t('playground.landingTitle')}
+        description={t('playground.helmDescription')}
       >
         <HelmPanel
           onChoose={(c) => {

@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import type { Challenge, Pattern } from '@/content/types';
 import { CategoryBadge } from '@/components/CategoryBadge';
-import { difficultyLabel } from './labels';
+import { useI18n } from '@/i18n';
 import { RichText } from './RichText';
 
 interface ChallengeBriefProps {
@@ -11,6 +11,7 @@ interface ChallengeBriefProps {
 }
 
 export const ChallengeBrief = ({ challenge, pattern, headingLevel = 1 }: ChallengeBriefProps) => {
+  const { t } = useI18n();
   const Heading = headingLevel === 1 ? 'h1' : 'h2';
   return (
     <div className="flex flex-col gap-3">
@@ -19,7 +20,9 @@ export const ChallengeBrief = ({ challenge, pattern, headingLevel = 1 }: Challen
           {pattern.name}
         </Link>
         <CategoryBadge category={pattern.category} />
-        <span className="text-kelp">Dificultad: {difficultyLabel[challenge.difficulty]}</span>
+        <span className="text-kelp">
+          {t('playground.difficulty', { level: t(`difficulty.${challenge.difficulty}`) })}
+        </span>
       </div>
       <Heading className="text-xl font-semibold tracking-tight">{challenge.title}</Heading>
       <p className="text-sm leading-relaxed text-kelp">{challenge.story}</p>

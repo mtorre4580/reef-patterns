@@ -1,6 +1,7 @@
 import { executeChallenge } from './execute';
 import { runInWorker, type WorkerLike } from './run';
-import { TIMEOUT_MESSAGE, type RunRequest } from './types';
+import { runnerMessages } from './messages';
+import type { RunRequest } from './types';
 
 /** Fake worker that runs the code on the same thread (or never answers). */
 class FakeWorker implements WorkerLike {
@@ -26,36 +27,38 @@ class FakeWorker implements WorkerLike {
 const request: RunRequest = {
   code: 'const depth = () => 18;',
   tests: [
-    { name: 'pasa', code: 'expect(depth()).toBe(18);' },
-    { name: 'falla', code: 'expect(depth()).toBe(30);' },
+    { name: 'passes', code: 'expect(depth()).toBe(18);' },
+    { name: 'fails', code: 'expect(depth()).toBe(30);' },
   ],
 };
 
 describe('runInWorker', () => {
-  it('devuelve los resultados y termina el worker', async () => {
+  it('returns the results and terminates the worker', async () => {
     let worker!: FakeWorker;
     const result = await runInWorker(request, () => (worker = new FakeWorker('run')));
     expect(result.results.map((r) => r.passed)).toEqual([true, false]);
     expect(worker.terminated).toBe(true);
   });
 
-  it('corta por timeout (bucle infinito) y marca todos los tests', async () => {
+  it('times out (infinite loop) and fails every test', async () => {
     let worker!: FakeWorker;
     const result = await runInWorker(
       { ...request, timeoutMs: 30 },
       () => (worker = new FakeWorker('hang')),
     );
     expect(result.timedOut).toBe(true);
-    expect(result.results.every((r) => !r.passed && r.error === TIMEOUT_MESSAGE)).toBe(true);
+    expect(result.results.every((r) => !r.passed && r.error === runnerMessages.en.timeout)).toBe(
+      true,
+    );
     expect(worker.terminated).toBe(true);
   });
 
-  it('reporta errores del worker', async () => {
+  it('reports worker errors', async () => {
     const result = await runInWorker(request, () => new FakeWorker('crash'));
-    expect(result.results[0]?.error).toBe('Error en el runner: boom');
+    expect(result.results[0]?.error).toBe('Runner error: boom');
   });
 
-  it('crea un worker nuevo por ejecución', async () => {
+  it('creates a new worker per run', async () => {
     const created: FakeWorker[] = [];
     const factory = () => {
       const w = new FakeWorker('run');

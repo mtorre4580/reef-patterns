@@ -1,6 +1,7 @@
 import { parse, type Node } from 'acorn';
 import { full, simple } from 'acorn-walk';
 import type { AstCheck } from '@/content/types';
+import { runnerMessages, type RunnerMessages } from './messages';
 import type { TestResult } from './types';
 
 type AnyNode = Node & Record<string, unknown>;
@@ -49,7 +50,11 @@ function collect(ast: Node) {
 }
 
 /** Runs the static rules on the user code. Each rule becomes one more result. */
-export function runAstChecks(code: string, checks: AstCheck[] = []): TestResult[] {
+export const runAstChecks = (
+  code: string,
+  checks: AstCheck[] = [],
+  m: RunnerMessages = runnerMessages.en,
+): TestResult[] => {
   if (checks.length === 0) return [];
   let ast: Node;
   try {
@@ -60,7 +65,7 @@ export function runAstChecks(code: string, checks: AstCheck[] = []): TestResult[
       name: c.message,
       passed: false,
       kind: 'check' as const,
-      error: `No se pudo analizar el código: ${message}`,
+      error: m.parseFailed(message),
     }));
   }
   const { nodeTypes, classes } = collect(ast);
@@ -72,27 +77,27 @@ export function runAstChecks(code: string, checks: AstCheck[] = []): TestResult[
         const count = nodeTypes.get(check.node) ?? 0;
         return count === 0
           ? { ...base, passed: true }
-          : { ...base, passed: false, error: `Se encontró ${check.node} en el código` };
+          : { ...base, passed: false, error: m.forbidNode(check.node) };
       }
       case 'requireClass': {
         const found = classes.some((c) => c.name === check.name);
         return found
           ? { ...base, passed: true }
-          : { ...base, passed: false, error: `Falta la clase ${check.name}` };
+          : { ...base, passed: false, error: m.missingClass(check.name) };
       }
       case 'requireMethod': {
         const cls = classes.find((c) => c.name === check.className);
-        if (!cls) return { ...base, passed: false, error: `Falta la clase ${check.className}` };
+        if (!cls) return { ...base, passed: false, error: m.missingClass(check.className) };
         return cls.methods.has(check.method)
           ? { ...base, passed: true }
-          : { ...base, passed: false, error: `${check.className} no define ${check.method}()` };
+          : { ...base, passed: false, error: m.missingMethod(check.className, check.method) };
       }
       case 'maxIfStatements': {
         const count = nodeTypes.get('IfStatement') ?? 0;
         return count <= check.max
           ? { ...base, passed: true }
-          : { ...base, passed: false, error: `Hay ${count} if; el máximo es ${check.max}` };
+          : { ...base, passed: false, error: m.tooManyIfs(count, check.max) };
       }
     }
   });
-}
+};

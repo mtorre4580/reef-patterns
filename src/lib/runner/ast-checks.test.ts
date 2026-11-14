@@ -10,23 +10,23 @@ switch (1) { default: }
 `;
 
 describe('runAstChecks', () => {
-  it('forbidNode detecta nodos prohibidos', () => {
+  it('forbidNode detects forbidden nodes', () => {
     const [r] = runAstChecks(code, [
-      { rule: 'forbidNode', node: 'SwitchStatement', message: 'Sin switch' },
+      { rule: 'forbidNode', node: 'SwitchStatement', message: 'No switch' },
     ]);
-    expect(r).toMatchObject({ name: 'Sin switch', passed: false, kind: 'check' });
+    expect(r).toMatchObject({ name: 'No switch', passed: false, kind: 'check' });
   });
 
-  it('requireClass acepta declaraciones y expresiones', () => {
+  it('requireClass accepts declarations and expressions', () => {
     const results = runAstChecks(code, [
-      { rule: 'requireClass', name: 'Doser', message: 'Clase Doser' },
-      { rule: 'requireClass', name: 'Helper', message: 'Clase Helper' },
-      { rule: 'requireClass', name: 'Nope', message: 'Clase Nope' },
+      { rule: 'requireClass', name: 'Doser', message: 'Class Doser' },
+      { rule: 'requireClass', name: 'Helper', message: 'Class Helper' },
+      { rule: 'requireClass', name: 'Nope', message: 'Class Nope' },
     ]);
     expect(results.map((r) => r.passed)).toEqual([true, true, false]);
   });
 
-  it('requireMethod busca métodos de la clase', () => {
+  it('requireMethod looks for class methods', () => {
     const results = runAstChecks(code, [
       { rule: 'requireMethod', className: 'Doser', method: 'plan', message: 'plan()' },
       { rule: 'requireMethod', className: 'Doser', method: 'undo', message: 'undo()' },
@@ -34,17 +34,20 @@ describe('runAstChecks', () => {
     expect(results.map((r) => r.passed)).toEqual([true, false]);
   });
 
-  it('maxIfStatements cuenta los if', () => {
-    const [ok] = runAstChecks(code, [{ rule: 'maxIfStatements', max: 1, message: 'Máx. 1 if' }]);
+  it('maxIfStatements counts if statements', () => {
+    const [ok] = runAstChecks(code, [{ rule: 'maxIfStatements', max: 1, message: 'Max 1 if' }]);
     const [ko] = runAstChecks('if (a) {} if (b) {}', [
-      { rule: 'maxIfStatements', max: 1, message: 'Máx. 1 if' },
+      { rule: 'maxIfStatements', max: 1, message: 'Max 1 if' },
     ]);
     expect(ok?.passed).toBe(true);
-    expect(ko).toMatchObject({ passed: false, error: 'Hay 2 if; el máximo es 1' });
+    expect(ko).toMatchObject({
+      passed: false,
+      error: 'There are 2 if statements; the maximum is 1',
+    });
   });
 
-  it('marca todos los chequeos como fallidos si el código no parsea', () => {
+  it('fails every check when the code does not parse', () => {
     const results = runAstChecks('class {', [{ rule: 'requireClass', name: 'A', message: 'A' }]);
-    expect(results[0]?.error).toMatch(/No se pudo analizar/);
+    expect(results[0]?.error).toMatch(/Could not parse/);
   });
 });

@@ -3,15 +3,18 @@ import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { routes } from '@/app/routes';
 import { ThemeProvider } from '@/app/ThemeProvider';
+import { I18nProvider, type Locale } from '@/i18n';
 
 /** Renders the whole app at a route using an in-memory router. */
-export function renderRoute(path = '/') {
+export function renderRoute(path = '/', locale: Locale = 'en') {
   const router = createMemoryRouter(routes, { initialEntries: [path] });
   const user = userEvent.setup();
   const utils = render(
-    <ThemeProvider>
-      <RouterProvider router={router} />
-    </ThemeProvider>,
+    <I18nProvider initial={locale}>
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </I18nProvider>,
   );
   return { ...utils, user, router };
 }

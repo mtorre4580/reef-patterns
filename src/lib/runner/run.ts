@@ -1,4 +1,5 @@
-import { DEFAULT_TIMEOUT_MS, TIMEOUT_MESSAGE, type RunRequest, type RunResult } from './types';
+import { runnerMessages } from './messages';
+import { DEFAULT_TIMEOUT_MS, type RunRequest, type RunResult } from './types';
 
 export interface WorkerLike {
   postMessage(message: unknown): void;
@@ -18,6 +19,7 @@ export const createRunnerWorker: CreateWorker = () =>
  */
 export function runInWorker(request: RunRequest, createWorker?: CreateWorker): Promise<RunResult> {
   const timeoutMs = request.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const m = runnerMessages[request.locale ?? 'en'];
   const started = performance.now();
 
   return new Promise((resolve) => {
@@ -43,12 +45,12 @@ export function runInWorker(request: RunRequest, createWorker?: CreateWorker): P
       timedOut,
     });
 
-    const timer = setTimeout(() => finish(failAll(TIMEOUT_MESSAGE, true)), timeoutMs);
+    const timer = setTimeout(() => finish(failAll(m.timeout, true)), timeoutMs);
 
     worker.onmessage = (event) => finish(event.data as RunResult);
     worker.onerror = (event) => {
       event.preventDefault?.();
-      finish(failAll(`Error en el runner: ${event.message ?? 'desconocido'}`));
+      finish(failAll(m.runnerError(event.message ?? 'unknown')));
     };
     worker.postMessage(request);
   });

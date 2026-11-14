@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import type { Challenge } from '@/content/types';
+import type { Locale } from '@/i18n/locales';
 import { runInWorker, type CreateWorker, type RunResult } from '@/lib/runner';
 
 export type RunStatus = 'idle' | 'running' | 'done';
@@ -10,11 +11,11 @@ export function useRunner(createWorker?: CreateWorker) {
   const runId = useRef(0);
 
   const run = useCallback(
-    async (challenge: Challenge, code: string) => {
+    async (challenge: Challenge, code: string, locale: Locale = 'en') => {
       const id = ++runId.current;
       setStatus('running');
       const next = await runInWorker(
-        { code, tests: challenge.tests, checks: challenge.checks },
+        { code, tests: challenge.tests, checks: challenge.checks, locale },
         createWorker,
       );
       if (id !== runId.current) return null; // a newer run won

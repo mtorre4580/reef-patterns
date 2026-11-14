@@ -6,6 +6,7 @@ import { CategoryBadge } from '@/components/CategoryBadge';
 import { CodeBlock } from '@/components/CodeBlock';
 import { GofBadge } from '@/components/GofBadge';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/i18n';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => {
@@ -20,15 +21,16 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 export const PatternDetailPage = () => {
   const { id = '' } = useParams();
   const pattern = patternsById.get(id);
-  useDocumentTitle(pattern?.name ?? 'Patrón no encontrado');
+  const { t } = useI18n();
+  useDocumentTitle(pattern?.name ?? t('detail.notFoundDocTitle'));
 
   if (!pattern) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-24 text-center">
-        <h1 className="text-xl font-semibold">No encontramos ese patrón</h1>
-        <p className="mt-2 text-kelp">Puede que el enlace esté mal escrito.</p>
+        <h1 className="text-xl font-semibold">{t('detail.notFoundTitle')}</h1>
+        <p className="mt-2 text-kelp">{t('detail.notFoundBody')}</p>
         <Button asChild variant="primary" className="mt-6">
-          <Link to="/">Volver al catálogo</Link>
+          <Link to="/">{t('detail.backToCatalog')}</Link>
         </Button>
       </div>
     );
@@ -41,9 +43,9 @@ export const PatternDetailPage = () => {
 
   return (
     <article className="mx-auto w-full max-w-3xl px-4 pt-8 pb-24 sm:px-6">
-      <nav aria-label="Migas de pan" className="text-sm text-kelp">
+      <nav aria-label={t('detail.breadcrumb')} className="text-sm text-kelp">
         <Link to="/" viewTransition className="inline-flex items-center gap-1 hover:text-foam">
-          <ArrowLeft className="size-4" aria-hidden /> Catálogo
+          <ArrowLeft className="size-4" aria-hidden /> {t('detail.catalog')}
         </Link>
       </nav>
 
@@ -52,7 +54,7 @@ export const PatternDetailPage = () => {
           <span className="font-mono text-kelp">#{pattern.rank}</span>
           <CategoryBadge category={pattern.category} />
           <span className="text-kelp">
-            {zone.label} · {zone.zone} {zone.depth}
+            {t(`tiers.${pattern.tier}.label`)} · {t(`tiers.${pattern.tier}.zone`)} {zone.depth}
           </span>
           {pattern.gof && <GofBadge />}
         </div>
@@ -64,26 +66,26 @@ export const PatternDetailPage = () => {
             <>
               <Button asChild variant="primary">
                 <Link to={`/playground?pattern=${pattern.id}`}>
-                  <Waves aria-hidden /> Practicar este patrón
+                  <Waves aria-hidden /> {t('detail.practice')}
                 </Link>
               </Button>
               <span className="text-sm text-kelp">
-                {challengeCount === 1 ? '1 challenge' : `${challengeCount} challenges`}
+                {t('detail.challenges', { count: challengeCount })}
               </span>
             </>
           ) : (
-            <span className="text-sm text-kelp">Challenges de este patrón: próximamente.</span>
+            <span className="text-sm text-kelp">{t('detail.challengesSoon')}</span>
           )}
         </div>
       </header>
 
       <div className="mt-10 flex flex-col gap-10">
-        <Section title="Cuándo usarlo">
+        <Section title={t('detail.when')}>
           <p className="leading-relaxed text-foam/90">{pattern.when}</p>
         </Section>
 
         <div className="grid gap-8 sm:grid-cols-2">
-          <Section title="Beneficios">
+          <Section title={t('detail.pros')}>
             <ul className="flex flex-col gap-2">
               {pattern.pros.map((pro) => (
                 <li key={pro} className="flex gap-2 text-foam/90">
@@ -93,7 +95,7 @@ export const PatternDetailPage = () => {
               ))}
             </ul>
           </Section>
-          <Section title="Contras">
+          <Section title={t('detail.cons')}>
             <ul className="flex flex-col gap-2">
               {pattern.cons.map((con) => (
                 <li key={con} className="flex gap-2 text-foam/90">
@@ -105,17 +107,17 @@ export const PatternDetailPage = () => {
           </Section>
         </div>
 
-        <Section title="Dónde aparece">
+        <Section title={t('detail.realWorld')}>
           <p className="leading-relaxed text-foam/90">{pattern.realWorld}</p>
         </Section>
 
-        <Section title={`Ejemplo: ${pattern.example.title}`}>
+        <Section title={t('detail.example', { title: pattern.example.title })}>
           <p className="leading-relaxed text-kelp">{pattern.example.scenario}</p>
           <CodeBlock code={pattern.example.code} label={pattern.example.title} />
         </Section>
 
         {pattern.related.length > 0 && (
-          <Section title="Relacionados">
+          <Section title={t('detail.related')}>
             <ul className="flex flex-wrap gap-2">
               {pattern.related.map((rid) => {
                 const rel = patternsById.get(rid);
@@ -138,7 +140,7 @@ export const PatternDetailPage = () => {
       </div>
 
       <nav
-        aria-label="Patrones vecinos"
+        aria-label={t('detail.neighbors')}
         className="mt-16 flex justify-between gap-4 border-t border-line pt-6 text-sm"
       >
         {prev ? (
@@ -148,7 +150,7 @@ export const PatternDetailPage = () => {
             className="flex flex-col gap-1 text-kelp hover:text-foam"
           >
             <span className="inline-flex items-center gap-1">
-              <ArrowLeft className="size-4" aria-hidden /> Anterior
+              <ArrowLeft className="size-4" aria-hidden /> {t('detail.previous')}
             </span>
             <span className="font-medium text-foam">{prev.name}</span>
           </Link>
@@ -162,7 +164,7 @@ export const PatternDetailPage = () => {
             className="flex flex-col items-end gap-1 text-kelp hover:text-foam"
           >
             <span className="inline-flex items-center gap-1">
-              Siguiente <ArrowRight className="size-4" aria-hidden />
+              {t('detail.next')} <ArrowRight className="size-4" aria-hidden />
             </span>
             <span className="font-medium text-foam">{next.name}</span>
           </Link>

@@ -1,6 +1,7 @@
 import type { ChallengeTest } from '@/content/types';
 import { runAstChecks } from './ast-checks';
-import { expect, fn, format } from './expect';
+import { createExpect, fn, format } from './expect';
+import { runnerMessages } from './messages';
 import type { LogEntry, LogLevel, RunRequest, RunResult, TestResult } from './types';
 
 const PER_TEST_ASYNC_TIMEOUT_MS = 1500;
@@ -35,9 +36,9 @@ export function buildScript(code: string, tests: ChallengeTest[]): string {
   return `"use strict";\n${code}\n;\nreturn [\n${testFns}\n];`;
 }
 
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(`El test no terminó en ${ms} ms`)), ms);
+    const timer = setTimeout(() => reject(new Error(message)), ms);
     promise.then(
       (v) => (clearTimeout(timer), resolve(v)),
       (e) => (clearTimeout(timer), reject(e)),
@@ -48,7 +49,8 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 export async function executeChallenge(request: RunRequest): Promise<RunResult> {
   const start = performance.now();
   const logs: LogEntry[] = [];
-  const results: TestResult[] = runAstChecks(request.code, request.checks);
+  const m = runnerMessages[request.locale ?? 'en'];
+  const results: TestResult[] = runAstChecks(request.code, request.checks, m);
   const sandboxConsole = createConsole(logs);
 
   let testFns: (() => Promise<void>)[];
@@ -59,10 +61,10 @@ export async function executeChallenge(request: RunRequest): Promise<RunResult> 
       'console',
       buildScript(request.code, request.tests),
     );
-    testFns = factory(expect, fn, sandboxConsole) as (() => Promise<void>)[];
+    testFns = factory(createExpect(m), fn, sandboxConsole) as (() => Promise<void>)[];
   } catch (error) {
-    const prefix = error instanceof SyntaxError ? 'Error de sintaxis' : 'Error al cargar tu código';
-    const message = `${prefix}: ${errorMessage(error)}`;
+    const detail = errorMessage(error);
+    const message = error instanceof SyntaxError ? m.syntaxError(detail) : m.loadError(detail);
     for (const t of request.tests)
       results.push({ name: t.name, passed: false, kind: 'test', error: message });
     return { results, logs, durationMs: performance.now() - start };
@@ -70,7 +72,11 @@ export async function executeChallenge(request: RunRequest): Promise<RunResult> 
 
   for (const [i, test] of request.tests.entries()) {
     try {
-      await withTimeout(testFns[i]!(), PER_TEST_ASYNC_TIMEOUT_MS);
+      await withTimeout(
+        testFns[i]!(),
+        PER_TEST_ASYNC_TIMEOUT_MS,
+        m.testTimeout(PER_TEST_ASYNC_TIMEOUT_MS),
+      );
       results.push({ name: test.name, passed: true, kind: 'test' });
     } catch (error) {
       results.push({ name: test.name, passed: false, kind: 'test', error: errorMessage(error) });

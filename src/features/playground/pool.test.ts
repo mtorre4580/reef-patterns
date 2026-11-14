@@ -2,7 +2,7 @@ import { challengesByPattern, patterns } from '@/content';
 import { buildPool, defaultHelmFilters } from './pool';
 
 describe('buildPool', () => {
-  it('sin filtros incluye todos los patrones con challenges', () => {
+  it('without filters includes every pattern with challenges', () => {
     const { sectors, pool } = buildPool(
       patterns,
       challengesByPattern,
@@ -13,7 +13,7 @@ describe('buildPool', () => {
     expect(pool.length).toBe([...challengesByPattern.values()].flat().length);
   });
 
-  it('respeta nivel y categoría', () => {
+  it('respects tier and category', () => {
     const { sectors, pool } = buildPool(
       patterns,
       challengesByPattern,
@@ -26,7 +26,7 @@ describe('buildPool', () => {
     ).toBe(true);
   });
 
-  it('solo pendientes excluye los resueltos y los patrones sin pendientes', () => {
+  it('unsolved-only drops solved challenges and fully solved patterns', () => {
     const { sectors, pool } = buildPool(
       patterns,
       challengesByPattern,
