@@ -25,3 +25,22 @@ if (!window.matchMedia) {
       dispatchEvent: () => false,
     }) as MediaQueryList;
 }
+
+// cmdk usa ResizeObserver y scrollIntoView, que jsdom no implementa
+if (!('ResizeObserver' in window)) {
+  (window as unknown as { ResizeObserver: unknown }).ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
+if (!Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = () => {};
+}
+
+// jsdom no implementa scrollTo (lo usa ScrollRestoration)
+window.scrollTo = (() => {}) as typeof window.scrollTo;
+
+// axe intenta usar canvas; jsdom no lo implementa
+HTMLCanvasElement.prototype.getContext = (() =>
+  null) as typeof HTMLCanvasElement.prototype.getContext;

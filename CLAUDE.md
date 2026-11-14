@@ -39,7 +39,7 @@ computadoras de buceo, etc.).
 | Tests | Vitest + React Testing Library + `@testing-library/user-event` + jsdom | |
 | Lint/format | ESLint (flat config) + Prettier | |
 | CI | GitHub Actions | lint, typecheck, test, build |
-| Deploy | Vercel (o GitHub Pages con `HashRouter`) | Decidir en Fase 5 |
+| Deploy | Vercel con `BrowserRouter` | `vercel.json` reescribe rutas del SPA a `index.html` |
 
 ## Comandos
 
@@ -242,10 +242,10 @@ ambos temas, `prefers-reduced-motion` desactiva el giro animado (muestra el resu
 ## Estado
 
 - [x] Fase 0 — Setup
-- [ ] Fase 1 — Contenido
-- [ ] Fase 2 — Catálogo
-- [ ] Fase 3 — Playground y runner
-- [ ] Fase 4 — Challenges y rueda
-- [ ] Fase 5 — Pulido y deploy
+- [x] Fase 1 — Contenido
+- [x] Fase 2 — Catálogo
+- [x] Fase 3 — Playground y runner
+- [x] Fase 4 — Challenges y rueda
+- [x] Fase 5 — Pulido y deploy (falta conectar el repo en Vercel)
 
 Ver `docs/PLAN.md` para el detalle de cada fase.
