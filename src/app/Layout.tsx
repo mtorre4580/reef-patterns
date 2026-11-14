@@ -33,8 +33,12 @@ const navClass = ({ isActive }: { isActive: boolean }) =>
 function Header() {
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-abyss/85 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6">
-        <NavLink to="/" className="flex items-center gap-2 font-semibold tracking-tight">
+      <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:gap-4 sm:px-6">
+        <NavLink
+          to="/"
+          aria-label="Reef Patterns, inicio"
+          className="flex shrink-0 items-center gap-2 font-semibold tracking-tight"
+        >
           <svg aria-hidden viewBox="0 0 32 32" className="size-6">
             <path
               d="M6 20c3-3 5-3 8 0s5 3 8 0 4-3 4-3"
@@ -45,7 +49,7 @@ function Header() {
             />
             <circle cx="16" cy="11" r="3" fill="var(--color-biolum)" />
           </svg>
-          Reef Patterns
+          <span className="hidden sm:inline">Reef Patterns</span>
         </NavLink>
         <nav aria-label="Principal" className="flex items-center gap-1">
           <NavLink to="/" end className={navClass}>
@@ -55,7 +59,7 @@ function Header() {
             Playground
           </NavLink>
         </nav>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1 sm:gap-2">
           <SearchButton />
           <ThemeToggle />
         </div>
