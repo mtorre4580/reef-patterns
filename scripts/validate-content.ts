@@ -1,7 +1,7 @@
 /**
- * Verifica el contenido: ids, rank, related, que cada ejemplo parsee y, para cada challenge,
- * que la solución pase todos los tests y que el starter falle al menos uno.
- * Uso: pnpm validate:content
+ * Validates content: ids, rank, related, that every example parses and, for each challenge,
+ * that the solution passes every test and the starter fails at least one.
+ * Usage: pnpm validate:content
  */
 import { challenges, patterns } from '../src/content/index.ts';
 import {

@@ -24,7 +24,7 @@ function initialTheme(): Theme {
   return fromDom === 'light' ? 'light' : 'dark';
 }
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
+export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, dispatch] = useReducer(reducer, undefined, initialTheme);
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(() => ({ theme, toggle: () => dispatch({ type: 'toggle' }) }), [theme]);
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
-}
+};
 
 export function useTheme(): ThemeContextValue {
   const ctx = useContext(ThemeContext);

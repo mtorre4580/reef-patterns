@@ -9,7 +9,7 @@ export interface HelmSector {
 }
 
 export interface HelmSpin {
-  /** Identifica cada giro; cambiarlo dispara la animación. */
+  /** Identifies each spin; changing it triggers the animation. */
   key: number;
   index: number;
 }
@@ -28,10 +28,10 @@ const C = 100;
 const SPIN_SECONDS = 2.6;
 
 /**
- * Timón de barco con un sector por patrón. El resultado se calcula antes de animar: la animación
- * solo lleva el sector elegido hasta el puntero. Con movimiento reducido, salta directo.
+ * Ship helm with one sector per pattern. The result is computed before animating: the animation
+ * only brings the chosen sector to the pointer. With reduced motion it jumps straight there.
  */
-export function Helm({
+export const Helm = ({
   sectors,
   spin,
   onSpin,
@@ -39,13 +39,13 @@ export function Helm({
   disabled,
   spinning,
   className,
-}: HelmProps) {
+}: HelmProps) => {
   const reduceMotion = useReducedMotion();
   const [rotation, setRotation] = useState(0);
   const [appliedKey, setAppliedKey] = useState<number | null>(null);
   const count = Math.max(sectors.length, 1);
 
-  // Nuevo giro: calcular la rotación final durante el render (estado derivado)
+  // New spin: compute the final rotation during render (derived state)
   if (spin && spin.key !== appliedKey) {
     setAppliedKey(spin.key);
     setRotation((r) =>
@@ -80,7 +80,7 @@ export function Helm({
           }}
         >
           <svg viewBox="-6 -6 212 212" className="size-full" aria-hidden>
-            {/* Manijas */}
+            {/* Handles */}
             {Array.from({ length: 8 }, (_, i) => {
               const a = i * 45;
               const inner = polar(C, C, 70, a);
@@ -100,9 +100,9 @@ export function Helm({
                 </g>
               );
             })}
-            {/* Aro */}
+            {/* Rim */}
             <circle cx={C} cy={C} r="80" fill="none" stroke="var(--color-kelp)" strokeWidth="6" />
-            {/* Sectores */}
+            {/* Sectors */}
             {sectors.map((s, i) => {
               const start = polar(C, C, 74, i * size);
               const end = polar(C, C, 74, (i + 1) * size);
@@ -113,7 +113,7 @@ export function Helm({
                   : `M ${C} ${C} L ${start.x} ${start.y} A 74 74 0 ${large} 1 ${end.x} ${end.y} Z`;
               const angle = sectorCenter(i, count);
               const labelPos = polar(C, C, 47, angle);
-              // Texto radial; en la mitad izquierda se da vuelta para que se lea derecho
+              // Radial text; flipped on the left half so it reads upright
               const labelRotation = angle > 180 ? angle + 90 : angle - 90;
               return (
                 <g key={s.id}>
@@ -140,7 +140,7 @@ export function Helm({
                 </g>
               );
             })}
-            {/* Cubo central */}
+            {/* Hub */}
             <circle
               cx={C}
               cy={C}
@@ -155,7 +155,7 @@ export function Helm({
           {spinning ? '…' : 'Girar'}
         </span>
       </button>
-      {/* Puntero fijo */}
+      {/* Fixed pointer */}
       <svg
         viewBox="0 0 20 16"
         aria-hidden
@@ -165,4 +165,4 @@ export function Helm({
       </svg>
     </div>
   );
-}
+};

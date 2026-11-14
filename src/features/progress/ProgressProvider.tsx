@@ -10,7 +10,7 @@ interface ProgressContextValue {
 
 const ProgressContext = createContext<ProgressContextValue | null>(null);
 
-export function ProgressProvider({ children }: { children: ReactNode }) {
+export const ProgressProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(progressReducer, undefined, () =>
     parseProgress(storage.getJson(PROGRESS_KEY, null)),
   );
@@ -29,7 +29,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   );
 
   return <ProgressContext.Provider value={value}>{children}</ProgressContext.Provider>;
-}
+};
 
 export function useProgress(): ProgressContextValue {
   const ctx = useContext(ProgressContext);

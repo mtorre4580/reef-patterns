@@ -26,6 +26,14 @@ export default tseslint.config(
       ],
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/consistent-type-imports': 'error',
+      // Team standard: components are arrow functions, never `function Component()`
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'FunctionDeclaration[id.name=/^[A-Z]/]',
+          message: 'Define components as arrow functions: const Component = () => …',
+        },
+      ],
     },
   },
   {

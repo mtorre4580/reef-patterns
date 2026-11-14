@@ -1,9 +1,9 @@
-/** Generador de números en [0, 1). Se inyecta para poder testear la aleatoriedad. */
+/** Number generator in [0, 1). Injected so randomness can be tested. */
 export type Rng = () => number;
 
 export const defaultRng: Rng = Math.random;
 
-/** RNG determinístico (mulberry32), útil en tests. */
+/** Deterministic RNG (mulberry32), handy in tests. */
 export function seededRng(seed: number): Rng {
   let a = seed >>> 0;
   return () => {
@@ -15,7 +15,7 @@ export function seededRng(seed: number): Rng {
   };
 }
 
-/** Índice en [0, length) a partir de un rng, tolerante a valores en el borde. */
+/** Index in [0, length) from an rng, tolerant of edge values. */
 export function randomIndex(length: number, rng: Rng = defaultRng): number {
   return Math.min(length - 1, Math.max(0, Math.floor(rng() * length)));
 }

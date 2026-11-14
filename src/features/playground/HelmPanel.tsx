@@ -22,7 +22,7 @@ function toggle<T>(list: T[], item: T): T[] {
   return list.includes(item) ? list.filter((x) => x !== item) : [...list, item];
 }
 
-function Chip({
+const Chip = ({
   pressed,
   onClick,
   children,
@@ -30,7 +30,7 @@ function Chip({
   pressed: boolean;
   onClick: () => void;
   children: React.ReactNode;
-}) {
+}) => {
   return (
     <button
       type="button"
@@ -44,10 +44,10 @@ function Chip({
       {children}
     </button>
   );
-}
+};
 
-/** Filtros + timón + resultado. El challenge se elige antes de animar. */
-export function HelmPanel({ onChoose, rng = defaultRng }: HelmPanelProps) {
+/** Filters + helm + result. The challenge is picked before animating. */
+export const HelmPanel = ({ onChoose, rng = defaultRng }: HelmPanelProps) => {
   const { completed } = useProgress();
   const [filters, setFilters] = useState<HelmFilters>(defaultHelmFilters);
   const [spin, setSpin] = useState<(HelmSpin & { challenge: Challenge }) | null>(null);
@@ -177,4 +177,4 @@ export function HelmPanel({ onChoose, rng = defaultRng }: HelmPanelProps) {
       </div>
     </div>
   );
-}
+};

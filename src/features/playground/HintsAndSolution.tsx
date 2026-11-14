@@ -10,8 +10,8 @@ interface HintsAndSolutionProps {
   onUseSolution: (code: string) => void;
 }
 
-/** Pistas de a una y solución detrás de una confirmación. Se reinicia al cambiar de challenge. */
-export function HintsAndSolution({ challenge, onUseSolution }: HintsAndSolutionProps) {
+/** One hint at a time and the solution behind a confirmation. Resets when the challenge changes. */
+export const HintsAndSolution = ({ challenge, onUseSolution }: HintsAndSolutionProps) => {
   const [shown, setShown] = useState(0);
   const [solutionVisible, setSolutionVisible] = useState(false);
   const remaining = challenge.hints.length - shown;
@@ -69,4 +69,4 @@ export function HintsAndSolution({ challenge, onUseSolution }: HintsAndSolutionP
       )}
     </section>
   );
-}
+};

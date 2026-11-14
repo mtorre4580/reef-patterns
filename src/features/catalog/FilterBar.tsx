@@ -13,7 +13,7 @@ interface FilterBarProps {
   resultCount: number;
 }
 
-function Chip({
+const Chip = ({
   pressed,
   onClick,
   children,
@@ -21,7 +21,7 @@ function Chip({
   pressed: boolean;
   onClick: () => void;
   children: React.ReactNode;
-}) {
+}) => {
   return (
     <button
       type="button"
@@ -37,9 +37,9 @@ function Chip({
       {children}
     </button>
   );
-}
+};
 
-export function FilterBar({ filters, onChange, resultCount }: FilterBarProps) {
+export const FilterBar = ({ filters, onChange, resultCount }: FilterBarProps) => {
   return (
     <div className="flex flex-col gap-4">
       <div className="relative">
@@ -100,4 +100,4 @@ export function FilterBar({ filters, onChange, resultCount }: FilterBarProps) {
       </div>
     </div>
   );
-}
+};

@@ -3,12 +3,12 @@ import { executeChallenge } from '@/lib/runner/execute';
 import type { RunRequest } from '@/lib/runner/types';
 import type { WorkerLike } from '@/lib/runner/run';
 
-/** Editor simple para tests: Monaco no corre en jsdom. */
-export function FakeEditor({ value, onChange, label }: CodeEditorProps) {
+/** Plain editor for tests: Monaco does not run in jsdom. */
+export const FakeEditor = ({ value, onChange, label }: CodeEditorProps) => {
   return <textarea aria-label={label} value={value} onChange={(e) => onChange(e.target.value)} />;
-}
+};
 
-/** Worker en el mismo hilo para tests de componentes. */
+/** Same-thread worker for component tests. */
 export function createInlineWorker(): WorkerLike {
   const worker: WorkerLike = {
     onmessage: null,

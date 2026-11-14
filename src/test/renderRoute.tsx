@@ -4,7 +4,7 @@ import { createMemoryRouter, RouterProvider } from 'react-router';
 import { routes } from '@/app/routes';
 import { ThemeProvider } from '@/app/ThemeProvider';
 
-/** Renderiza la app completa en una ruta, con router en memoria. */
+/** Renders the whole app at a route using an in-memory router. */
 export function renderRoute(path = '/') {
   const router = createMemoryRouter(routes, { initialEntries: [path] });
   const user = userEvent.setup();

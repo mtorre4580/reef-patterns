@@ -18,7 +18,7 @@ export function parsesAsJs(code: string): string | null {
   }
 }
 
-/** Validaciones estáticas del contenido (sin ejecutar challenges). */
+/** Static content checks (without running challenges). */
 export function validatePatterns(patterns: Pattern[]): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
   const ids = new Set<string>();
@@ -101,8 +101,8 @@ export function validateChallengeShapes(
 }
 
 /**
- * Ejecuta cada challenge: la solución debe pasar todos los tests y chequeos, y el starter debe
- * fallar al menos uno (si no, el challenge no obliga a hacer nada).
+ * Runs every challenge: the solution must pass all tests and checks, and the starter must
+ * fail at least one (otherwise the challenge asks for nothing).
  */
 export async function validateChallengeRuns(
   challenges: Challenge[],

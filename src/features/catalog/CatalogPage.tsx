@@ -11,7 +11,7 @@ import { ZoneSection } from './ZoneSection';
 
 const search = createPatternSearch(patterns);
 
-export function CatalogPage() {
+export const CatalogPage = () => {
   useDocumentTitle(null);
   const { filters, update } = useCatalogFilters();
 
@@ -58,4 +58,4 @@ export function CatalogPage() {
       {visibleZones.length > 0 && <DepthGauge zones={visibleZones} />}
     </div>
   );
-}
+};

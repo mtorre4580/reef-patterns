@@ -12,8 +12,8 @@ export interface DepthReading {
 }
 
 /**
- * Calcula la profundidad según la posición de scroll: dentro de cada zona interpola entre su
- * profundidad mínima y máxima. Es pura para poder testearla.
+ * Computes depth from the scroll position: within each zone it interpolates between its
+ * minimum and maximum depth. Pure so it can be tested.
  */
 export function computeDepth(
   zones: TierInfo[],

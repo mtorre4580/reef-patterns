@@ -4,7 +4,7 @@ import type { Pattern } from '@/content/types';
 import { CategoryBadge } from '@/components/CategoryBadge';
 import { GofBadge } from '@/components/GofBadge';
 
-export function PatternRow({ pattern }: { pattern: Pattern }) {
+export const PatternRow = ({ pattern }: { pattern: Pattern }) => {
   return (
     <li>
       <Link
@@ -31,4 +31,4 @@ export function PatternRow({ pattern }: { pattern: Pattern }) {
       </Link>
     </li>
   );
-}
+};

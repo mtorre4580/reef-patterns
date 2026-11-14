@@ -40,7 +40,7 @@ function collect(ast: Node) {
         addClass((n.id as AnyNode).name as string, init.body as AnyNode);
     },
   });
-  // Conteo de cada tipo de nodo (para forbidNode y maxIfStatements)
+  // Count every node type (for forbidNode and maxIfStatements)
   full(ast, (node) => {
     nodeTypes.set(node.type, (nodeTypes.get(node.type) ?? 0) + 1);
   });
@@ -48,7 +48,7 @@ function collect(ast: Node) {
   return { nodeTypes, classes };
 }
 
-/** Ejecuta las reglas estáticas sobre el código del usuario. Cada regla es un resultado más. */
+/** Runs the static rules on the user code. Each rule becomes one more result. */
 export function runAstChecks(code: string, checks: AstCheck[] = []): TestResult[] {
   if (checks.length === 0) return [];
   let ast: Node;

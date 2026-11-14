@@ -5,7 +5,7 @@ import { renderRoute } from '@/test/renderRoute';
 import { draftKey } from './useDraft';
 
 vi.mock('./CodeEditor', async () => ({ CodeEditor: (await import('@/test/mocks')).FakeEditor }));
-// Worker en el mismo hilo: jsdom no tiene Web Workers
+// Same-thread worker: jsdom has no Web Workers
 vi.mock('@/lib/runner/run', async (importOriginal) => {
   const original = await importOriginal<typeof RunModule>();
   const { createInlineWorker } = await import('@/test/mocks');
@@ -52,8 +52,8 @@ describe('playground', () => {
 
   it('autoguarda el borrador y Reiniciar lo descarta', async () => {
     const { user, editor } = await openChallenge();
-    fireEvent.change(editor, { target: { value: '// mi intento' } });
-    await waitFor(() => expect(localStorage.getItem(draftKey('observer-1'))).toBe('// mi intento'));
+    fireEvent.change(editor, { target: { value: '// my attempt' } });
+    await waitFor(() => expect(localStorage.getItem(draftKey('observer-1'))).toBe('// my attempt'));
     await user.click(screen.getByRole('button', { name: /Reiniciar/ }));
     expect(screen.getByRole('textbox', { name: /Editor de código/ })).toHaveValue(
       challenge.starterCode,
@@ -62,9 +62,9 @@ describe('playground', () => {
   });
 
   it('recupera el borrador guardado', async () => {
-    localStorage.setItem(draftKey('observer-1'), '// guardado antes');
+    localStorage.setItem(draftKey('observer-1'), '// saved earlier');
     const { editor } = await openChallenge();
-    expect(editor).toHaveValue('// guardado antes');
+    expect(editor).toHaveValue('// saved earlier');
   });
 
   it('muestra las pistas de a una', async () => {
@@ -102,7 +102,7 @@ describe('playground', () => {
 describe('timón', () => {
   const realMatchMedia = window.matchMedia;
   beforeEach(() => {
-    // Movimiento reducido: el timón muestra el resultado sin animar
+    // Reduced motion: the helm shows the result without animating
     window.matchMedia = ((query: string) => ({
       ...realMatchMedia(query),
       matches: query.includes('prefers-reduced-motion'),

@@ -2,8 +2,8 @@ import type { Challenge } from '@/content/types';
 import { defaultRng, randomIndex, type Rng } from '@/lib/random';
 
 /**
- * Elige un challenge del pool. Prioriza los no completados; si están todos completos, elige
- * entre todos. Es pura: el rng se inyecta.
+ * Picks a challenge from the pool. Prefers unsolved ones; if all are solved, picks among
+ * all of them. Pure: the rng is injected.
  */
 export function pickChallenge(
   pool: readonly Challenge[],

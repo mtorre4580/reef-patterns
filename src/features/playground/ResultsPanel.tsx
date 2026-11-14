@@ -28,7 +28,7 @@ function summary(status: RunStatus, result: RunResult | null, total: number) {
     : `${passed} de ${all} pasaron.`;
 }
 
-export function ResultsPanel({ status, result, testNames }: ResultsPanelProps) {
+export const ResultsPanel = ({ status, result, testNames }: ResultsPanelProps) => {
   const passed = result?.results.filter((r) => r.passed).length ?? 0;
   const total = result?.results.length ?? testNames.length;
   const allGreen = !!result && passed === total && total > 0;
@@ -128,4 +128,4 @@ export function ResultsPanel({ status, result, testNames }: ResultsPanelProps) {
       </TabsContent>
     </Tabs>
   );
-}
+};

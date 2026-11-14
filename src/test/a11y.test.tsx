@@ -8,7 +8,7 @@ vi.mock('@/features/playground/CodeEditor', async () => ({
 
 async function audit(container: Element) {
   const results = await axe.run(container, {
-    // jsdom no calcula estilos reales: el contraste se verifica aparte, en ambos temas
+    // jsdom does not compute real styles: contrast is checked separately, in both themes
     rules: { 'color-contrast': { enabled: false } },
   });
   return results.violations.map(

@@ -1,4 +1,4 @@
-export function GofBadge() {
+export const GofBadge = () => {
   return (
     <abbr
       title="Uno de los 23 patrones del libro Design Patterns (Gang of Four)"
@@ -7,4 +7,4 @@ export function GofBadge() {
       GoF
     </abbr>
   );
-}
+};

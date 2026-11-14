@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router';
 import { parseFilters, serializeFilters, type CatalogFilters } from './filters';
 
-/** Filtros del catálogo sincronizados con la URL. */
+/** Catalog filters synced with the URL. */
 export function useCatalogFilters() {
   const [params, setParams] = useSearchParams();
   const filters = useMemo(() => parseFilters(params), [params]);

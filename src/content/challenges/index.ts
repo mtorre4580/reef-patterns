@@ -24,7 +24,7 @@ import { state1 } from './state/state-1';
 import { strategy1 } from './strategy/strategy-1';
 import { strategy2 } from './strategy/strategy-2';
 
-/** Registro de challenges. Cada archivo vive en challenges/<patternId>/<patternId>-<n>.ts */
+/** Challenge registry. Each file lives at challenges/<patternId>/<patternId>-<n>.ts */
 export const challenges: Challenge[] = [
   adapter1,
   adapter2,

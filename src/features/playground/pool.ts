@@ -8,7 +8,7 @@ export interface HelmFilters {
 
 export const defaultHelmFilters: HelmFilters = { tiers: [], categories: [], pendingOnly: false };
 
-/** Patrones que pasan los filtros y tienen challenges; el pool son sus challenges. */
+/** Patterns that pass the filters and have challenges; the pool is their challenges. */
 export function buildPool(
   patterns: readonly Pattern[],
   challengesByPattern: ReadonlyMap<string, Challenge[]>,

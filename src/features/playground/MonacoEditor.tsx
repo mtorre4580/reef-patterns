@@ -11,7 +11,7 @@ import { useEffect, useRef } from 'react';
 import { monacoThemes } from '@/lib/editor-theme';
 import type { CodeEditorProps } from './editor-types';
 
-// Monaco local (sin CDN) con sus workers empaquetados por Vite
+// Local Monaco (no CDN) with its workers bundled by Vite
 self.MonacoEnvironment = {
   getWorker(_id: string, label: string) {
     if (label === 'typescript' || label === 'javascript') return new TsWorker();
@@ -37,8 +37,8 @@ monaco.editor.defineTheme(
   monacoThemes.light as monaco.editor.IStandaloneThemeData,
 );
 
-/** Editor Monaco. Export por defecto porque se carga con React.lazy. */
-export default function MonacoEditor({ value, onChange, onRun, theme, label }: CodeEditorProps) {
+/** Monaco editor. Default export because it is loaded with React.lazy. */
+const MonacoEditor = ({ value, onChange, onRun, theme, label }: CodeEditorProps) => {
   const runRef = useRef(onRun);
   useEffect(() => {
     runRef.current = onRun;
@@ -72,4 +72,6 @@ export default function MonacoEditor({ value, onChange, onRun, theme, label }: C
       }}
     />
   );
-}
+};
+
+export default MonacoEditor;

@@ -17,7 +17,7 @@ describe('computeDepth', () => {
     ];
     const reading = computeDepth(tiers, rects, 100);
     expect(reading.zone?.zone).toBe('Arrecife');
-    expect(reading.depth).toBe(20); // mitad de 10–30 m
+    expect(reading.depth).toBe(20); // halfway through 10–30 m
   });
 
   it('no supera la profundidad máxima de la última zona', () => {

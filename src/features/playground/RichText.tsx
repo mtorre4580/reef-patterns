@@ -12,8 +12,8 @@ function inline(text: string) {
   );
 }
 
-/** Texto con `código` en línea y listas con “- ”. Suficiente para las instrucciones. */
-export function RichText({ text }: { text: string }) {
+/** Text with inline `code` and “- ” lists. Enough for challenge instructions. */
+export const RichText = ({ text }: { text: string }) => {
   const blocks: { type: 'p' | 'ul'; lines: string[] }[] = [];
   for (const line of text.split('\n')) {
     const isItem = line.startsWith('- ');
@@ -37,4 +37,4 @@ export function RichText({ text }: { text: string }) {
       )}
     </div>
   );
-}
+};

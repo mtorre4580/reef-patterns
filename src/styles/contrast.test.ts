@@ -27,7 +27,7 @@ function ratio(a: string, b: string): number {
   return (l1! + 0.05) / (l2! + 0.05);
 }
 
-// [texto, fondo, mínimo]
+// [text, background, minimum]
 const pairs: [string, string, number][] = [
   ['foam', 'abyss', 7],
   ['foam', 'trench', 7],

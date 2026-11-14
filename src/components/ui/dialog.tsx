@@ -10,7 +10,7 @@ interface DialogProps {
   children: ReactNode;
 }
 
-export function Dialog({ open, onOpenChange, title, description, children }: DialogProps) {
+export const Dialog = ({ open, onOpenChange, title, description, children }: DialogProps) => {
   return (
     <Primitive.Root open={open} onOpenChange={onOpenChange}>
       <Primitive.Portal>
@@ -35,4 +35,4 @@ export function Dialog({ open, onOpenChange, title, description, children }: Dia
       </Primitive.Portal>
     </Primitive.Root>
   );
-}
+};

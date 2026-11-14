@@ -53,7 +53,7 @@ import { hexagonal } from './patterns/hexagonal';
 import { objectPool } from './patterns/object-pool';
 import { challenges } from './challenges';
 
-/** Los 52 patrones ordenados por rank (frecuencia de uso). */
+/** The 52 patterns sorted by rank (frequency of use). */
 export const patterns: Pattern[] = [
   strategy,
   observer,
@@ -111,7 +111,7 @@ export const patterns: Pattern[] = [
 
 export const patternsById: ReadonlyMap<string, Pattern> = new Map(patterns.map((p) => [p.id, p]));
 
-/** Única vía de acceso a los challenges: la usa la rueda y el playground. */
+/** The only way to access challenges: used by the helm and the playground. */
 export const challengesByPattern: ReadonlyMap<string, Challenge[]> = buildChallengeMap(challenges);
 
 export const challengesById: ReadonlyMap<string, Challenge> = new Map(

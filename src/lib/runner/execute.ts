@@ -26,9 +26,9 @@ function createConsole(logs: LogEntry[]) {
 }
 
 /**
- * Arma un único script con el código del usuario seguido de cada test (como funciones async
- * en el mismo ámbito) y lo ejecuta con `new Function`. No tiene timeout para bucles síncronos:
- * eso lo resuelve el hilo principal terminando el worker.
+ * Builds a single script with the user code followed by each test (as async functions in the
+ * same scope) and runs it with `new Function`. There is no timeout for synchronous loops: the
+ * main thread handles that by terminating the worker.
  */
 export function buildScript(code: string, tests: ChallengeTest[]): string {
   const testFns = tests.map((t) => `async () => {\n${t.code}\n}`).join(',\n');

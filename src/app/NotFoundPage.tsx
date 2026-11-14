@@ -2,8 +2,8 @@ import { Link } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 
-/** Sonar sin eco: nada en esta profundidad. */
-function EmptySonar() {
+/** Sonar with no echo: nothing at this depth. */
+const EmptySonar = () => {
   return (
     <svg viewBox="0 0 160 160" aria-hidden className="size-40">
       {[70, 52, 34].map((r, i) => (
@@ -39,9 +39,9 @@ function EmptySonar() {
       <circle cx="80" cy="80" r="4" fill="var(--color-biolum)" />
     </svg>
   );
-}
+};
 
-export function NotFoundPage() {
+export const NotFoundPage = () => {
   useDocumentTitle('Página no encontrada');
   return (
     <div className="mx-auto flex max-w-xl flex-col items-center px-4 py-20 text-center">
@@ -62,4 +62,4 @@ export function NotFoundPage() {
       </div>
     </div>
   );
-}
+};

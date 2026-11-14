@@ -8,7 +8,7 @@ interface ZoneSectionProps {
   patterns: Pattern[];
 }
 
-export function ZoneSection({ zone, patterns }: ZoneSectionProps) {
+export const ZoneSection = ({ zone, patterns }: ZoneSectionProps) => {
   const headingId = `${zoneElementId(zone.tier)}-titulo`;
   return (
     <section id={zoneElementId(zone.tier)} aria-labelledby={headingId} className="scroll-mt-24">
@@ -26,4 +26,4 @@ export function ZoneSection({ zone, patterns }: ZoneSectionProps) {
       </ol>
     </section>
   );
-}
+};

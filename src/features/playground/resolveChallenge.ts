@@ -6,7 +6,7 @@ export type Resolution =
   | { kind: 'no-challenges'; pattern: Pattern | null }
   | { kind: 'landing' };
 
-/** Decide qué challenge mostrar a partir de ?challenge= o ?pattern=. */
+/** Decides which challenge to show from ?challenge= or ?pattern=. */
 export function resolveChallenge(params: URLSearchParams): Resolution {
   const byId = challengesById.get(params.get('challenge') ?? '');
   if (byId)
@@ -20,6 +20,6 @@ export function resolveChallenge(params: URLSearchParams): Resolution {
     return { kind: 'no-challenges', pattern };
   }
 
-  // Sin parámetros: el usuario gira el timón para elegir
+  // No params: the user spins the helm to choose
   return { kind: 'landing' };
 }
