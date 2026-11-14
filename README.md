@@ -1,36 +1,42 @@
 # Reef Patterns
 
-Web para repasar 52 patrones de diseño orientados a frontend y practicarlos con challenges que
-se ejecutan en el navegador. Temática oceánica: arrecife, acuario y buceo.
+A website to review 52 frontend-oriented design patterns and practice them with challenges that
+run in the browser. Nautical theme: reefs, aquariums and diving.
 
-- **Catálogo**: 52 patrones ordenados por frecuencia de uso, agrupados en zonas de buceo
-  (Superficie → Abismo), con búsqueda difusa, filtros sincronizados con la URL y paleta ⌘K.
-- **Playground**: editor Monaco, tests que corren en un Web Worker con timeout, chequeos AST,
-  pistas, solución y un timón que asigna challenges al azar priorizando los pendientes.
+**Live:** <https://mtorre4580.github.io/reef-patterns/>
 
-## Desarrollo
+- **Catalog**: 52 patterns sorted by how often they are used, grouped into dive zones
+  (Surface → Abyss), with fuzzy search, URL-synced filters and a ⌘K command palette.
+- **Playground**: Monaco editor, tests that run in a Web Worker with a timeout, AST checks,
+  hints, solutions and a ship's helm that assigns random challenges, unsolved ones first.
+- **Languages**: English (default), Spanish and Brazilian Portuguese, for both UI and content.
+
+## Development
+
+Requires Node 24 (see `.nvmrc`) and pnpm.
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-| Comando | Qué hace |
+| Command | What it does |
 |---|---|
-| `pnpm dev` | Servidor de desarrollo |
-| `pnpm build` | Typecheck + build de producción |
-| `pnpm test` / `pnpm test:run` | Vitest (watch / una vez) |
+| `pnpm dev` | Development server |
+| `pnpm build` | Typecheck + production build |
+| `pnpm preview` | Serves the build under `/reef-patterns/` |
+| `pnpm test` / `pnpm test:run` | Vitest (watch / once) |
 | `pnpm lint` / `pnpm typecheck` | ESLint / `tsc --noEmit` |
-| `pnpm validate:content` | Valida patrones y ejecuta cada challenge (la solución pasa, el starter falla) |
+| `pnpm validate:content` | Validates patterns and runs every challenge (the solution passes, the starter fails) |
 
 ## Deploy
 
-GitHub Pages: el workflow `.github/workflows/deploy.yml` construye y publica en cada push a
-`main` (también se puede correr a mano). La app usa `HashRouter` porque Pages no tiene fallback
-de SPA, y Vite construye con `base: '/reef-patterns/'`.
+GitHub Pages: the `.github/workflows/deploy.yml` workflow builds and publishes on every push to
+`main` (it can also be run manually). The app uses `HashRouter` because Pages has no SPA
+fallback, and Vite builds with `base: '/reef-patterns/'`.
 
-Publicada en <https://mtorre4580.github.io/reef-patterns/> (requiere activar Pages con fuente
-“GitHub Actions” en *Settings → Pages* la primera vez).
+## Contributing
 
-Ver [`CLAUDE.md`](./CLAUDE.md) para el contexto técnico y [`docs/PLAN.md`](./docs/PLAN.md) para
-el plan por fases.
+See [`CLAUDE.md`](./CLAUDE.md) for the technical context and conventions (English code comments,
+arrow-function components, i18n rules) and [`docs/PLAN.md`](./docs/PLAN.md) for the original
+phase plan.
