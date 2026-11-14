@@ -26,6 +26,8 @@
   --color-trench: #0c1f2b;
   --color-reef: #12293a;
   --color-current: #1f3b4b;
+  /* alias utilizable: `border-current` en Tailwind es currentColor */
+  --color-line: var(--color-current);
   --color-foam: #e4f1f3;
   --color-kelp: #9ab3bb;
   --color-lagoon: #2dd4bf;
@@ -111,6 +113,23 @@
   kbd {
     font-family: var(--font-mono);
   }
+}
+
+/* Shiki con temas duales: los spans traen --shiki-light y --shiki-dark */
+.shiki,
+.shiki span {
+  color: var(--shiki-dark);
+  background-color: transparent !important;
+}
+:root[data-theme='light'] .shiki,
+:root[data-theme='light'] .shiki span {
+  color: var(--shiki-light);
+}
+
+/* View Transitions entre catálogo y detalle */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
