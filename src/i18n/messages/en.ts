@@ -16,6 +16,9 @@ export const en = {
     toLight: 'Switch to light mode',
     toDark: 'Switch to dark mode',
     language: 'Language',
+    sound: 'Ship sounds',
+    soundOn: 'Sound on',
+    soundOff: 'Sound off',
   },
   categories: {
     creacional: { label: 'Creational', description: 'How objects get created.' },
@@ -163,7 +166,8 @@ export const en = {
     hub: 'Spin',
     patterns: { one: '{count} pattern', other: '{count} patterns' },
     challenges: { one: '{count} challenge', other: '{count} challenges' },
-    inPlay: '{patterns} · {challenges} in play. Click the helm, or focus it and press Enter.',
+    inPlay:
+      '{patterns} · {challenges} in play. Click the helm, drag it to give it a spin, or focus it and press Enter.',
     none: 'No challenges left with these filters. Try other zones or categories.',
     result: 'You got {pattern}: {title}',
     alreadySolved: ' (already solved)',

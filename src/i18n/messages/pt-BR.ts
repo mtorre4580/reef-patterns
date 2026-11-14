@@ -17,6 +17,9 @@ export const ptBR: Messages = {
     toLight: 'Mudar para o modo claro',
     toDark: 'Mudar para o modo escuro',
     language: 'Idioma',
+    sound: 'Sons do navio',
+    soundOn: 'Som ligado',
+    soundOff: 'Som desligado',
   },
   categories: {
     creacional: { label: 'Criacional', description: 'Como os objetos são criados.' },
@@ -166,7 +169,8 @@ export const ptBR: Messages = {
     hub: 'Girar',
     patterns: { one: '{count} padrão', other: '{count} padrões' },
     challenges: { one: '{count} desafio', other: '{count} desafios' },
-    inPlay: '{patterns} · {challenges} em jogo. Clique no leme ou foque nele e pressione Enter.',
+    inPlay:
+      '{patterns} · {challenges} em jogo. Clique no leme, arraste para dar impulso ou foque nele e pressione Enter.',
     none: 'Não sobrou nenhum desafio com esses filtros. Tente outras zonas ou categorias.',
     result: 'Você tirou {pattern}: {title}',
     alreadySolved: ' (já resolvido)',

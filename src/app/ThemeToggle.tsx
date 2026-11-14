@@ -8,7 +8,7 @@ export const ThemeToggle = () => {
   const { t } = useI18n();
   const label = theme === 'dark' ? t('nav.toLight') : t('nav.toDark');
   return (
-    <Button variant="ghost" size="icon" onClick={toggle} aria-label={label}>
+    <Button variant="onWood" size="icon" onClick={toggle} aria-label={label}>
       {theme === 'dark' ? <Sun /> : <Moon />}
     </Button>
   );

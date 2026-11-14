@@ -6,6 +6,7 @@ import { useTheme } from '@/app/ThemeProvider';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
 import { useProgress } from '@/features/progress';
+import { useSound } from '@/app/SoundProvider';
 import { allPassed } from '@/lib/runner';
 import { Kbd } from '@/components/ui/kbd';
 import { useI18n } from '@/i18n';
@@ -41,12 +42,14 @@ export const PlaygroundPage = () => {
 
   if (resolution.kind === 'landing') {
     return (
-      <div className="mx-auto flex max-w-md flex-col gap-6 px-4 py-10 sm:py-14">
+      <div className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-10 sm:py-14">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">{t('playground.landingTitle')}</h1>
+          <h1 className="text-4xl leading-tight">{t('playground.landingTitle')}</h1>
           <p className="mt-2 text-kelp">{t('playground.landingBody')}</p>
         </div>
-        <HelmPanel onChoose={choose} />
+        <div className="parchment nailed rounded-panel p-5 pt-7 sm:p-8">
+          <HelmPanel onChoose={choose} />
+        </div>
       </div>
     );
   }
@@ -91,14 +94,18 @@ const Workspace = ({ challenge, pattern, onChoose }: WorkspaceProps) => {
   const { code, setCode, reset } = useDraft(challenge);
   const runner = useRunner();
   const { t, locale } = useI18n();
+  const { bell } = useSound();
   const [mobileTab, setMobileTab] = useState<MobileTab>('brief');
 
   const run = useCallback(() => {
     setMobileTab((t) => (t === 'code' ? 'results' : t));
     void runner.run(challenge, code, locale).then((result) => {
-      if (result && allPassed(result)) markCompleted(challenge.id);
+      if (result && allPassed(result)) {
+        markCompleted(challenge.id);
+        bell(2);
+      }
     });
-  }, [runner, challenge, code, locale, markCompleted]);
+  }, [runner, challenge, code, locale, markCompleted, bell]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -118,7 +125,7 @@ const Workspace = ({ challenge, pattern, onChoose }: WorkspaceProps) => {
       <div
         role="tablist"
         aria-label={t('playground.sections')}
-        className="flex border-b border-line px-2 lg:hidden"
+        className="planks flex px-2 lg:hidden"
       >
         {mobileTabs.map((tab) => (
           <button
@@ -130,7 +137,9 @@ const Workspace = ({ challenge, pattern, onChoose }: WorkspaceProps) => {
             onClick={() => setMobileTab(tab)}
             className={cn(
               '-mb-px h-11 flex-1 border-b-2 text-sm',
-              mobileTab === tab ? 'border-biolum text-foam' : 'border-transparent text-kelp',
+              mobileTab === tab
+                ? 'border-brass text-on-wood'
+                : 'border-transparent text-on-wood-muted',
             )}
           >
             {t(`playground.${tab}`)}
@@ -139,18 +148,18 @@ const Workspace = ({ challenge, pattern, onChoose }: WorkspaceProps) => {
       </div>
 
       <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-        <div className="flex min-h-0 flex-col lg:border-r lg:border-line">
+        <div className="flex min-h-0 flex-col">
           <section
             id="panel-brief"
             aria-label={t('playground.brief')}
             className={cn(
-              'overflow-y-auto p-4 sm:p-6 lg:max-h-[38%] lg:border-b lg:border-line',
+              'parchment overflow-y-auto rounded-none border-0 border-b-2 border-b-wood-deep p-4 sm:p-6 lg:max-h-[38%]',
               panel('brief'),
             )}
           >
             <div className="mb-3 flex items-center justify-between gap-2">
               {solved ? (
-                <span className="inline-flex items-center gap-1.5 text-xs text-anemone">
+                <span className="brass inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs">
                   <CheckCircle2 aria-hidden className="size-4" /> {t('playground.solved')}
                 </span>
               ) : (
@@ -166,9 +175,9 @@ const Workspace = ({ challenge, pattern, onChoose }: WorkspaceProps) => {
           <section
             id="panel-code"
             aria-label={t('playground.code')}
-            className={cn('flex min-h-0 flex-1 flex-col', panel('code'))}
+            className={cn('wood flex min-h-0 flex-1 flex-col gap-2 p-2 sm:p-3', panel('code'))}
           >
-            <div className="min-h-[240px] flex-1 bg-trench">
+            <div className="min-h-[240px] flex-1 overflow-hidden rounded-control border border-wood-deep bg-[var(--code-bg)] shadow-[inset_0_2px_6px_rgb(0_0_0/0.4)]">
               <CodeEditor
                 value={code}
                 onChange={setCode}
@@ -177,11 +186,11 @@ const Workspace = ({ challenge, pattern, onChoose }: WorkspaceProps) => {
                 label={t('playground.editorLabel', { title: challenge.title[locale] })}
               />
             </div>
-            <div className="flex items-center justify-between gap-2 border-t border-line p-3">
-              <Button variant="ghost" size="sm" onClick={() => (reset(), runner.clear())}>
+            <div className="flex items-center justify-between gap-2 px-1">
+              <Button variant="onWood" size="sm" onClick={() => (reset(), runner.clear())}>
                 <RotateCcw aria-hidden /> {t('playground.reset')}
               </Button>
-              <span className="ml-auto hidden text-xs text-kelp sm:inline">
+              <span className="ml-auto hidden text-xs text-on-wood-muted sm:inline">
                 <Kbd>⌘/Ctrl</Kbd> + <Kbd>↵</Kbd>
               </span>
               <Button
@@ -199,7 +208,10 @@ const Workspace = ({ challenge, pattern, onChoose }: WorkspaceProps) => {
         <section
           id="panel-results"
           aria-label={t('playground.results')}
-          className={cn('flex min-h-0 flex-col overflow-y-auto bg-trench/40', panel('results'))}
+          className={cn(
+            'parchment flex min-h-0 flex-col overflow-y-auto rounded-none border-0 lg:border-l-2 lg:border-l-wood-deep',
+            panel('results'),
+          )}
         >
           <ResultsPanel
             status={runner.status}

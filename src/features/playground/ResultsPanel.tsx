@@ -1,6 +1,8 @@
 import { CheckCircle2, CircleDashed, Loader2, ShieldCheck, XCircle } from 'lucide-react';
 import type { LogEntry, RunResult } from '@/lib/runner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { motion } from 'motion/react';
+import { Bunting } from '@/components/Bunting';
 import { useI18n, type TranslationKey } from '@/i18n';
 import { cn } from '@/lib/utils';
 import type { RunStatus } from './useRunner';
@@ -34,6 +36,9 @@ const summary = (
     : t('results.partial', { passed, total: all });
 };
 
+const woodTab =
+  'text-on-wood-muted hover:text-on-wood data-[state=active]:border-brass data-[state=active]:text-on-wood';
+
 export const ResultsPanel = ({ status, result, testNames }: ResultsPanelProps) => {
   const { t } = useI18n();
   const passed = result?.results.filter((r) => r.passed).length ?? 0;
@@ -42,12 +47,14 @@ export const ResultsPanel = ({ status, result, testNames }: ResultsPanelProps) =
 
   return (
     <Tabs defaultValue="results" className="flex flex-col">
-      <TabsList aria-label={t('results.panel')} className="sticky top-0 z-[1] bg-trench">
-        <TabsTrigger value="results">{t('results.results')}</TabsTrigger>
-        <TabsTrigger value="console">
+      <TabsList aria-label={t('results.panel')} className="planks sticky top-0 z-[1] border-b-0">
+        <TabsTrigger value="results" className={woodTab}>
+          {t('results.results')}
+        </TabsTrigger>
+        <TabsTrigger value="console" className={woodTab}>
           {t('results.console')}
           {!!result?.logs.length && (
-            <span className="rounded bg-reef px-1.5 font-mono text-xs text-kelp">
+            <span className="brass rounded-full px-1.5 font-mono text-xs">
               {result.logs.length}
             </span>
           )}
@@ -55,7 +62,7 @@ export const ResultsPanel = ({ status, result, testNames }: ResultsPanelProps) =
         <span
           className={cn(
             'ml-auto font-mono text-xs tabular-nums',
-            allGreen ? 'text-anemone' : 'text-kelp',
+            allGreen ? 'text-brass' : 'text-on-wood-muted',
           )}
         >
           {result ? t('results.testsCount', { passed, total }) : ''}
@@ -63,19 +70,29 @@ export const ResultsPanel = ({ status, result, testNames }: ResultsPanelProps) =
       </TabsList>
 
       <TabsContent value="results" className="p-4">
+        {allGreen && status === 'done' && <Bunting />}
         <p
           aria-live="polite"
           aria-atomic="true"
-          className={cn('mb-4 text-sm', allGreen ? 'text-anemone' : 'text-kelp')}
+          className={cn(
+            'mb-4 text-sm',
+            allGreen ? 'font-display text-xl text-anemone' : 'text-kelp',
+          )}
         >
           {summary(t, status, result, testNames.length)}
         </p>
         <ul className="flex flex-col gap-2" aria-busy={status === 'running'}>
           {result
             ? result.results.map((r, i) => (
-                <li
-                  key={`${r.kind}-${i}`}
-                  className="rounded-control border border-line bg-abyss/40 px-3 py-2 text-sm"
+                <motion.li
+                  key={`${r.kind}-${i}-${r.passed}-${r.error ?? ''}`}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.05, duration: 0.2 }}
+                  className={cn(
+                    'rounded-control border border-l-4 border-line bg-abyss/30 px-3 py-2 text-sm',
+                    r.passed ? 'border-l-anemone' : 'border-l-coral',
+                  )}
                 >
                   <div className="flex items-start gap-2">
                     {r.passed ? (
@@ -100,7 +117,7 @@ export const ResultsPanel = ({ status, result, testNames }: ResultsPanelProps) =
                       {r.error}
                     </p>
                   )}
-                </li>
+                </motion.li>
               ))
             : testNames.map((name) => (
                 <li

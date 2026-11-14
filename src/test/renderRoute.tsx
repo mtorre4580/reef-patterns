@@ -2,6 +2,7 @@ import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { routes } from '@/app/routes';
+import { SoundProvider } from '@/app/SoundProvider';
 import { ThemeProvider } from '@/app/ThemeProvider';
 import { I18nProvider, type Locale } from '@/i18n';
 
@@ -12,7 +13,9 @@ export function renderRoute(path = '/', locale: Locale = 'en') {
   const utils = render(
     <I18nProvider initial={locale}>
       <ThemeProvider>
-        <RouterProvider router={router} />
+        <SoundProvider>
+          <RouterProvider router={router} />
+        </SoundProvider>
       </ThemeProvider>
     </I18nProvider>,
   );

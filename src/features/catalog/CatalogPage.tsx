@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { patterns } from '@/content';
 import { tiers } from '@/content/tiers';
 import { DepthGauge } from '@/components/DepthGauge';
+import { SailingShip } from '@/components/SailingShip';
 import { useI18n } from '@/i18n';
 import { createPatternSearch } from '@/lib/search';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
@@ -35,12 +36,17 @@ export const CatalogPage = () => {
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 pb-24 sm:px-6 lg:pr-36">
-      <div className="py-10 sm:py-14">
-        <p className="font-mono text-sm text-kelp">{t('catalog.eyebrow')}</p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
-          {t('catalog.title')}
-        </h1>
-        <p className="mt-3 max-w-2xl text-kelp">{t('catalog.intro')}</p>
+      <div className="relative my-8 overflow-hidden rounded-panel border-2 border-wood-deep sm:my-10">
+        <div className="parchment grid items-end gap-4 rounded-none border-0 px-6 pt-8 sm:grid-cols-[1fr_15rem] sm:px-8">
+          <div className="pb-12">
+            <p className="font-mono text-sm text-kelp">{t('catalog.eyebrow')}</p>
+            <h1 className="mt-2 text-3xl leading-tight sm:text-4xl">{t('catalog.title')}</h1>
+            <p className="mt-3 max-w-xl text-kelp">{t('catalog.intro')}</p>
+          </div>
+          <SailingShip className="mx-auto -mb-2 w-48 sm:w-full" />
+        </div>
+        <div aria-hidden className="sea h-6 motion-safe:animate-waves" />
+        <div aria-hidden className="rope h-[7px] rounded-none" />
       </div>
 
       <FilterBar filters={filters} onChange={update} resultCount={visible.length} />

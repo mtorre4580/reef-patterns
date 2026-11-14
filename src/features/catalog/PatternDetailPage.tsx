@@ -11,8 +11,11 @@ import { useDocumentTitle } from '@/lib/useDocumentTitle';
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => {
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-base font-semibold tracking-tight">{title}</h2>
+    <section className="parchment flex flex-col gap-3 rounded-panel p-5 sm:p-6">
+      <div>
+        <h2 className="text-xl leading-tight">{title}</h2>
+        <div aria-hidden className="rope mt-1.5 h-[4px] w-16" />
+      </div>
       {children}
     </section>
   );
@@ -27,7 +30,7 @@ export const PatternDetailPage = () => {
   if (!pattern) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-24 text-center">
-        <h1 className="text-xl font-semibold">{t('detail.notFoundTitle')}</h1>
+        <h1 className="text-2xl">{t('detail.notFoundTitle')}</h1>
         <p className="mt-2 text-kelp">{t('detail.notFoundBody')}</p>
         <Button asChild variant="primary" className="mt-6">
           <Link to="/">{t('detail.backToCatalog')}</Link>
@@ -49,16 +52,18 @@ export const PatternDetailPage = () => {
         </Link>
       </nav>
 
-      <header className="mt-6 flex flex-col gap-3">
+      <header className="parchment nailed mt-6 flex flex-col gap-3 rounded-panel p-6 pt-7 sm:p-8">
         <div className="flex flex-wrap items-center gap-3 text-sm">
-          <span className="font-mono text-kelp">#{pattern.rank}</span>
+          <span className="brass flex size-8 items-center justify-center rounded-full font-mono text-xs">
+            {pattern.rank}
+          </span>
           <CategoryBadge category={pattern.category} />
           <span className="text-kelp">
             {t(`tiers.${pattern.tier}.label`)} · {t(`tiers.${pattern.tier}.zone`)} {zone.depth}
           </span>
           {pattern.gof && <GofBadge />}
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{pattern.name}</h1>
+        <h1 className="text-3xl leading-tight sm:text-4xl">{pattern.name}</h1>
         {pattern.localName[locale] !== pattern.name && (
           <p className="text-kelp">{pattern.localName[locale]}</p>
         )}
@@ -81,12 +86,12 @@ export const PatternDetailPage = () => {
         </div>
       </header>
 
-      <div className="mt-10 flex flex-col gap-10">
+      <div className="mt-8 flex flex-col gap-6">
         <Section title={t('detail.when')}>
           <p className="leading-relaxed text-foam/90">{pattern.when[locale]}</p>
         </Section>
 
-        <div className="grid gap-8 sm:grid-cols-2">
+        <div className="grid gap-6 sm:grid-cols-2">
           <Section title={t('detail.pros')}>
             <ul className="flex flex-col gap-2">
               {pattern.pros[locale].map((pro) => (
@@ -129,7 +134,7 @@ export const PatternDetailPage = () => {
                     <Link
                       to={`/patterns/${rid}`}
                       viewTransition
-                      className="inline-flex h-8 items-center rounded-control border border-line px-3 text-sm text-kelp hover:border-kelp hover:text-foam"
+                      className="inline-flex h-8 items-center rounded-full border border-dashed border-line px-3.5 text-sm text-kelp transition-colors hover:border-solid hover:border-brass hover:bg-reef hover:text-foam"
                     >
                       {rel.name}
                     </Link>

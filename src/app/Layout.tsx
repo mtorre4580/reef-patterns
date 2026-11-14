@@ -5,6 +5,8 @@ import { ProgressProvider } from '@/features/progress';
 import { Kbd } from '@/components/ui/kbd';
 import { scrollToId } from '@/lib/scrollToId';
 import { cn } from '@/lib/utils';
+import { ShipLogo } from '@/components/ShipLogo';
+import { SoundToggle } from './SoundToggle';
 import { ThemeToggle } from './ThemeToggle';
 import { LanguageSwitcher, useI18n } from '@/i18n';
 
@@ -17,7 +19,7 @@ const SearchButton = () => {
     <button
       type="button"
       onClick={open}
-      className="inline-flex h-9 items-center gap-2 rounded-control border border-line bg-trench px-3 text-sm text-kelp transition-colors hover:text-foam"
+      className="inline-flex h-9 items-center gap-2 rounded-control border border-brass/60 bg-black/20 px-3 text-sm text-on-wood-muted transition-colors hover:bg-black/30 hover:text-on-wood"
     >
       <Search aria-hidden className="size-4" />
       <span className="hidden sm:inline">{t('nav.search')}</span>
@@ -29,46 +31,43 @@ const SearchButton = () => {
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
   cn(
-    'rounded-control px-2 py-1 text-sm transition-colors',
-    isActive ? 'text-foam' : 'text-kelp hover:text-foam',
+    'relative rounded-control px-2 py-1 text-sm transition-colors after:absolute after:inset-x-2 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-brass after:transition-transform after:duration-200',
+    isActive
+      ? 'text-on-wood after:scale-x-100'
+      : 'text-on-wood-muted after:scale-x-0 hover:text-on-wood hover:after:scale-x-100',
   );
 
 const Header = () => {
   const { t } = useI18n();
   return (
-    <header className="sticky top-0 z-20 border-b border-line bg-abyss/85 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:gap-4 sm:px-6">
-        <NavLink
-          to="/"
-          aria-label={t('nav.home')}
-          className="flex shrink-0 items-center gap-2 font-semibold tracking-tight"
-        >
-          <svg aria-hidden viewBox="0 0 32 32" className="size-6">
-            <path
-              d="M6 20c3-3 5-3 8 0s5 3 8 0 4-3 4-3"
-              fill="none"
-              stroke="var(--color-lagoon)"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-            />
-            <circle cx="16" cy="11" r="3" fill="var(--color-biolum)" />
-          </svg>
-          <span className="hidden sm:inline">Reef Patterns</span>
-        </NavLink>
-        <nav aria-label={t('nav.main')} className="flex items-center gap-1">
-          <NavLink to="/" end className={navClass}>
-            {t('nav.catalog')}
+    <header className="sticky top-0 z-20">
+      <div className="planks">
+        <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:gap-4 sm:px-6">
+          <NavLink
+            to="/"
+            aria-label={t('nav.home')}
+            className="group flex shrink-0 items-center gap-2 text-on-wood"
+          >
+            <ShipLogo className="size-7 transition-transform duration-500 group-hover:rotate-45" />
+            <span className="hidden font-display text-xl sm:inline">Reef Patterns</span>
           </NavLink>
-          <NavLink to="/playground" className={navClass}>
-            {t('nav.playground')}
-          </NavLink>
-        </nav>
-        <div className="ml-auto flex items-center gap-1 sm:gap-2">
-          <SearchButton />
-          <LanguageSwitcher />
-          <ThemeToggle />
+          <nav aria-label={t('nav.main')} className="flex items-center gap-1">
+            <NavLink to="/" end className={navClass}>
+              {t('nav.catalog')}
+            </NavLink>
+            <NavLink to="/playground" className={navClass}>
+              {t('nav.playground')}
+            </NavLink>
+          </nav>
+          <div className="ml-auto flex items-center gap-1 sm:gap-2">
+            <SearchButton />
+            <LanguageSwitcher />
+            <SoundToggle />
+            <ThemeToggle />
+          </div>
         </div>
       </div>
+      <div aria-hidden className="rope h-[7px] rounded-none" />
     </header>
   );
 };
