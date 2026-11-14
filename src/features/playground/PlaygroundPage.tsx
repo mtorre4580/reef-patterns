@@ -26,7 +26,7 @@ const mobileTabs: MobileTab[] = ['brief', 'code', 'results'];
 
 export const PlaygroundPage = () => {
   const [params] = useSearchParams();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const navigate = useNavigate();
   const resolution = resolveChallenge(params);
   const choose = useCallback(
@@ -35,7 +35,7 @@ export const PlaygroundPage = () => {
   );
   useDocumentTitle(
     resolution.kind === 'challenge'
-      ? `${resolution.challenge.title} · ${t('playground.title')}`
+      ? `${resolution.challenge.title[locale]} · ${t('playground.title')}`
       : t('playground.title'),
   );
 
@@ -174,7 +174,7 @@ const Workspace = ({ challenge, pattern, onChoose }: WorkspaceProps) => {
                 onChange={setCode}
                 onRun={run}
                 theme={theme}
-                label={t('playground.editorLabel', { title: challenge.title })}
+                label={t('playground.editorLabel', { title: challenge.title[locale] })}
               />
             </div>
             <div className="flex items-center justify-between gap-2 border-t border-line p-3">
@@ -204,7 +204,7 @@ const Workspace = ({ challenge, pattern, onChoose }: WorkspaceProps) => {
           <ResultsPanel
             status={runner.status}
             result={runner.result}
-            testNames={challenge.tests.map((t) => t.name)}
+            testNames={challenge.tests.map((test) => test.name[locale])}
           />
           <HintsAndSolution challenge={challenge} onUseSolution={setCode} />
         </section>

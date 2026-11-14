@@ -131,6 +131,13 @@ describe('language', () => {
     expect(localStorage.getItem('reef-patterns:locale')).toBe('pt-BR');
   });
 
+  it('shows pattern content in the active language', () => {
+    renderRoute('/patterns/strategy', 'es');
+    expect(screen.getByText('Estrategia')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Cuándo usarlo' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /^Ejemplo: Dosificadora/ })).toBeInTheDocument();
+  });
+
   it('localizes category filters', () => {
     renderRoute('/', 'pt-BR');
     expect(screen.getByRole('button', { name: 'Criacional' })).toBeInTheDocument();

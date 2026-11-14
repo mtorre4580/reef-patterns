@@ -1,3 +1,4 @@
+import { useI18n } from '@/i18n';
 import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router';
 import type { Pattern } from '@/content/types';
@@ -5,6 +6,7 @@ import { CategoryBadge } from '@/components/CategoryBadge';
 import { GofBadge } from '@/components/GofBadge';
 
 export const PatternRow = ({ pattern }: { pattern: Pattern }) => {
+  const { locale } = useI18n();
   return (
     <li>
       <Link
@@ -17,7 +19,7 @@ export const PatternRow = ({ pattern }: { pattern: Pattern }) => {
         </span>
         <span className="min-w-0 flex-1">
           <span className="block font-medium text-foam">{pattern.name}</span>
-          <span className="block truncate text-sm text-kelp">{pattern.summary}</span>
+          <span className="block truncate text-sm text-kelp">{pattern.summary[locale]}</span>
           <CategoryBadge category={pattern.category} className="mt-1 sm:hidden" />
         </span>
         <span className="hidden w-36 shrink-0 sm:block">

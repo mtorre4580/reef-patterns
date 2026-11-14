@@ -21,7 +21,7 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 export const PatternDetailPage = () => {
   const { id = '' } = useParams();
   const pattern = patternsById.get(id);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   useDocumentTitle(pattern?.name ?? t('detail.notFoundDocTitle'));
 
   if (!pattern) {
@@ -59,8 +59,10 @@ export const PatternDetailPage = () => {
           {pattern.gof && <GofBadge />}
         </div>
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{pattern.name}</h1>
-        <p className="text-kelp">{pattern.nameEs}</p>
-        <p className="text-lg text-foam">{pattern.summary}</p>
+        {pattern.localName[locale] !== pattern.name && (
+          <p className="text-kelp">{pattern.localName[locale]}</p>
+        )}
+        <p className="text-lg text-foam">{pattern.summary[locale]}</p>
         <div className="mt-2 flex items-center gap-3">
           {challengeCount > 0 ? (
             <>
@@ -81,13 +83,13 @@ export const PatternDetailPage = () => {
 
       <div className="mt-10 flex flex-col gap-10">
         <Section title={t('detail.when')}>
-          <p className="leading-relaxed text-foam/90">{pattern.when}</p>
+          <p className="leading-relaxed text-foam/90">{pattern.when[locale]}</p>
         </Section>
 
         <div className="grid gap-8 sm:grid-cols-2">
           <Section title={t('detail.pros')}>
             <ul className="flex flex-col gap-2">
-              {pattern.pros.map((pro) => (
+              {pattern.pros[locale].map((pro) => (
                 <li key={pro} className="flex gap-2 text-foam/90">
                   <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-anemone" />
                   {pro}
@@ -97,7 +99,7 @@ export const PatternDetailPage = () => {
           </Section>
           <Section title={t('detail.cons')}>
             <ul className="flex flex-col gap-2">
-              {pattern.cons.map((con) => (
+              {pattern.cons[locale].map((con) => (
                 <li key={con} className="flex gap-2 text-foam/90">
                   <Minus aria-hidden className="mt-0.5 size-4 shrink-0 text-coral" />
                   {con}
@@ -108,12 +110,12 @@ export const PatternDetailPage = () => {
         </div>
 
         <Section title={t('detail.realWorld')}>
-          <p className="leading-relaxed text-foam/90">{pattern.realWorld}</p>
+          <p className="leading-relaxed text-foam/90">{pattern.realWorld[locale]}</p>
         </Section>
 
-        <Section title={t('detail.example', { title: pattern.example.title })}>
-          <p className="leading-relaxed text-kelp">{pattern.example.scenario}</p>
-          <CodeBlock code={pattern.example.code} label={pattern.example.title} />
+        <Section title={t('detail.example', { title: pattern.example.title[locale] })}>
+          <p className="leading-relaxed text-kelp">{pattern.example.scenario[locale]}</p>
+          <CodeBlock code={pattern.example.code} label={pattern.example.title[locale]} />
         </Section>
 
         {pattern.related.length > 0 && (

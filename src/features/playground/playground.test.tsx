@@ -20,7 +20,7 @@ const challenge = challengesById.get('observer-1')!;
 
 async function openChallenge(path = '/playground?challenge=observer-1') {
   const utils = renderRoute(path);
-  await screen.findByRole('heading', { level: 1, name: challenge.title }, { timeout: 5000 });
+  await screen.findByRole('heading', { level: 1, name: challenge.title.en }, { timeout: 5000 });
   const editor = screen.getByRole('textbox', { name: /Code editor/ });
   return { ...utils, editor };
 }
@@ -87,16 +87,30 @@ describe('playground', () => {
   it('resolves the challenge from the pattern', async () => {
     renderRoute('/playground?pattern=observer');
     expect(
-      await screen.findByRole('heading', { level: 1, name: challenge.title }),
+      await screen.findByRole('heading', { level: 1, name: challenge.title.en }),
     ).toBeInTheDocument();
   });
 
   it('localizes runner messages', async () => {
     const { user } = renderRoute('/playground?challenge=observer-1', 'es');
-    await screen.findByRole('heading', { level: 1, name: challenge.title }, { timeout: 5000 });
+    await screen.findByRole('heading', { level: 1, name: challenge.title.es }, { timeout: 5000 });
     await user.click(screen.getByRole('button', { name: /Ejecutar tests/ }));
     expect(await screen.findByText(/de 5 pasaron/)).toBeInTheDocument();
     expect(screen.getAllByText(/Se esperaba/).length).toBeGreaterThan(0);
+    // test names come from the localized content too
+    expect(screen.getByText(challenge.tests[0]!.name.es)).toBeInTheDocument();
+  });
+
+  it('shows the challenge content in Portuguese', async () => {
+    renderRoute('/playground?challenge=observer-1', 'pt-BR');
+    expect(
+      await screen.findByRole(
+        'heading',
+        { level: 1, name: challenge.title['pt-BR'] },
+        { timeout: 5000 },
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText(challenge.story['pt-BR'])).toBeInTheDocument();
   });
 
   it('says when a pattern has no challenges yet', async () => {

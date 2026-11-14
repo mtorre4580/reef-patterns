@@ -11,7 +11,7 @@ interface ChallengeBriefProps {
 }
 
 export const ChallengeBrief = ({ challenge, pattern, headingLevel = 1 }: ChallengeBriefProps) => {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const Heading = headingLevel === 1 ? 'h1' : 'h2';
   return (
     <div className="flex flex-col gap-3">
@@ -24,10 +24,10 @@ export const ChallengeBrief = ({ challenge, pattern, headingLevel = 1 }: Challen
           {t('playground.difficulty', { level: t(`difficulty.${challenge.difficulty}`) })}
         </span>
       </div>
-      <Heading className="text-xl font-semibold tracking-tight">{challenge.title}</Heading>
-      <p className="text-sm leading-relaxed text-kelp">{challenge.story}</p>
+      <Heading className="text-xl font-semibold tracking-tight">{challenge.title[locale]}</Heading>
+      <p className="text-sm leading-relaxed text-kelp">{challenge.story[locale]}</p>
       <div className="text-sm leading-relaxed text-foam/90">
-        <RichText text={challenge.instructions} />
+        <RichText text={challenge.instructions[locale]} />
       </div>
     </div>
   );

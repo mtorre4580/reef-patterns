@@ -93,36 +93,37 @@ internos de otra feature.
 type CategoryId = 'creacional' | 'estructural' | 'comportamiento'
   | 'arquitectura' | 'resiliencia' | 'frontend';
 type Tier = 1 | 2 | 3 | 4; // 1 Esencial … 4 Poco común
+type Localized<T> = Record<'en' | 'es' | 'pt-BR', T>;  // todo texto visible, en los 3 idiomas
 
 interface Pattern {
   id: string;            // kebab-case, estable: se usa en URLs
   rank: number;          // orden global 1..N, sin huecos
   name: string;          // nombre canónico en inglés (Strategy)
-  nameEs: string;        // nombre en español (Estrategia)
+  localName: Localized<string>;  // Strategy / Estrategia / Estratégia
   category: CategoryId;
   tier: Tier;
   gof: boolean;
-  summary: string;       // 1 oración
-  when: string;          // cuándo usarlo
-  pros: string[];        // 2-4
-  cons: string[];        // 2-4
-  realWorld: string;     // dónde aparece en el ecosistema JS
-  example: { title: string; scenario: string; code: string }; // JS, temática oceánica
+  summary: Localized<string>;    // 1 oración
+  when: Localized<string>;       // cuándo usarlo
+  pros: Localized<string[]>;     // 2-4, misma cantidad en cada idioma
+  cons: Localized<string[]>;     // 2-4
+  realWorld: Localized<string>;  // dónde aparece en el ecosistema JS
+  example: { title: Localized<string>; scenario: Localized<string>; code: string }; // code: JS en inglés
   related: string[];     // ids existentes
 }
 
 interface Challenge {
   id: string;            // `${patternId}-${n}`
   patternId: string;
-  title: string;
+  title: Localized<string>;
   difficulty: 'facil' | 'media' | 'dificil';
-  story: string;         // contexto narrativo oceánico
-  instructions: string;  // qué debe implementar, con nombres exactos de API
-  starterCode: string;   // JS
-  tests: { name: string; code: string }[];   // usan expect() del runner
-  checks?: AstCheck[];   // reglas estáticas opcionales
-  hints: string[];
-  solution: string;      // JS, debe pasar todos los tests
+  story: Localized<string>;         // contexto narrativo oceánico
+  instructions: Localized<string>;  // qué implementar, con nombres exactos de API
+  starterCode: string;              // JS en inglés
+  tests: { name: Localized<string>; code: string }[];  // usan expect() del runner
+  checks?: AstCheck<Localized<string>>[];              // reglas estáticas opcionales
+  hints: Localized<string[]>;
+  solution: string;                 // JS en inglés, debe pasar todos los tests
 }
 ```
 
@@ -203,7 +204,10 @@ ambos temas, `prefers-reduced-motion` desactiva el giro animado (muestra el resu
 - **Código de ejemplos y challenges: JavaScript moderno (ES2023), sin TypeScript, sin
   dependencias, sin APIs del DOM** (corre en un worker). Identificadores en inglés.
 - **Todos los comentarios del código van en inglés**, sin excepción: app, scripts, tests y el
-  JS de ejemplos y challenges que ve el usuario. Es el estándar del equipo.
+  JS de ejemplos y challenges que ve el usuario. Es el estándar del equipo. El código de
+  ejemplos y challenges es único para los tres idiomas: comentarios, strings y mensajes de error
+  en inglés; solo la prosa (`Localized`) se traduce. `runnableChallenge(challenge, locale)` arma
+  los nombres de tests y chequeos en el idioma activo para el runner.
 - Dominio de los ejemplos: acuario de arrecife (sensores de temperatura, salinidad, pH,
   dosificadoras de kalkwasser o métodos tipo Triton, skimmer, ATO, iluminación, corales SPS/LPS/
   blandos, fragging) y buceo (computadora de buceo, paradas de seguridad, plan de inmersión,
@@ -239,11 +243,13 @@ ambos temas, `prefers-reduced-motion` desactiva el giro animado (muestra el resu
 
 ## Cómo agregar…
 
-**Un patrón**: crear `src/content/patterns/<id>.ts`, registrarlo en `content/index.ts`, ajustar
-`rank` y correr `pnpm validate:content`.
+**Un patrón**: crear `src/content/patterns/<id>.ts` con todos los textos en `en`, `es` y `pt-BR`,
+registrarlo en `content/index.ts`, ajustar `rank` y correr `pnpm validate:content` (falla si falta
+un idioma o si las listas no tienen la misma cantidad en todos).
 
 **Un challenge**: crear `src/content/challenges/<patternId>/<patternId>-<n>.ts` con
-`starterCode`, `tests`, `hints` y `solution`; registrarlo; correr `pnpm validate:content`.
+`starterCode`, `tests`, `hints` y `solution` (código en inglés, textos en los 3 idiomas);
+registrarlo; correr `pnpm validate:content`.
 
 ## Git
 

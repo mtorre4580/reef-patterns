@@ -12,8 +12,11 @@ describe('createPatternSearch', () => {
     expect(search.search('obsrver')[0]?.id).toBe('observer');
   });
 
-  it('finds by Spanish name without diacritics', () => {
-    expect(search.search('fabrica abstracta')[0]?.id).toBe('abstract-factory');
+  it('finds by the localized name without diacritics', () => {
+    const es = createPatternSearch(patterns, 'es');
+    const pt = createPatternSearch(patterns, 'pt-BR');
+    expect(es.search('fabrica abstracta')[0]?.id).toBe('abstract-factory');
+    expect(pt.search('fabrica abstrata')[0]?.id).toBe('abstract-factory');
   });
 
   it('finds by category', () => {
