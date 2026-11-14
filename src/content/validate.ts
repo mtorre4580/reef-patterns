@@ -99,3 +99,30 @@ export function validateChallengeShapes(
   }
   return issues;
 }
+
+/**
+ * Ejecuta cada challenge: la solución debe pasar todos los tests y chequeos, y el starter debe
+ * fallar al menos uno (si no, el challenge no obliga a hacer nada).
+ */
+export async function validateChallengeRuns(
+  challenges: Challenge[],
+  execute: (request: {
+    code: string;
+    tests: Challenge['tests'];
+    checks?: Challenge['checks'];
+  }) => Promise<{ results: { name: string; passed: boolean; error?: string }[] }>,
+): Promise<ValidationIssue[]> {
+  const issues: ValidationIssue[] = [];
+  for (const c of challenges) {
+    const where = `challenge:${c.id}`;
+    const solution = await execute({ code: c.solution, tests: c.tests, checks: c.checks });
+    for (const r of solution.results.filter((r) => !r.passed)) {
+      issues.push({ where, message: `la solución falla "${r.name}": ${r.error ?? ''}` });
+    }
+    const starter = await execute({ code: c.starterCode, tests: c.tests, checks: c.checks });
+    if (starter.results.every((r) => r.passed)) {
+      issues.push({ where, message: 'el starterCode pasa todos los tests' });
+    }
+  }
+  return issues;
+}

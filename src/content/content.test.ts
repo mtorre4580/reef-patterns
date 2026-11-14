@@ -1,5 +1,6 @@
 import { challenges, challengesByPattern, patterns, patternsById, tiers } from './index';
-import { validateChallengeShapes, validatePatterns } from './validate';
+import { executeChallenge } from '@/lib/runner/execute';
+import { validateChallengeRuns, validateChallengeShapes, validatePatterns } from './validate';
 
 describe('contenido', () => {
   it('tiene 52 patrones válidos', () => {
@@ -23,6 +24,10 @@ describe('contenido', () => {
     expect(validateChallengeShapes(challenges, new Set(patternsById.keys()))).toEqual([]);
     const total = [...challengesByPattern.values()].reduce((n, list) => n + list.length, 0);
     expect(total).toBe(challenges.length);
+  });
+
+  it('cada solución pasa y cada starter falla', async () => {
+    expect(await validateChallengeRuns(challenges, executeChallenge)).toEqual([]);
   });
 
   it('detecta problemas en contenido inválido', () => {
