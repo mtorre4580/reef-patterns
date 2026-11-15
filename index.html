@@ -7,11 +7,17 @@
     <meta name="color-scheme" content="dark light" />
     <meta
       name="description"
-      content="Review 52 frontend-oriented design patterns and practice them with challenges that run in the browser."
+      content="Learn 52 design patterns for frontend developers, sorted by how often they are used, with JavaScript examples and interactive challenges that run in your browser."
     />
     <meta name="theme-color" content="#06131c" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#f6f2e9" media="(prefers-color-scheme: light)" />
-    <title>Reef Patterns</title>
+    <title>Reef Patterns · 52 design patterns for frontend developers</title>
+    <script>
+      // Legacy hash links (#/patterns/strategy) from before real URLs: move them to the path
+      if (location.hash.startsWith('#/')) {
+        location.replace(location.pathname.replace(/\/?$/, '/') + location.hash.slice(2));
+      }
+    </script>
     <!-- Critical fonts: fetched before the CSS is parsed, so they are ready by the first paint -->
     <link
       rel="preload"

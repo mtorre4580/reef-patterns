@@ -45,14 +45,14 @@ knowledge to understand an exercise.
 | Browser tests | Playwright + `@axe-core/playwright` | `e2e/`, runs against the production build |
 | Performance | Lighthouse CI (`lighthouserc.json`) + `bundle-budget.json` | Gzip limits per chunk |
 | Dependencies | Dependabot (weekly, grouped) | `.github/dependabot.yml` |
-| Deploy | GitHub Pages with `HashRouter` (`createHashRouter`) | `deploy.yml` runs after CI passes on `main`; `base: '/reef-patterns/'` |
+| Deploy | GitHub Pages with `createBrowserRouter` (real URLs) | `deploy.yml` runs after CI passes on `main`; `base: '/reef-patterns/'`; `scripts/prerender.ts` writes one HTML per route, `404.html` and `sitemap.xml` |
 
 ## Commands
 
 ```bash
 pnpm install
 pnpm dev                # development server
-pnpm build              # production build
+pnpm build              # production build + prerender (static HTML per route, sitemap)
 pnpm preview            # preview the build (served under /reef-patterns/)
 pnpm test               # Vitest in watch mode
 pnpm test:run           # Vitest once (CI)
@@ -90,6 +90,7 @@ src/
   test/                # Vitest setup and helpers
 scripts/
   validate-content.ts
+  prerender.ts         # static HTML per route + sitemap, runs after vite build
 ```
 
 Rule: each feature exports its public API from `features/<x>/index.ts`. Do not import internal
