@@ -59,17 +59,17 @@ export const objectPool: Pattern = {
   },
   example: {
     title: {
-      en: 'Skimmer bubbles in the simulator',
-      es: 'Burbujas del skimmer en el simulador',
-      'pt-BR': 'Bolhas do skimmer no simulador',
+      en: 'Database connection pool',
+      es: 'Pool de conexiones a la base de datos',
+      'pt-BR': 'Pool de conexões ao banco de dados',
     },
     scenario: {
-      en: 'The simulator animates bubbles that rise and pop. Instead of creating thousands per second, it recycles a fixed pool and resets them on reuse.',
-      es: 'El simulador anima burbujas que suben y desaparecen. En vez de crear miles por segundo, recicla un pool fijo y las reinicia al reutilizarlas.',
+      en: 'Opening a database connection takes time. The server keeps a fixed pool, lends a connection to each request and gets it back afterwards, resetting it every time.',
+      es: 'Abrir una conexión a la base tarda. El servidor mantiene un pool fijo, presta una conexión a cada request y la recupera después, reseteándola cada vez.',
       'pt-BR':
-        'O simulador anima bolhas que sobem e somem. Em vez de criar milhares por segundo, recicla um pool fixo e as reinicia ao reutilizá-las.',
+        'Abrir uma conexão com o banco demora. O servidor mantém um pool fixo, empresta uma conexão a cada requisição e a recebe de volta depois, resetando-a toda vez.',
     },
-    code: `class BubblePool {
+    code: `class ConnectionPool {
   #free = [];
   created = 0;
 
@@ -77,35 +77,31 @@ export const objectPool: Pattern = {
     this.max = max;
   }
 
-  acquire(x) {
-    let bubble = this.#free.pop();
-    if (!bubble) {
-      if (this.created >= this.max) return null; // pool exhausted
+  acquire() {
+    let connection = this.#free.pop();
+    if (!connection) {
+      if (this.created >= this.max) return null; // pool exhausted: the caller must wait
       this.created++;
-      bubble = {};
+      connection = { id: this.created }; // in real life: an expensive TCP + TLS handshake
     }
-    // Full reset: never reuse dirty state
-    return Object.assign(bubble, { x, y: 0, radius: 1 + Math.random() * 2, alive: true });
+    // Full reset: never reuse dirty state (open transactions, session variables)
+    return Object.assign(connection, { inTransaction: false, lastQuery: null });
   }
 
-  release(bubble) {
-    bubble.alive = false;
-    this.#free.push(bubble);
+  release(connection) {
+    this.#free.push(connection);
   }
 }
 
-const pool = new BubblePool(50);
-const active = [];
+const pool = new ConnectionPool(5);
 
-for (let frame = 0; frame < 600; frame++) {
-  const bubble = pool.acquire(frame % 30);
-  if (bubble) active.push(bubble);
-  for (const b of active) b.y += 4;
-  // Bubbles that reach the surface go back to the pool
-  while (active.length && active[0].y > 100) pool.release(active.shift());
+for (let request = 0; request < 1000; request++) {
+  const conn = pool.acquire();
+  conn.lastQuery = 'SELECT * FROM orders WHERE id = ' + request;
+  pool.release(conn); // each request returns its connection when done
 }
 
-console.log('Bubbles created in 600 frames:', pool.created); // ≤ 50`,
+console.log('Connections created for 1000 requests:', pool.created); // 1`,
   },
   related: ['flyweight', 'bulkhead', 'singleton'],
 };

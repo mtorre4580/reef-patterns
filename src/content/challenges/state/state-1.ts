@@ -4,99 +4,83 @@ export const state1: Challenge = {
   id: 'state-1',
   patternId: 'state',
   title: {
-    en: 'Dive computer phases',
-    es: 'Fases de la computadora de buceo',
-    'pt-BR': 'Fases do computador de mergulho',
+    en: 'Order lifecycle',
+    es: 'Ciclo de vida de una orden',
+    'pt-BR': 'Ciclo de vida de um pedido',
   },
   difficulty: 'media',
   story: {
-    en: 'The dive computer goes through surface, descent, bottom, ascent and safety stop. The current firmware has one if per phase in every method and allowed surfacing without a stop.',
-    es: 'La computadora de buceo pasa por superficie, descenso, fondo, ascenso y parada de seguridad. El firmware actual tiene un if por fase en cada método y dejó salir a la superficie sin parada.',
+    en: 'An order goes from pending to paid, shipped and delivered. The current code has an if per status in every method, and a bug let unpaid orders ship.',
+    es: 'Una orden pasa de pendiente a pagada, enviada y entregada. El código actual tiene un if por estado en cada método, y un bug dejó salir órdenes sin pagar.',
     'pt-BR':
-      'O computador de mergulho passa por superfície, descida, fundo, subida e parada de segurança. O firmware atual tem um if por fase em cada método e deixou subir à superfície sem parada.',
+      'Um pedido passa de pendente a pago, enviado e entregue. O código atual tem um if por status em cada método, e um bug deixou sair pedidos sem pagamento.',
   },
   instructions: {
-    en: 'Implement `DiveComputer` with `phase` (starting at `"surface"`), a `log` array of `"<from> → <to>"` transitions and the methods `descend()`, `level()`, `ascend()`, `reachStop()` and `complete()`.\nValid transitions:\n- surface → descend → descending\n- descending → level → bottom; descending → ascend → ascending\n- bottom → ascend → ascending\n- ascending → reachStop → safetyStop\n- safetyStop → complete → surface\nAny other one throws `Error("Cannot <action> from <phase>")` and does not change the phase.',
-    es: 'Implementá `DiveComputer` con `phase` (empieza en `"surface"`), un array `log` de transiciones `"<de> → <a>"` y los métodos `descend()`, `level()`, `ascend()`, `reachStop()` y `complete()`.\nTransiciones válidas:\n- surface → descend → descending\n- descending → level → bottom; descending → ascend → ascending\n- bottom → ascend → ascending\n- ascending → reachStop → safetyStop\n- safetyStop → complete → surface\nCualquier otra lanza `Error("Cannot <acción> from <fase>")` y no cambia la fase.',
+    en: 'Implement `Order` with `status` (starting at `"pending"`), a `history` array of `"<from> → <to>"` transitions and the methods `pay()`, `ship()`, `deliver()` and `cancel()`.\nValid transitions:\n- pending → pay → paid; pending → cancel → cancelled\n- paid → ship → shipped; paid → cancel → cancelled\n- shipped → deliver → delivered\nAny other one throws `Error("Cannot <action> from <status>")` and does not change the status.',
+    es: 'Implementá `Order` con `status` (empieza en `"pending"`), un array `history` de transiciones `"<de> → <a>"` y los métodos `pay()`, `ship()`, `deliver()` y `cancel()`.\nTransiciones válidas:\n- pending → pay → paid; pending → cancel → cancelled\n- paid → ship → shipped; paid → cancel → cancelled\n- shipped → deliver → delivered\nCualquier otra lanza `Error("Cannot <acción> from <status>")` y no cambia el estado.',
     'pt-BR':
-      'Implemente `DiveComputer` com `phase` (começa em `"surface"`), um array `log` de transições `"<de> → <para>"` e os métodos `descend()`, `level()`, `ascend()`, `reachStop()` e `complete()`.\nTransições válidas:\n- surface → descend → descending\n- descending → level → bottom; descending → ascend → ascending\n- bottom → ascend → ascending\n- ascending → reachStop → safetyStop\n- safetyStop → complete → surface\nQualquer outra lança `Error("Cannot <ação> from <fase>")` e não muda a fase.',
+      'Implemente `Order` com `status` (começa em `"pending"`), um array `history` de transições `"<de> → <para>"` e os métodos `pay()`, `ship()`, `deliver()` e `cancel()`.\nTransições válidas:\n- pending → pay → paid; pending → cancel → cancelled\n- paid → ship → shipped; paid → cancel → cancelled\n- shipped → deliver → delivered\nQualquer outra lança `Error("Cannot <ação> from <status>")` e não muda o status.',
   },
-  starterCode: `class DiveComputer {
-  phase = 'surface';
-  log = [];
+  starterCode: `class Order {
+  status = 'pending';
+  history = [];
 
-  descend() {
-    this.phase = 'descending';
+  pay() {
+    this.status = 'paid';
   }
-  level() {
-    this.phase = 'bottom';
+  ship() {
+    this.status = 'shipped';
   }
-  ascend() {
-    this.phase = 'ascending';
+  deliver() {
+    this.status = 'delivered';
   }
-  reachStop() {
-    this.phase = 'safetyStop';
-  }
-  complete() {
-    this.phase = 'surface';
+  cancel() {
+    this.status = 'cancelled';
   }
 }
 `,
   tests: [
     {
-      name: {
-        en: 'a complete dive',
-        es: 'una inmersión completa',
-        'pt-BR': 'um mergulho completo',
-      },
-      code: `const c = new DiveComputer();
-c.descend();
-c.level();
-c.ascend();
-c.reachStop();
-c.complete();
-expect(c.phase).toBe('surface');
-expect(c.log).toEqual([
-  'surface → descending',
-  'descending → bottom',
-  'bottom → ascending',
-  'ascending → safetyStop',
-  'safetyStop → surface',
-]);`,
+      name: { en: 'a complete order', es: 'una orden completa', 'pt-BR': 'um pedido completo' },
+      code: `const order = new Order();
+order.pay();
+order.ship();
+order.deliver();
+expect(order.status).toBe('delivered');
+expect(order.history).toEqual(['pending → paid', 'paid → shipped', 'shipped → delivered']);`,
     },
     {
       name: {
-        en: 'cannot surface without a safety stop',
-        es: 'no se puede salir sin parada de seguridad',
-        'pt-BR': 'não dá para subir sem parada de segurança',
+        en: 'an unpaid order cannot ship',
+        es: 'una orden sin pagar no se puede enviar',
+        'pt-BR': 'um pedido sem pagamento não pode ser enviado',
       },
-      code: `const c = new DiveComputer();
-c.descend();
-c.ascend();
-expect(() => c.complete()).toThrow('Cannot complete from ascending');
-expect(c.phase).toBe('ascending');`,
+      code: `const order = new Order();
+expect(() => order.ship()).toThrow('Cannot ship from pending');
+expect(order.status).toBe('pending');
+expect(order.history).toEqual([]);`,
     },
     {
       name: {
-        en: 'cannot ascend from the surface',
-        es: 'no se puede ascender desde la superficie',
-        'pt-BR': 'não dá para subir a partir da superfície',
+        en: 'a paid order can be cancelled',
+        es: 'una orden pagada se puede cancelar',
+        'pt-BR': 'um pedido pago pode ser cancelado',
       },
-      code: `const c = new DiveComputer();
-expect(() => c.ascend()).toThrow('Cannot ascend from surface');
-expect(c.log).toEqual([]);`,
+      code: `const order = new Order();
+order.pay();
+order.cancel();
+expect(order.status).toBe('cancelled');`,
     },
     {
       name: {
-        en: 'cannot descend again during the stop',
-        es: 'no se puede volver a descender durante la parada',
-        'pt-BR': 'não dá para voltar a descer durante a parada',
+        en: 'a shipped order cannot be cancelled',
+        es: 'una orden enviada no se puede cancelar',
+        'pt-BR': 'um pedido enviado não pode ser cancelado',
       },
-      code: `const c = new DiveComputer();
-c.descend();
-c.ascend();
-c.reachStop();
-expect(() => c.descend()).toThrow('Cannot descend from safetyStop');`,
+      code: `const order = new Order();
+order.pay();
+order.ship();
+expect(() => order.cancel()).toThrow('Cannot cancel from shipped');`,
     },
   ],
   checks: [
@@ -104,9 +88,9 @@ expect(() => c.descend()).toThrow('Cannot descend from safetyStop');`,
       rule: 'forbidNode',
       node: 'SwitchStatement',
       message: {
-        en: 'No switch per phase',
-        es: 'Sin switch por fase',
-        'pt-BR': 'Sem switch por fase',
+        en: 'No switch per status',
+        es: 'Sin switch por estado',
+        'pt-BR': 'Sem switch por status',
       },
     },
     {
@@ -121,45 +105,44 @@ expect(() => c.descend()).toThrow('Cannot descend from safetyStop');`,
   ],
   hints: {
     en: [
-      'Model the transitions as data: `{ surface: { descend: "descending" }, … }`.',
-      'A private `#go(action)` method looks up the next phase in that table and throws if it does not exist.',
+      'Model the transitions as data: `{ pending: { pay: "paid", cancel: "cancelled" }, … }`.',
+      'A private `#go(action)` method looks up the next status in that table and throws if it does not exist.',
       'Each public method just calls `this.#go("name")`.',
     ],
     es: [
-      'Modelá las transiciones como datos: `{ surface: { descend: "descending" }, … }`.',
-      'Un método privado `#go(action)` busca la próxima fase en esa tabla y lanza si no existe.',
+      'Modelá las transiciones como datos: `{ pending: { pay: "paid", cancel: "cancelled" }, … }`.',
+      'Un método privado `#go(action)` busca el próximo estado en esa tabla y lanza si no existe.',
       'Cada método público solo llama a `this.#go("nombre")`.',
     ],
     'pt-BR': [
-      'Modele as transições como dados: `{ surface: { descend: "descending" }, … }`.',
-      'Um método privado `#go(action)` busca a próxima fase nessa tabela e lança se não existir.',
+      'Modele as transições como dados: `{ pending: { pay: "paid", cancel: "cancelled" }, … }`.',
+      'Um método privado `#go(action)` busca o próximo status nessa tabela e lança se não existir.',
       'Cada método público só chama `this.#go("nome")`.',
     ],
   },
   solution: `const transitions = {
-  surface: { descend: 'descending' },
-  descending: { level: 'bottom', ascend: 'ascending' },
-  bottom: { ascend: 'ascending' },
-  ascending: { reachStop: 'safetyStop' },
-  safetyStop: { complete: 'surface' },
+  pending: { pay: 'paid', cancel: 'cancelled' },
+  paid: { ship: 'shipped', cancel: 'cancelled' },
+  shipped: { deliver: 'delivered' },
+  delivered: {},
+  cancelled: {},
 };
 
-class DiveComputer {
-  phase = 'surface';
-  log = [];
+class Order {
+  status = 'pending';
+  history = [];
 
   #go(action) {
-    const next = transitions[this.phase][action];
-    if (!next) throw new Error('Cannot ' + action + ' from ' + this.phase);
-    this.log.push(this.phase + ' → ' + next);
-    this.phase = next;
+    const next = transitions[this.status][action];
+    if (!next) throw new Error('Cannot ' + action + ' from ' + this.status);
+    this.history.push(this.status + ' → ' + next);
+    this.status = next;
   }
 
-  descend() { this.#go('descend'); }
-  level() { this.#go('level'); }
-  ascend() { this.#go('ascend'); }
-  reachStop() { this.#go('reachStop'); }
-  complete() { this.#go('complete'); }
+  pay() { this.#go('pay'); }
+  ship() { this.#go('ship'); }
+  deliver() { this.#go('deliver'); }
+  cancel() { this.#go('cancel'); }
 }
 `,
 };

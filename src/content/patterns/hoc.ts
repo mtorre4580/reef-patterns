@@ -62,33 +62,31 @@ export const hoc: Pattern = {
       'connect do react-redux, withRouter do React Router v5, React.memo e forwardRef, withAuthenticationRequired do Auth0.',
   },
   example: {
-    title: { en: 'withUnits', es: 'withUnits', 'pt-BR': 'withUnits' },
+    title: { en: 'withFeatureFlag', es: 'withFeatureFlag', 'pt-BR': 'withFeatureFlag' },
     scenario: {
-      en: "Several legacy widgets show temperatures and need to format them in the user's unit. withUnits injects a formatter without rewriting them.",
-      es: 'Varios widgets heredados muestran temperaturas y necesitan formatearlas en la unidad del usuario. withUnits les inyecta un formateador sin reescribirlos.',
+      en: 'New widgets ship behind feature flags. withFeatureFlag wraps any component and renders it only when the flag is on, without changing the component.',
+      es: 'Los widgets nuevos salen detrás de feature flags. withFeatureFlag envuelve cualquier componente y lo muestra solo si el flag está activo, sin cambiar el componente.',
       'pt-BR':
-        'Vários widgets legados mostram temperaturas e precisam formatá-las na unidade do usuário. withUnits injeta um formatador sem reescrevê-los.',
+        'Os widgets novos saem atrás de feature flags. withFeatureFlag envolve qualquer componente e só o mostra se a flag estiver ativa, sem mudar o componente.',
     },
     code: `import { createElement as h } from 'react';
 
-// Where preferences come from (in a real app, from Context)
-const preferences = { temp: 'F' };
+// Where flags come from (in a real app, a flags service or Context)
+const flags = { newCheckout: true, darkReports: false };
 
-export const withUnits = (Component) => {
-  const WithUnits = (props) => {
-    const formatTemp = (c) =>
-      preferences.temp === 'F' ? ((c * 9) / 5 + 32).toFixed(1) + ' °F' : c.toFixed(1) + ' °C';
-    return h(Component, { ...props, formatTemp });
-  };
-  WithUnits.displayName = 'withUnits(' + (Component.displayName || Component.name) + ')';
-  return WithUnits;
+export const withFeatureFlag = (Component, flag, Fallback = () => null) => {
+  const WithFeatureFlag = (props) =>
+    flags[flag] ? h(Component, props) : h(Fallback, props);
+  WithFeatureFlag.displayName =
+    'withFeatureFlag(' + (Component.displayName || Component.name) + ')';
+  return WithFeatureFlag;
 };
 
-// Original component: it does not know where the units come from
-const SumpTemperature = ({ celsius, formatTemp }) => h('p', null, 'Sump: ' + formatTemp(celsius));
+// Original component: it knows nothing about flags
+const NewCheckoutButton = ({ total }) => h('button', null, 'Pay $' + total);
 
-export const SumpTemperatureWithUnits = withUnits(SumpTemperature);
-// <SumpTemperatureWithUnits celsius={25.4} /> → "Sump: 77.7 °F"`,
+export const CheckoutButton = withFeatureFlag(NewCheckoutButton, 'newCheckout');
+// <CheckoutButton total={59} /> renders only while newCheckout is on`,
   },
   related: ['decorator', 'render-props', 'custom-hooks'],
 };

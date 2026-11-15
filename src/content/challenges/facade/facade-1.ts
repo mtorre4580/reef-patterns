@@ -3,148 +3,163 @@ import type { Challenge } from '../../types';
 export const facade1: Challenge = {
   id: 'facade-1',
   patternId: 'facade',
-  title: { en: 'Maintenance mode', es: 'Modo mantenimiento', 'pt-BR': 'Modo manutenção' },
+  title: {
+    en: 'App startup and shutdown',
+    es: 'Arranque y apagado de la app',
+    'pt-BR': 'Inicialização e desligamento do app',
+  },
   difficulty: 'facil',
   story: {
-    en: 'To clean the glass you must turn off the ATO, the skimmer and the return pump, in that order, and turn them back on in reverse when done. Last month someone started the skimmer with an empty sump.',
-    es: 'Para limpiar el vidrio hay que apagar el ATO, el skimmer y la bomba de retorno, en ese orden, y al terminar encenderlos al revés. El mes pasado alguien prendió el skimmer con el sump vacío.',
+    en: 'Starting the server means loading the config, connecting to the database and warming the cache, in that order, and stopping them in reverse. Last month someone warmed the cache before the database was connected.',
+    es: 'Arrancar el servidor implica cargar la configuración, conectar la base y precalentar la caché, en ese orden, y apagarlos al revés. El mes pasado alguien precalentó la caché antes de conectar la base.',
     'pt-BR':
-      'Para limpar o vidro é preciso desligar o ATO, o skimmer e a bomba de retorno, nessa ordem, e ao terminar ligá-los ao contrário. No mês passado alguém ligou o skimmer com o sump vazio.',
+      'Iniciar o servidor implica carregar a configuração, conectar o banco e aquecer o cache, nessa ordem, e desligá-los ao contrário. No mês passado alguém aqueceu o cache antes de conectar o banco.',
   },
   instructions: {
-    en: 'Implement `TankFacade` with `constructor({ ato, skimmer, returnPump })`:\n- `maintenanceMode()`: turns off the ATO, the skimmer and the return pump, in that order.\n- `resume()`: turns them on in reverse order, but only the ones that were on before maintenance. Without a maintenance in progress it does nothing.\nEach device has `on`, `stop()` and `start()` (use `createDevice` to try it out).',
-    es: 'Implementá `TankFacade` con `constructor({ ato, skimmer, returnPump })`:\n- `maintenanceMode()`: apaga ATO, skimmer y retorno, en ese orden.\n- `resume()`: los enciende en orden inverso, pero solo los que estaban encendidos antes del mantenimiento. Si no hubo mantenimiento, no hace nada.\nCada equipo tiene `on`, `stop()` y `start()` (usá `createDevice` para probar).',
+    en: 'Implement `AppLifecycle` with `constructor({ config, db, cache })`:\n- `start()`: starts config, db and cache, in that order.\n- `stop()`: stops them in reverse order, but only the ones that were started. If `start()` was never called, it does nothing.\nEach service has `running`, `start()` and `stop()` (use `createService` to try it out).',
+    es: 'Implementá `AppLifecycle` con `constructor({ config, db, cache })`:\n- `start()`: arranca config, db y cache, en ese orden.\n- `stop()`: los apaga en orden inverso, pero solo los que se arrancaron. Si nunca se llamó a `start()`, no hace nada.\nCada servicio tiene `running`, `start()` y `stop()` (usá `createService` para probar).',
     'pt-BR':
-      'Implemente `TankFacade` com `constructor({ ato, skimmer, returnPump })`:\n- `maintenanceMode()`: desliga ATO, skimmer e retorno, nessa ordem.\n- `resume()`: liga-os na ordem inversa, mas só os que estavam ligados antes da manutenção. Se não houve manutenção, não faz nada.\nCada equipamento tem `on`, `stop()` e `start()` (use `createDevice` para testar).',
+      'Implemente `AppLifecycle` com `constructor({ config, db, cache })`:\n- `start()`: inicia config, db e cache, nessa ordem.\n- `stop()`: desliga-os na ordem inversa, mas só os que foram iniciados. Se `start()` nunca foi chamado, não faz nada.\nCada serviço tem `running`, `start()` e `stop()` (use `createService` para testar).',
   },
-  starterCode: `// Test device: logs every action into the shared log
-function createDevice(name, log, on = true) {
+  starterCode: `// Test service: logs every action into the shared log
+function createService(name, log, { failOnStart = false } = {}) {
   return {
     name,
-    on,
-    stop() { this.on = false; log.push('stop:' + name); },
-    start() { this.on = true; log.push('start:' + name); },
+    running: false,
+    start() {
+      if (failOnStart) throw new Error(name + ' failed to start');
+      this.running = true;
+      log.push('start:' + name);
+    },
+    stop() { this.running = false; log.push('stop:' + name); },
   };
 }
 
-class TankFacade {
-  constructor(devices) {
-    this.devices = devices;
+class AppLifecycle {
+  constructor(services) {
+    this.services = services;
   }
 
-  maintenanceMode() {}
+  start() {}
 
-  resume() {}
+  stop() {}
 }
 `,
   tests: [
     {
       name: {
-        en: 'shuts down in the safe order',
-        es: 'apaga en el orden seguro',
-        'pt-BR': 'desliga na ordem segura',
+        en: 'starts in the safe order',
+        es: 'arranca en el orden seguro',
+        'pt-BR': 'inicia na ordem segura',
       },
       code: `const log = [];
-const tank = new TankFacade({
-  ato: createDevice('ato', log),
-  skimmer: createDevice('skimmer', log),
-  returnPump: createDevice('return', log),
+const app = new AppLifecycle({
+  config: createService('config', log),
+  db: createService('db', log),
+  cache: createService('cache', log),
 });
-tank.maintenanceMode();
-expect(log).toEqual(['stop:ato', 'stop:skimmer', 'stop:return']);`,
+app.start();
+expect(log).toEqual(['start:config', 'start:db', 'start:cache']);`,
     },
     {
       name: {
-        en: 'restores in reverse order',
-        es: 'restaura en orden inverso',
-        'pt-BR': 'restaura na ordem inversa',
+        en: 'stops in reverse order',
+        es: 'apaga en orden inverso',
+        'pt-BR': 'desliga na ordem inversa',
       },
       code: `const log = [];
-const tank = new TankFacade({
-  ato: createDevice('ato', log),
-  skimmer: createDevice('skimmer', log),
-  returnPump: createDevice('return', log),
+const app = new AppLifecycle({
+  config: createService('config', log),
+  db: createService('db', log),
+  cache: createService('cache', log),
 });
-tank.maintenanceMode();
+app.start();
 log.length = 0;
-tank.resume();
-expect(log).toEqual(['start:return', 'start:skimmer', 'start:ato']);`,
+app.stop();
+expect(log).toEqual(['stop:cache', 'stop:db', 'stop:config']);`,
     },
     {
       name: {
-        en: 'a device that was off stays off',
-        es: 'un equipo que estaba apagado sigue apagado',
-        'pt-BR': 'um equipamento que estava desligado continua desligado',
+        en: 'if a service fails, only the started ones are stopped',
+        es: 'si un servicio falla, solo se apagan los que arrancaron',
+        'pt-BR': 'se um serviço falha, só os iniciados são desligados',
       },
       code: `const log = [];
-const skimmer = createDevice('skimmer', log, false);
-const tank = new TankFacade({ ato: createDevice('ato', log), skimmer, returnPump: createDevice('return', log) });
-tank.maintenanceMode();
-tank.resume();
-expect(skimmer.on).toBe(false);`,
-    },
-    {
-      name: {
-        en: 'resume without maintenance does nothing',
-        es: 'resume sin mantenimiento no hace nada',
-        'pt-BR': 'resume sem manutenção não faz nada',
-      },
-      code: `const log = [];
-const tank = new TankFacade({
-  ato: createDevice('ato', log),
-  skimmer: createDevice('skimmer', log),
-  returnPump: createDevice('return', log),
+const app = new AppLifecycle({
+  config: createService('config', log),
+  db: createService('db', log, { failOnStart: true }),
+  cache: createService('cache', log),
 });
-tank.resume();
+expect(() => app.start()).toThrow('db failed to start');
+log.length = 0;
+app.stop();
+expect(log).toEqual(['stop:config']);`,
+    },
+    {
+      name: {
+        en: 'stop without start does nothing',
+        es: 'stop sin start no hace nada',
+        'pt-BR': 'stop sem start não faz nada',
+      },
+      code: `const log = [];
+const app = new AppLifecycle({
+  config: createService('config', log),
+  db: createService('db', log),
+  cache: createService('cache', log),
+});
+app.stop();
 expect(log).toEqual([]);`,
     },
   ],
   hints: {
     en: [
-      'Keep an array with the shutdown order: `[ato, skimmer, returnPump]`.',
-      'Before shutting down, remember which devices were on (for example, a `Set` or an array of booleans).',
-      'To restore, walk the array backwards with `toReversed()`.',
+      'Keep an array with the startup order: `[config, db, cache]`.',
+      'Remember which services actually started (push each one after its `start()` succeeds).',
+      'To stop, walk that list backwards with `toReversed()`.',
     ],
     es: [
-      'Guardá un array con el orden de apagado: `[ato, skimmer, returnPump]`.',
-      'Antes de apagar, recordá qué equipos estaban encendidos (por ejemplo, un `Set` o un array de booleanos).',
-      'Para restaurar, recorré el array al revés con `toReversed()`.',
+      'Guardá un array con el orden de arranque: `[config, db, cache]`.',
+      'Recordá qué servicios arrancaron de verdad (agregá cada uno después de que su `start()` funcione).',
+      'Para apagar, recorré esa lista al revés con `toReversed()`.',
     ],
     'pt-BR': [
-      'Guarde um array com a ordem de desligamento: `[ato, skimmer, returnPump]`.',
-      'Antes de desligar, lembre quais equipamentos estavam ligados (por exemplo, um `Set` ou um array de booleanos).',
-      'Para restaurar, percorra o array ao contrário com `toReversed()`.',
+      'Guarde um array com a ordem de inicialização: `[config, db, cache]`.',
+      'Lembre quais serviços realmente iniciaram (adicione cada um depois que o `start()` dele der certo).',
+      'Para desligar, percorra essa lista ao contrário com `toReversed()`.',
     ],
   },
-  solution: `// Test device: logs every action into the shared log
-function createDevice(name, log, on = true) {
+  solution: `// Test service: logs every action into the shared log
+function createService(name, log, { failOnStart = false } = {}) {
   return {
     name,
-    on,
-    stop() { this.on = false; log.push('stop:' + name); },
-    start() { this.on = true; log.push('start:' + name); },
+    running: false,
+    start() {
+      if (failOnStart) throw new Error(name + ' failed to start');
+      this.running = true;
+      log.push('start:' + name);
+    },
+    stop() { this.running = false; log.push('stop:' + name); },
   };
 }
 
-class TankFacade {
+class AppLifecycle {
   #order;
-  #wasOn = null;
+  #started = [];
 
-  constructor({ ato, skimmer, returnPump }) {
-    this.#order = [ato, skimmer, returnPump];
+  constructor({ config, db, cache }) {
+    this.#order = [config, db, cache];
   }
 
-  maintenanceMode() {
-    this.#wasOn = new Set(this.#order.filter((d) => d.on));
-    for (const device of this.#order) device.stop();
-  }
-
-  resume() {
-    if (!this.#wasOn) return;
-    for (const device of this.#order.toReversed()) {
-      if (this.#wasOn.has(device)) device.start();
+  start() {
+    for (const service of this.#order) {
+      service.start();
+      this.#started.push(service);
     }
-    this.#wasOn = null;
+  }
+
+  stop() {
+    for (const service of this.#started.toReversed()) service.stop();
+    this.#started = [];
   }
 }
 `,

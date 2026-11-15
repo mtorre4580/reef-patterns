@@ -62,31 +62,31 @@ export const eventSourcing: Pattern = {
   },
   example: {
     title: {
-      en: 'The story of a frag',
-      es: 'Historia de un frag',
-      'pt-BR': 'A história de um frag',
+      en: 'Account balance from events',
+      es: 'Saldo de una cuenta a partir de eventos',
+      'pt-BR': 'Saldo de uma conta a partir de eventos',
     },
     scenario: {
-      en: 'Everything that happens to a frag is stored as an event: mounted, moved, grew, dosed. The current state comes from replaying the story; you can also see how it looked in March.',
-      es: 'Cada cosa que le pasa a un frag queda como evento: se pegó, se movió, creció, se dosificó. El estado actual sale de reproducir la historia; también se puede ver cómo estaba en marzo.',
+      en: 'A wallet stores every movement as an event: opened, deposited, withdrew. The balance comes from replaying them, and support can see what the balance was on any date.',
+      es: 'Una billetera guarda cada movimiento como evento: abierta, depósito, extracción. El saldo sale de reproducirlos, y soporte puede ver cuál era el saldo en cualquier fecha.',
       'pt-BR':
-        'Tudo o que acontece com um frag vira evento: foi colado, foi movido, cresceu, foi dosado. O estado atual sai de reproduzir a história; também dá para ver como estava em março.',
+        'Uma carteira guarda cada movimento como evento: aberta, depósito, saque. O saldo sai de reproduzi-los, e o suporte pode ver qual era o saldo em qualquer data.',
     },
     code: `const events = [
-  { type: 'FragMounted', at: '2026-01-10', size: 2, spot: 'rack A1' },
-  { type: 'FragMoved', at: '2026-02-02', spot: 'main rock' },
-  { type: 'FragGrew', at: '2026-03-15', cm: 1.5 },
-  { type: 'FragGrew', at: '2026-05-01', cm: 2 },
+  { type: 'AccountOpened', at: '2026-01-10', owner: 'ana' },
+  { type: 'MoneyDeposited', at: '2026-01-12', amount: 500 },
+  { type: 'MoneyWithdrawn', at: '2026-02-03', amount: 120 },
+  { type: 'MoneyDeposited', at: '2026-03-15', amount: 80 },
 ];
 
 function apply(state, event) {
   switch (event.type) {
-    case 'FragMounted':
-      return { size: event.size, spot: event.spot, moves: 0 };
-    case 'FragMoved':
-      return { ...state, spot: event.spot, moves: state.moves + 1 };
-    case 'FragGrew':
-      return { ...state, size: state.size + event.cm };
+    case 'AccountOpened':
+      return { owner: event.owner, balance: 0, movements: 0 };
+    case 'MoneyDeposited':
+      return { ...state, balance: state.balance + event.amount, movements: state.movements + 1 };
+    case 'MoneyWithdrawn':
+      return { ...state, balance: state.balance - event.amount, movements: state.movements + 1 };
     default:
       return state;
   }
@@ -95,8 +95,8 @@ function apply(state, event) {
 const replay = (history, until = '9999') =>
   history.filter((e) => e.at <= until).reduce(apply, null);
 
-console.log(replay(events)); // { size: 5.5, spot: 'main rock', moves: 1 }
-console.log(replay(events, '2026-03-31')); // how it looked in March: size 3.5`,
+console.log(replay(events)); // { owner: 'ana', balance: 460, movements: 3 }
+console.log(replay(events, '2026-02-28')); // balance at the end of February: 380`,
   },
   related: ['cqrs', 'memento', 'command', 'pub-sub'],
 };

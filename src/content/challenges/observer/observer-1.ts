@@ -3,101 +3,105 @@ import type { Challenge } from '../../types';
 export const observer1: Challenge = {
   id: 'observer-1',
   patternId: 'observer',
-  title: { en: 'Temperature alarm', es: 'Alarma de temperatura', 'pt-BR': 'Alarme de temperatura' },
+  title: {
+    en: 'Cart that notifies the UI',
+    es: 'Carrito que avisa a la UI',
+    'pt-BR': 'Carrinho que avisa a UI',
+  },
   difficulty: 'facil',
   story: {
-    en: 'The sump sensor measures the temperature every minute. The heater, the alarm and the phone app need to hear about every reading, but the sensor should not know any of them.',
-    es: 'El sensor del sump mide la temperatura cada minuto. El calentador, la alarma y la app del celular tienen que enterarse de cada lectura, pero el sensor no debería conocer a ninguno de ellos.',
+    en: 'When an item is added to the cart, the header badge, the analytics tracker and the local storage sync need to know. Today the cart imports all three and calls them by hand.',
+    es: 'Cuando se agrega un producto al carrito, el contador del header, el tracking de analytics y el guardado local tienen que enterarse. Hoy el carrito importa a los tres y los llama a mano.',
     'pt-BR':
-      'O sensor do sump mede a temperatura a cada minuto. O aquecedor, o alarme e o app do celular precisam saber de cada leitura, mas o sensor não deveria conhecer nenhum deles.',
+      'Quando um produto é adicionado ao carrinho, o contador do header, o tracking de analytics e o salvamento local precisam saber. Hoje o carrinho importa os três e os chama à mão.',
   },
   instructions: {
-    en: 'Implement the `TemperatureSensor` class with:\n- `subscribe(listener)`: registers a function and returns another function that unsubscribes that listener when called.\n- `read(celsius)`: stores the reading and calls each listener with the value.\n- `get last`: returns the last reading (or `null` if there has not been one yet).',
-    es: 'Implementá la clase `TemperatureSensor` con:\n- `subscribe(listener)`: registra una función y devuelve otra función que, al llamarla, desuscribe a ese listener.\n- `read(celsius)`: guarda la lectura y llama a cada listener con el valor.\n- `get last`: devuelve la última lectura (o `null` si todavía no hubo ninguna).',
+    en: 'Implement the `CartStore` class with:\n- `subscribe(listener)`: registers a function and returns another function that unsubscribes that listener when called.\n- `add(product)`: adds the product and calls each listener with the updated items array.\n- `get items`: returns the current items (an empty array at first).',
+    es: 'Implementá la clase `CartStore` con:\n- `subscribe(listener)`: registra una función y devuelve otra función que, al llamarla, desuscribe a ese listener.\n- `add(product)`: agrega el producto y llama a cada listener con el array actualizado de items.\n- `get items`: devuelve los items actuales (un array vacío al principio).',
     'pt-BR':
-      'Implemente a classe `TemperatureSensor` com:\n- `subscribe(listener)`: registra uma função e devolve outra função que, ao ser chamada, cancela a inscrição desse listener.\n- `read(celsius)`: guarda a leitura e chama cada listener com o valor.\n- `get last`: devolve a última leitura (ou `null` se ainda não houve nenhuma).',
+      'Implemente a classe `CartStore` com:\n- `subscribe(listener)`: registra uma função e devolve outra função que, ao ser chamada, cancela a inscrição desse listener.\n- `add(product)`: adiciona o produto e chama cada listener com o array atualizado de itens.\n- `get items`: devolve os itens atuais (um array vazio no começo).',
   },
-  starterCode: `class TemperatureSensor {
+  starterCode: `class CartStore {
   subscribe(listener) {
     // Register the listener and return a function that unsubscribes it
   }
 
-  read(celsius) {
+  add(product) {
     // Notify every subscriber
   }
 
-  get last() {
-    return null;
+  get items() {
+    return [];
   }
 }
 `,
   tests: [
     {
       name: {
-        en: 'notifies the reading to every subscriber',
-        es: 'notifica la lectura a todos los suscriptores',
-        'pt-BR': 'notifica a leitura a todos os inscritos',
+        en: 'notifies every subscriber with the items',
+        es: 'avisa a todos los suscriptores con los items',
+        'pt-BR': 'avisa todos os inscritos com os itens',
       },
-      code: `const sensor = new TemperatureSensor();
-const heater = fn();
-const alarm = fn();
-sensor.subscribe(heater);
-sensor.subscribe(alarm);
-sensor.read(25.4);
-expect(heater.calls).toEqual([[25.4]]);
-expect(alarm.calls).toEqual([[25.4]]);`,
+      code: `const cart = new CartStore();
+const badge = fn();
+const analytics = fn();
+cart.subscribe(badge);
+cart.subscribe(analytics);
+cart.add({ sku: 'MUG' });
+expect(badge.calls).toEqual([[[{ sku: 'MUG' }]]]);
+expect(analytics).toHaveBeenCalledTimes(1);`,
     },
     {
       name: {
-        en: 'an unsubscribed listener gets no more readings',
-        es: 'un suscriptor desuscripto no recibe más lecturas',
-        'pt-BR': 'um inscrito cancelado não recebe mais leituras',
+        en: 'an unsubscribed listener gets no more updates',
+        es: 'un suscriptor desuscripto no recibe más cambios',
+        'pt-BR': 'um inscrito cancelado não recebe mais mudanças',
       },
-      code: `const sensor = new TemperatureSensor();
-const phone = fn();
-const heater = fn();
-const stop = sensor.subscribe(phone);
-sensor.subscribe(heater);
-sensor.read(24);
+      code: `const cart = new CartStore();
+const persist = fn();
+const badge = fn();
+const stop = cart.subscribe(persist);
+cart.subscribe(badge);
+cart.add({ sku: 'A' });
 stop();
-sensor.read(29);
-expect(phone).toHaveBeenCalledTimes(1);
-expect(heater).toHaveBeenCalledTimes(2);`,
+cart.add({ sku: 'B' });
+expect(persist).toHaveBeenCalledTimes(1);
+expect(badge).toHaveBeenCalledTimes(2);`,
     },
     {
       name: {
-        en: 'each sensor has its own subscribers',
-        es: 'cada sensor tiene sus propios suscriptores',
-        'pt-BR': 'cada sensor tem seus próprios inscritos',
+        en: 'each cart has its own subscribers',
+        es: 'cada carrito tiene sus propios suscriptores',
+        'pt-BR': 'cada carrinho tem seus próprios inscritos',
       },
-      code: `const sump = new TemperatureSensor();
-const display = new TemperatureSensor();
+      code: `const a = new CartStore();
+const b = new CartStore();
 const listener = fn();
-sump.subscribe(listener);
-display.read(26);
+a.subscribe(listener);
+b.add({ sku: 'X' });
 expect(listener).toHaveBeenCalledTimes(0);`,
     },
     {
       name: {
-        en: 'remembers the last reading',
-        es: 'recuerda la última lectura',
-        'pt-BR': 'lembra a última leitura',
+        en: 'keeps the current items',
+        es: 'guarda los items actuales',
+        'pt-BR': 'guarda os itens atuais',
       },
-      code: `const sensor = new TemperatureSensor();
-expect(sensor.last).toBe(null);
-sensor.read(25);
-sensor.read(25.8);
-expect(sensor.last).toBe(25.8);`,
+      code: `const cart = new CartStore();
+expect(cart.items).toEqual([]);
+cart.add({ sku: 'A' });
+cart.add({ sku: 'B' });
+expect(cart.items.map((i) => i.sku)).toEqual(['A', 'B']);`,
     },
   ],
   checks: [
     {
       rule: 'requireClass',
-      name: 'TemperatureSensor',
+      name: 'CartStore',
       message: {
-        en: 'Defines the TemperatureSensor class',
-        es: 'Define la clase TemperatureSensor',
-        'pt-BR': 'Define a classe TemperatureSensor',
+        en: 'Defines the CartStore class',
+        es: 'Define la clase CartStore',
+        'pt-BR': 'Define a classe CartStore',
       },
     },
   ],
@@ -105,35 +109,35 @@ expect(sensor.last).toBe(25.8);`,
     en: [
       'Keep the listeners in a collection inside the instance, for example a `Set` in a private `#listeners` field.',
       '`subscribe` can return an arrow function that does `this.#listeners.delete(listener)`.',
-      'In `read`, loop over the collection with `for…of` and call each listener with the reading.',
+      'In `add`, update the array and call each listener with it using `for…of`.',
     ],
     es: [
       'Guardá los listeners en una colección dentro de la instancia, por ejemplo un `Set` en un campo privado `#listeners`.',
       '`subscribe` puede devolver una arrow function que haga `this.#listeners.delete(listener)`.',
-      'En `read`, recorré la colección con `for…of` y llamá a cada listener con la lectura.',
+      'En `add`, actualizá el array y llamá a cada listener con él usando `for…of`.',
     ],
     'pt-BR': [
       'Guarde os listeners em uma coleção dentro da instância, por exemplo um `Set` em um campo privado `#listeners`.',
       '`subscribe` pode devolver uma arrow function que faça `this.#listeners.delete(listener)`.',
-      'Em `read`, percorra a coleção com `for…of` e chame cada listener com a leitura.',
+      'Em `add`, atualize o array e chame cada listener com ele usando `for…of`.',
     ],
   },
-  solution: `class TemperatureSensor {
+  solution: `class CartStore {
   #listeners = new Set();
-  #last = null;
+  #items = [];
 
   subscribe(listener) {
     this.#listeners.add(listener);
     return () => this.#listeners.delete(listener);
   }
 
-  read(celsius) {
-    this.#last = celsius;
-    for (const listener of this.#listeners) listener(celsius);
+  add(product) {
+    this.#items = [...this.#items, product];
+    for (const listener of this.#listeners) listener(this.#items);
   }
 
-  get last() {
-    return this.#last;
+  get items() {
+    return this.#items;
   }
 }
 `,

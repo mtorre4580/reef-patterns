@@ -63,47 +63,43 @@ export const cqrs: Pattern = {
   },
   example: {
     title: {
-      en: 'Dose log and weekly panel',
-      es: 'Registro de dosis y panel semanal',
-      'pt-BR': 'Registro de doses e painel semanal',
+      en: 'Orders and the sales dashboard',
+      es: 'Órdenes y el dashboard de ventas',
+      'pt-BR': 'Pedidos e o dashboard de vendas',
     },
     scenario: {
-      en: 'Doses are recorded with validations (a daily limit). The panel shows totals per week and element, a very different shape from the original log. In-memory example.',
-      es: 'Las dosis se registran con validaciones (límite diario). El panel muestra totales por semana y elemento, una forma muy distinta a la del registro original. Ejemplo en memoria.',
+      en: 'Orders are written with business rules (no duplicate order numbers). The dashboard shows revenue per day, a very different shape from the orders table. In-memory example.',
+      es: 'Las órdenes se escriben con reglas de negocio (sin números de orden repetidos). El dashboard muestra ventas por día, una forma muy distinta a la tabla de órdenes. Ejemplo en memoria.',
       'pt-BR':
-        'As doses são registradas com validações (limite diário). O painel mostra totais por semana e elemento, um formato muito diferente do registro original. Exemplo em memória.',
+        'Os pedidos são gravados com regras de negócio (sem números de pedido repetidos). O dashboard mostra vendas por dia, um formato muito diferente da tabela de pedidos. Exemplo em memória.',
     },
     code: `// Write side: validates and stores facts
-const writeModel = { doses: [] };
+const writeModel = { orders: new Map() };
 
 const commands = {
-  recordDose({ element, ml, day }) {
-    const today = writeModel.doses.filter((d) => d.day === day && d.element === element);
-    const total = today.reduce((s, d) => s + d.ml, 0);
-    if (total + ml > 60) throw new Error('Exceeds the daily limit for ' + element);
-    writeModel.doses.push({ element, ml, day });
-    projector.apply({ element, ml, day }); // updates the read model
+  placeOrder({ number, total, day }) {
+    if (writeModel.orders.has(number)) throw new Error('Duplicate order ' + number);
+    writeModel.orders.set(number, { number, total, day });
+    projector.apply({ total, day }); // updates the read model
   },
 };
 
-// Read side: shape ready for the panel
-const readModel = { weekly: {} };
+// Read side: shape ready for the dashboard
+const readModel = { revenueByDay: {} };
 const projector = {
-  apply({ element, ml, day }) {
-    const week = 'W' + Math.ceil(day / 7);
-    readModel.weekly[week] ??= {};
-    readModel.weekly[week][element] = (readModel.weekly[week][element] ?? 0) + ml;
+  apply({ total, day }) {
+    readModel.revenueByDay[day] = (readModel.revenueByDay[day] ?? 0) + total;
   },
 };
 
 const queries = {
-  weeklyTotals: (week) => readModel.weekly[week] ?? {},
+  revenueOn: (day) => readModel.revenueByDay[day] ?? 0,
 };
 
-commands.recordDose({ element: 'calcium', ml: 20, day: 1 });
-commands.recordDose({ element: 'alk', ml: 20, day: 1 });
-commands.recordDose({ element: 'calcium', ml: 25, day: 3 });
-console.log(queries.weeklyTotals('W1')); // { calcium: 45, alk: 20 }`,
+commands.placeOrder({ number: 'A-1', total: 30, day: '2026-03-01' });
+commands.placeOrder({ number: 'A-2', total: 45, day: '2026-03-01' });
+commands.placeOrder({ number: 'A-3', total: 20, day: '2026-03-02' });
+console.log(queries.revenueOn('2026-03-01')); // 75`,
   },
   related: ['event-sourcing', 'flux', 'repository'],
 };

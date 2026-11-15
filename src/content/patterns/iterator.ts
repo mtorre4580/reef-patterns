@@ -55,44 +55,41 @@ export const iterator: Pattern = {
   },
   example: {
     title: {
-      en: 'Paginated dive log',
-      es: 'Log de inmersiones paginado',
-      'pt-BR': 'Log de mergulhos paginado',
+      en: 'Paginated API results',
+      es: 'Resultados paginados de una API',
+      'pt-BR': 'Resultados paginados de uma API',
     },
     scenario: {
-      en: 'The log holds hundreds of dives stored by page. The stats screen wants to walk them one by one and stop at the first dive deeper than 30 m.',
-      es: 'El log tiene cientos de inmersiones guardadas por página. La pantalla de estadísticas quiere recorrerlas una por una y cortar al encontrar la primera de más de 30 m.',
+      en: 'The orders API returns 50 results per page with a cursor. The export screen wants to walk orders one by one and stop at the first refund, without downloading every page.',
+      es: 'La API de órdenes devuelve 50 resultados por página con un cursor. La pantalla de exportación quiere recorrerlas una por una y cortar en el primer reembolso, sin bajar todas las páginas.',
       'pt-BR':
-        'O log tem centenas de mergulhos guardados por página. A tela de estatísticas quer percorrê-los um a um e parar no primeiro com mais de 30 m.',
+        'A API de pedidos devolve 50 resultados por página com um cursor. A tela de exportação quer percorrê-los um a um e parar no primeiro reembolso, sem baixar todas as páginas.',
     },
-    code: `const pages = [
-  [{ site: 'Red Shoal', depth: 18 }, { site: 'The Wall', depth: 27 }],
-  [{ site: 'The Wreck', depth: 33 }, { site: 'Coral Garden', depth: 12 }],
-  [{ site: 'Blue Cave', depth: 40 }],
-];
+    code: `// Fake API: three pages linked by cursors
+const pages = {
+  start: { items: [{ id: 1, type: 'sale' }, { id: 2, type: 'sale' }], next: 'p2' },
+  p2: { items: [{ id: 3, type: 'refund' }, { id: 4, type: 'sale' }], next: 'p3' },
+  p3: { items: [{ id: 5, type: 'sale' }], next: null },
+};
+const fetchPage = (cursor) => {
+  console.log('GET /orders?cursor=' + cursor);
+  return pages[cursor];
+};
 
-class DiveLog {
-  constructor(fetchPage) {
-    this.fetchPage = fetchPage;
-  }
-
-  // Generator: fetches a page only when needed
-  *[Symbol.iterator]() {
-    for (let page = 0; ; page++) {
-      const dives = this.fetchPage(page);
-      if (!dives) return;
-      console.log('Loading page ' + page);
-      yield* dives;
-    }
+// Generator: fetches a page only when the consumer needs more items
+function* orders() {
+  let cursor = 'start';
+  while (cursor) {
+    const page = fetchPage(cursor);
+    yield* page.items;
+    cursor = page.next;
   }
 }
 
-const log = new DiveLog((n) => pages[n]);
-
-for (const dive of log) {
-  if (dive.depth > 30) {
-    console.log('First deep dive:', dive.site);
-    break; // page 2 is never loaded
+for (const order of orders()) {
+  if (order.type === 'refund') {
+    console.log('First refund:', order.id);
+    break; // page p3 is never requested
   }
 }`,
   },

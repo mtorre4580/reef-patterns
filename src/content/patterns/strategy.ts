@@ -59,39 +59,22 @@ export const strategy: Pattern = {
   },
   example: {
     title: {
-      en: 'Doser with interchangeable methods',
-      es: 'Dosificadora con métodos intercambiables',
-      'pt-BR': 'Dosadora com métodos intercambiáveis',
+      en: 'Shipping cost at checkout',
+      es: 'Costo de envío en el checkout',
+      'pt-BR': 'Custo de frete no checkout',
     },
     scenario: {
-      en: 'Calcium consumption in an SPS tank changes over time. The doser must be able to switch from kalkwasser to Balling or a Triton-style method without being rewritten.',
-      es: 'El consumo de calcio de un acuario SPS cambia con el tiempo. La dosificadora debe poder pasar de kalkwasser a Balling o a un método tipo Triton sin reescribirse.',
+      en: 'The checkout offers standard, express and store pickup. Marketing wants to add a "free over $50" option next week without touching the checkout code.',
+      es: 'El checkout ofrece envío estándar, express y retiro en tienda. Marketing quiere sumar "gratis desde $50" la semana que viene sin tocar el código del checkout.',
       'pt-BR':
-        'O consumo de cálcio de um aquário SPS muda com o tempo. A dosadora precisa poder passar de kalkwasser para Balling ou para um método tipo Triton sem ser reescrita.',
+        'O checkout oferece frete padrão, expresso e retirada na loja. O marketing quer adicionar "grátis acima de $50" na semana que vem sem mexer no código do checkout.',
     },
-    code: `// Each strategy receives the daily calcium consumption (ppm) and the volume (liters)
-const kalkwasser = {
-  name: 'Kalkwasser',
-  dailyDose: (ppm, liters) => ({ kalkMl: Math.round(ppm * liters * 0.54) }),
-};
+    code: `// Each strategy receives the order and returns the shipping cost
+const standard = { name: 'Standard', cost: (order) => 5 + order.weightKg * 0.8 };
+const express = { name: 'Express', cost: (order) => 15 + order.weightKg * 1.5 };
+const pickup = { name: 'Store pickup', cost: () => 0 };
 
-const balling = {
-  name: 'Balling',
-  dailyDose: (ppm, liters) => ({
-    calciumMl: Math.round(ppm * liters * 0.012),
-    alkalinityMl: Math.round(ppm * liters * 0.012),
-  }),
-};
-
-const triton = {
-  name: 'Triton-style',
-  dailyDose: (ppm, liters) => {
-    const ml = Math.round(ppm * liters * 0.009);
-    return { a: ml, b: ml, c: ml, d: ml };
-  },
-};
-
-class Doser {
+class ShippingCalculator {
   constructor(strategy) {
     this.strategy = strategy;
   }
@@ -100,17 +83,23 @@ class Doser {
     this.strategy = strategy;
   }
 
-  plan(ppmPerDay, liters) {
-    // Doser does not know which method it uses: it just delegates
-    return { method: this.strategy.name, ...this.strategy.dailyDose(ppmPerDay, liters) };
+  quote(order) {
+    // The calculator does not know which method it uses: it just delegates
+    return { method: this.strategy.name, cost: +this.strategy.cost(order).toFixed(2) };
   }
 }
 
-const doser = new Doser(kalkwasser);
-console.log(doser.plan(10, 300)); // { method: 'Kalkwasser', kalkMl: 1620 }
+const order = { subtotal: 42, weightKg: 2 };
+const calculator = new ShippingCalculator(standard);
+console.log(calculator.quote(order)); // { method: 'Standard', cost: 6.6 }
 
-doser.setStrategy(triton); // consumption went up: switch methods
-console.log(doser.plan(10, 300));`,
+calculator.setStrategy(express); // the user picked express delivery
+console.log(calculator.quote(order)); // { method: 'Express', cost: 18 }
+
+// A new option is just a new object: the calculator stays untouched
+const freeOver50 = { name: 'Free over $50', cost: (o) => (o.subtotal >= 50 ? 0 : 5) };
+calculator.setStrategy(freeOver50);
+console.log(calculator.quote(order));`,
   },
   related: ['state', 'template-method', 'dependency-injection'],
 };

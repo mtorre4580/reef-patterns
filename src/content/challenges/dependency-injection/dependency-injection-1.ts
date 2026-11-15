@@ -4,103 +4,102 @@ export const dependencyInjection1: Challenge = {
   id: 'dependency-injection-1',
   patternId: 'dependency-injection',
   title: {
-    en: 'A testable pH monitor',
-    es: 'Monitor de pH testeable',
-    'pt-BR': 'Monitor de pH testável',
+    en: 'A testable health check',
+    es: 'Un health check testeable',
+    'pt-BR': 'Um health check testável',
   },
   difficulty: 'facil',
   story: {
-    en: "The pH monitor creates its own probe and warns with `console.warn`. There's no probe connected to the laptop, so it can't be tested, and nobody notices the alerts.",
-    es: 'El monitor de pH crea su propia sonda y avisa con `console.warn`. En la notebook no hay sonda conectada, así que es imposible probarlo, y nadie se entera de las alertas.',
+    en: 'The health check creates its own HTTP client and warns with `console.warn`. CI has no network, so it cannot be tested, and nobody notices slow responses.',
+    es: 'El health check crea su propio cliente HTTP y avisa con `console.warn`. En CI no hay red, así que no se puede testear, y nadie se entera de las respuestas lentas.',
     'pt-BR':
-      'O monitor de pH cria sua própria sonda e avisa com `console.warn`. No notebook não há sonda conectada, então é impossível testá-lo, e ninguém fica sabendo dos alertas.',
+      'O health check cria seu próprio cliente HTTP e avisa com `console.warn`. No CI não há rede, então não dá para testá-lo, e ninguém fica sabendo das respostas lentas.',
   },
   instructions: {
-    en: 'Refactor `PhMonitor` to receive its dependencies: `new PhMonitor({ sensor, notify })`.\n- `check()` reads `sensor.read()`, and if the pH is outside `[7.9, 8.4]` calls `notify("pH out of range: <value>")`.\n- It returns the value it read.',
-    es: 'Refactorizá `PhMonitor` para recibir sus dependencias: `new PhMonitor({ sensor, notify })`.\n- `check()` lee `sensor.read()`, y si el pH está fuera de `[7.9, 8.4]` llama a `notify("pH out of range: <valor>")`.\n- Devuelve el valor leído.',
+    en: 'Refactor `HealthCheck` to receive its dependencies: `new HealthCheck({ api, notify })`.\n- `run()` calls `api.ping()`, which returns the latency in ms. If it is above 500, call `notify("Slow API: <ms> ms")`.\n- It returns the latency.',
+    es: 'Refactorizá `HealthCheck` para recibir sus dependencias: `new HealthCheck({ api, notify })`.\n- `run()` llama a `api.ping()`, que devuelve la latencia en ms. Si es mayor a 500, llamá a `notify("Slow API: <ms> ms")`.\n- Devuelve la latencia.',
     'pt-BR':
-      'Refatore `PhMonitor` para receber suas dependências: `new PhMonitor({ sensor, notify })`.\n- `check()` lê `sensor.read()` e, se o pH estiver fora de `[7.9, 8.4]`, chama `notify("pH out of range: <valor>")`.\n- Devolve o valor lido.',
+      'Refatore `HealthCheck` para receber suas dependências: `new HealthCheck({ api, notify })`.\n- `run()` chama `api.ping()`, que devolve a latência em ms. Se for maior que 500, chame `notify("Slow API: <ms> ms")`.\n- Devolve a latência.',
   },
-  starterCode: `class RealProbe {
-  read() {
-    throw new Error('No probe connected');
+  starterCode: `class RealApi {
+  ping() {
+    throw new Error('No network in tests');
   }
 }
 
-class PhMonitor {
+class HealthCheck {
   constructor() {
-    this.sensor = new RealProbe();
+    this.api = new RealApi();
   }
 
-  check() {
-    const ph = this.sensor.read();
-    if (ph < 7.9 || ph > 8.4) console.warn('pH out of range: ' + ph);
-    return ph;
+  run() {
+    const ms = this.api.ping();
+    if (ms > 500) console.warn('Slow API: ' + ms + ' ms');
+    return ms;
   }
 }
 `,
   tests: [
     {
       name: {
-        en: 'uses the injected sensor',
-        es: 'usa el sensor inyectado',
-        'pt-BR': 'usa o sensor injetado',
+        en: 'uses the injected API',
+        es: 'usa la API inyectada',
+        'pt-BR': 'usa a API injetada',
       },
-      code: `const monitor = new PhMonitor({ sensor: { read: () => 8.1 }, notify: fn() });
-expect(monitor.check()).toBe(8.1);`,
+      code: `const check = new HealthCheck({ api: { ping: () => 120 }, notify: fn() });
+expect(check.run()).toBe(120);`,
     },
     {
       name: {
-        en: 'notifies when the pH is low',
-        es: 'notifica cuando el pH está bajo',
-        'pt-BR': 'notifica quando o pH está baixo',
+        en: 'notifies when the API is slow',
+        es: 'avisa cuando la API está lenta',
+        'pt-BR': 'avisa quando a API está lenta',
       },
       code: `const notify = fn();
-new PhMonitor({ sensor: { read: () => 7.7 }, notify }).check();
-expect(notify.calls).toEqual([['pH out of range: 7.7']]);`,
+new HealthCheck({ api: { ping: () => 830 }, notify }).run();
+expect(notify.calls).toEqual([['Slow API: 830 ms']]);`,
     },
     {
       name: {
-        en: 'does not notify when in range',
-        es: 'no notifica si está en rango',
-        'pt-BR': 'não notifica se estiver na faixa',
+        en: 'does not notify when it is fast',
+        es: 'no avisa si responde rápido',
+        'pt-BR': 'não avisa se responde rápido',
       },
       code: `const notify = fn();
-const monitor = new PhMonitor({ sensor: { read: () => 8.4 }, notify });
-monitor.check();
+new HealthCheck({ api: { ping: () => 500 }, notify }).run();
 expect(notify).toHaveBeenCalledTimes(0);`,
     },
   ],
   hints: {
     en: [
-      'Receive an object in the constructor and store `sensor` and `notify` as properties.',
+      'Receive an object in the constructor and store `api` and `notify` as properties.',
       'Replace `console.warn` with `this.notify`.',
     ],
     es: [
-      'Recibí un objeto en el constructor y guardá `sensor` y `notify` como propiedades.',
+      'Recibí un objeto en el constructor y guardá `api` y `notify` como propiedades.',
       'Reemplazá `console.warn` por `this.notify`.',
     ],
     'pt-BR': [
-      'Receba um objeto no construtor e guarde `sensor` e `notify` como propriedades.',
+      'Receba um objeto no construtor e guarde `api` e `notify` como propriedades.',
       'Troque `console.warn` por `this.notify`.',
     ],
   },
-  solution: `class RealProbe {
-  read() {
-    throw new Error('No probe connected');
+  solution: `class RealApi {
+  ping() {
+    throw new Error('No network in tests');
   }
 }
 
-class PhMonitor {
-  constructor({ sensor, notify }) {
-    this.sensor = sensor;
+class HealthCheck {
+  constructor({ api, notify }) {
+    this.api = api;
     this.notify = notify;
   }
 
-  check() {
-    const ph = this.sensor.read();
-    if (ph < 7.9 || ph > 8.4) this.notify('pH out of range: ' + ph);
-    return ph;
+  run() {
+    const ms = this.api.ping();
+    if (ms > 500) this.notify('Slow API: ' + ms + ' ms');
+    return ms;
   }
 }
 `,

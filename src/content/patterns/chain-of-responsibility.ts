@@ -60,49 +60,49 @@ export const chainOfResponsibility: Pattern = {
   },
   example: {
     title: {
-      en: 'Tiered temperature alarms',
-      es: 'Alarmas de temperatura escalonadas',
-      'pt-BR': 'Alarmes de temperatura escalonados',
+      en: 'Mapping errors to HTTP responses',
+      es: 'Convertir errores en respuestas HTTP',
+      'pt-BR': 'Converter erros em respostas HTTP',
     },
     scenario: {
-      en: 'A high reading goes through three levels: at 27.5 °C it only warns, at 29 °C it alerts the phone and at 30.5 °C it turns off the lighting so the water stops heating up.',
-      es: 'Una lectura alta pasa por tres niveles: a 27,5 °C solo se avisa, a 29 °C se alerta al celular y a 30,5 °C se apaga la iluminación para que el agua no siga calentándose.',
+      en: 'The API turns thrown errors into responses: validation errors become 400, missing resources 404, missing sessions 401, and anything else a 500.',
+      es: 'La API convierte los errores lanzados en respuestas: los de validación son 400, los recursos inexistentes 404, la falta de sesión 401 y todo lo demás 500.',
       'pt-BR':
-        'Uma leitura alta passa por três níveis: a 27,5 °C só avisa, a 29 °C alerta o celular e a 30,5 °C desliga a iluminação para a água parar de esquentar.',
+        'A API transforma os erros lançados em respostas: os de validação viram 400, recursos inexistentes 404, falta de sessão 401 e todo o resto 500.',
     },
-    code: `class AlarmHandler {
+    code: `class ErrorHandler {
   setNext(handler) {
     this.next = handler;
     return handler; // allows chaining: a.setNext(b).setNext(c)
   }
-  handle(celsius) {
-    return this.next ? this.next.handle(celsius) : 'Normal temperature';
+  handle(error) {
+    return this.next ? this.next.handle(error) : { status: 500, body: 'Internal error' };
   }
 }
 
-class Shutdown extends AlarmHandler {
-  handle(c) {
-    return c >= 30.5 ? 'Turning off the lights (' + c + ' °C)' : super.handle(c);
+class ValidationHandler extends ErrorHandler {
+  handle(e) {
+    return e.name === 'ValidationError' ? { status: 400, body: e.message } : super.handle(e);
   }
 }
-class PhoneAlert extends AlarmHandler {
-  handle(c) {
-    return c >= 29 ? 'Alert sent to the phone (' + c + ' °C)' : super.handle(c);
+class NotFoundHandler extends ErrorHandler {
+  handle(e) {
+    return e.name === 'NotFoundError' ? { status: 404, body: 'Not found' } : super.handle(e);
   }
 }
-class Notice extends AlarmHandler {
-  handle(c) {
-    return c >= 27.5 ? 'Notice on the panel (' + c + ' °C)' : super.handle(c);
+class AuthHandler extends ErrorHandler {
+  handle(e) {
+    return e.name === 'AuthError' ? { status: 401, body: 'Please sign in' } : super.handle(e);
   }
 }
 
-// The most severe goes first
-const chain = new Shutdown();
-chain.setNext(new PhoneAlert()).setNext(new Notice());
+const chain = new ValidationHandler();
+chain.setNext(new NotFoundHandler()).setNext(new AuthHandler());
 
-console.log(chain.handle(26)); // Normal temperature
-console.log(chain.handle(28)); // Notice on the panel
-console.log(chain.handle(31)); // Turning off the lights`,
+const error = (name, message = '') => Object.assign(new Error(message), { name });
+console.log(chain.handle(error('ValidationError', 'email is required'))); // 400
+console.log(chain.handle(error('AuthError'))); // 401
+console.log(chain.handle(new TypeError('x is undefined'))); // 500`,
   },
   related: ['middleware', 'command', 'decorator'],
 };

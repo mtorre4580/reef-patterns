@@ -52,50 +52,49 @@ export const mediator: Pattern = {
       'Um formulário que coordena campos dependentes, o "lift state up" do React, os orquestradores de micro-frontends, as salas de chat.',
   },
   example: {
-    title: { en: 'Sump coordinator', es: 'Coordinador del sump', 'pt-BR': 'Coordenador do sump' },
-    scenario: {
-      en: 'If the level sensor detects low water, the ATO refills; if the skimmer overflows, it shuts down and the ATO pauses. No device knows the others: they tell the coordinator.',
-      es: 'Si el sensor de nivel detecta agua baja, el ATO repone; si el skimmer desborda, se apaga y se pausa el ATO. Ningún equipo conoce a los demás: le avisan al coordinador.',
-      'pt-BR':
-        'Se o sensor de nível detecta água baixa, o ATO repõe; se o skimmer transborda, ele desliga e o ATO pausa. Nenhum equipamento conhece os outros: eles avisam o coordenador.',
+    title: {
+      en: 'Checkout form coordinator',
+      es: 'Coordinador de un formulario de checkout',
+      'pt-BR': 'Coordenador de um formulário de checkout',
     },
-    code: `class SumpMediator {
-  constructor() {
-    this.devices = {};
+    scenario: {
+      en: 'Changing the country updates the shipping options and the tax field; choosing pickup hides the address. The fields do not know each other: they tell the form mediator.',
+      es: 'Cambiar el país actualiza las opciones de envío y el campo de impuestos; elegir retiro oculta la dirección. Los campos no se conocen: le avisan al mediador del formulario.',
+      'pt-BR':
+        'Mudar o país atualiza as opções de frete e o campo de impostos; escolher retirada esconde o endereço. Os campos não se conhecem: avisam o mediador do formulário.',
+    },
+    code: `class CheckoutFormMediator {
+  fields = {};
+  register(name, field) {
+    this.fields[name] = field;
+    field.mediator = this;
   }
-  register(name, device) {
-    this.devices[name] = device;
-    device.mediator = this;
-  }
-  notify(sender, event) {
-    const { ato, skimmer } = this.devices;
-    if (event === 'low-level') ato.start();
-    if (event === 'level-ok') ato.stop();
-    if (event === 'overflow') {
-      skimmer.stop();
-      ato.stop();
+  notify(sender, value) {
+    const { shipping, tax, address } = this.fields;
+    if (sender === 'country') {
+      shipping.setOptions(value === 'AR' ? ['standard', 'pickup'] : ['standard', 'express']);
+      tax.setVisible(value === 'AR');
     }
-    console.log(sender + ': ' + event);
+    if (sender === 'shipping') address.setVisible(value !== 'pickup');
   }
 }
 
-const levelSensor = {
-  read(cm) {
-    this.mediator.notify('sensor', cm < 18 ? 'low-level' : 'level-ok');
-  },
-};
-const skimmer = { running: true, stop() { this.running = false; }, overflow() { this.mediator.notify('skimmer', 'overflow'); } };
-const ato = { running: false, start() { this.running = true; }, stop() { this.running = false; } };
+const field = (name) => ({
+  name,
+  visible: true,
+  options: [],
+  change(value) { this.mediator.notify(name, value); },
+  setOptions(options) { this.options = options; },
+  setVisible(visible) { this.visible = visible; },
+});
 
-const sump = new SumpMediator();
-sump.register('sensor', levelSensor);
-sump.register('skimmer', skimmer);
-sump.register('ato', ato);
+const form = new CheckoutFormMediator();
+for (const name of ['country', 'shipping', 'tax', 'address']) form.register(name, field(name));
 
-levelSensor.read(15);
-console.log(ato.running); // true
-skimmer.overflow();
-console.log(ato.running, skimmer.running); // false false`,
+form.fields.country.change('AR');
+console.log(form.fields.shipping.options, form.fields.tax.visible); // ['standard', 'pickup'] true
+form.fields.shipping.change('pickup');
+console.log(form.fields.address.visible); // false`,
   },
   related: ['observer', 'facade', 'pub-sub'],
 };

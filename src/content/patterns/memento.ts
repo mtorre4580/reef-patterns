@@ -56,45 +56,44 @@ export const memento: Pattern = {
   },
   example: {
     title: {
-      en: 'Lighting profiles',
-      es: 'Perfiles de iluminación',
-      'pt-BR': 'Perfis de iluminação',
+      en: 'Draft snapshots in a rich editor',
+      es: 'Snapshots de borradores en un editor',
+      'pt-BR': 'Snapshots de rascunhos em um editor',
     },
     scenario: {
-      en: 'While tuning the lamp channels you try combinations. Before experimenting you save a snapshot, and if the corals look bad you go back to the previous profile.',
-      es: 'Mientras ajustás los canales de la lámpara probás combinaciones. Antes de experimentar guardás una foto, y si los corales se ven mal, volvés al perfil anterior.',
+      en: 'Before running "format document" or an AI rewrite, the editor saves a snapshot. If the user does not like the result, it goes back to the previous state in one step.',
+      es: 'Antes de "formatear documento" o de una reescritura con IA, el editor guarda un snapshot. Si al usuario no le gusta el resultado, vuelve al estado anterior en un paso.',
       'pt-BR':
-        'Enquanto ajusta os canais da luminária você testa combinações. Antes de experimentar, salva uma foto e, se os corais ficarem mal, volta ao perfil anterior.',
+        'Antes de "formatar documento" ou de uma reescrita com IA, o editor salva um snapshot. Se o usuário não gostar do resultado, volta ao estado anterior em um passo.',
     },
-    code: `class LightProfile {
-  #channels = { blue: 80, white: 40, uv: 20 };
+    code: `class DocumentEditor {
+  #state = { title: 'Release notes', body: 'fixed  login bug', cursor: 16 };
 
-  set(channel, percent) {
-    this.#channels[channel] = percent;
+  apply(change) {
+    this.#state = { ...this.#state, ...change };
   }
   describe() {
-    return JSON.stringify(this.#channels);
+    return JSON.stringify(this.#state);
   }
 
-  // Create and restore mementos: nobody else touches #channels
+  // Create and restore mementos: nobody else touches #state
   save() {
-    return Object.freeze({ channels: structuredClone(this.#channels), at: Date.now() });
+    return Object.freeze({ state: structuredClone(this.#state), at: Date.now() });
   }
   restore(memento) {
-    this.#channels = structuredClone(memento.channels);
+    this.#state = structuredClone(memento.state);
   }
 }
 
-const profile = new LightProfile();
+const editor = new DocumentEditor();
 const history = [];
 
-history.push(profile.save());
-profile.set('white', 90);
-profile.set('uv', 0);
-console.log(profile.describe()); // too much white: the SPS is bleaching
+history.push(editor.save());
+editor.apply({ body: 'We are thrilled to announce a revolutionary login experience!!!', cursor: 0 });
+console.log(editor.describe()); // the AI rewrite went too far
 
-profile.restore(history.pop());
-console.log(profile.describe()); // back to { blue: 80, white: 40, uv: 20 }`,
+editor.restore(history.pop());
+console.log(editor.describe()); // back to the previous draft`,
   },
   related: ['command', 'state', 'event-sourcing'],
 };

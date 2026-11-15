@@ -58,44 +58,40 @@ export const customHooks: Pattern = {
       'useQuery do TanStack Query, useForm do react-hook-form, useSWR, coleções de hooks como usehooks-ts.',
   },
   example: {
-    title: { en: 'useWaterParams', es: 'useWaterParams', 'pt-BR': 'useWaterParams' },
+    title: { en: 'useFetch', es: 'useFetch', 'pt-BR': 'useFetch' },
     scenario: {
-      en: "Three screens show water parameters and all of them repeated the same polling against the controller's API. The hook wraps reading, interval, loading and error.",
-      es: 'Tres pantallas muestran parámetros del agua y todas repetían el mismo polling a la API del controlador. El hook encapsula lectura, intervalo, carga y error.',
+      en: 'Several screens fetched data with the same useState/useEffect dance and forgot to cancel requests when unmounting. The hook wraps loading, error and abort.',
+      es: 'Varias pantallas traían datos con el mismo baile de useState/useEffect y se olvidaban de cancelar el request al desmontar. El hook encapsula carga, error y abort.',
       'pt-BR':
-        'Três telas mostram parâmetros da água e todas repetiam o mesmo polling na API do controlador. O hook encapsula leitura, intervalo, carregamento e erro.',
+        'Várias telas buscavam dados com a mesma dança de useState/useEffect e esqueciam de cancelar a requisição ao desmontar. O hook encapsula carregamento, erro e abort.',
     },
     code: `import { useEffect, useState } from 'react';
 
-export function useWaterParams(api, { intervalMs = 60_000 } = {}) {
-  const [params, setParams] = useState(null);
+export function useFetch(url) {
+  const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
+    setData(null);
+    setError(null);
 
-    async function poll() {
-      try {
-        const data = await api.readParams(); // { temp, ph, salinity }
-        if (!cancelled) setParams(data);
-      } catch (err) {
-        if (!cancelled) setError(err);
-      }
-    }
+    fetch(url, { signal: controller.signal })
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error('HTTP ' + res.status))))
+      .then(setData)
+      .catch((err) => {
+        if (err.name !== 'AbortError') setError(err);
+      });
 
-    poll();
-    const id = setInterval(poll, intervalMs);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, [api, intervalMs]);
+    // Cancel the request if the component unmounts or the URL changes
+    return () => controller.abort();
+  }, [url]);
 
-  return { params, error, loading: params === null && error === null };
+  return { data, error, loading: data === null && error === null };
 }
 
 // Usage in any component:
-// const { params, loading } = useWaterParams(controllerApi);`,
+// const { data: user, loading } = useFetch('/api/users/' + id);`,
   },
   related: ['hoc', 'render-props', 'provider', 'mvvm'],
 };

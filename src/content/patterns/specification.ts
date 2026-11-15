@@ -47,15 +47,15 @@ export const specification: Pattern = {
   },
   example: {
     title: {
-      en: 'Corals suitable for a tank',
-      es: 'Corales aptos para un acuario',
-      'pt-BR': 'Corais adequados para um aquário',
+      en: 'Segmenting users for a campaign',
+      es: 'Segmentar usuarios para una campaña',
+      'pt-BR': 'Segmentar usuários para uma campanha',
     },
     scenario: {
-      en: 'The frag shop only offers compatible corals: "enough light and compatible flow, and not aggressive if there are close neighbors". The same rules filter the catalog and validate a purchase.',
-      es: 'La tienda de frags ofrece solo corales compatibles: “luz suficiente y flujo compatible, y no agresivo si hay vecinos cerca”. Las mismas reglas filtran el catálogo y validan una compra.',
+      en: 'Marketing wants to email "active users on a paid plan who have not opened the app in 14 days". The same rules filter the audience and validate a single user before sending.',
+      es: 'Marketing quiere mandar un email a "usuarios activos con plan pago que no abren la app hace 14 días". Las mismas reglas filtran la audiencia y validan a un usuario antes de enviar.',
       'pt-BR':
-        'A loja de frags só oferece corais compatíveis: "luz suficiente e fluxo compatível, e não agressivo se houver vizinhos perto". As mesmas regras filtram o catálogo e validam uma compra.',
+        'O marketing quer mandar um email para "usuários ativos em plano pago que não abrem o app há 14 dias". As mesmas regras filtram a audiência e validam um usuário antes de enviar.',
     },
     code: `const spec = (isSatisfiedBy) => ({
   isSatisfiedBy,
@@ -64,21 +64,22 @@ export const specification: Pattern = {
   not: () => spec((x) => !isSatisfiedBy(x)),
 });
 
-const tank = { par: 220, flow: 'medium', crowded: true };
+const today = new Date('2026-03-20');
+const daysSince = (date) => (today - new Date(date)) / 86_400_000;
 
-const enoughLight = spec((coral) => coral.minPar <= tank.par);
-const flowFits = spec((coral) => coral.flows.includes(tank.flow));
-const aggressive = spec((coral) => coral.sweeperTentacles);
+const active = spec((u) => !u.deactivated);
+const paid = spec((u) => u.plan !== 'free');
+const recentlySeen = spec((u) => daysSince(u.lastSeen) < 14);
 
-const suitable = enoughLight.and(flowFits).and(tank.crowded ? aggressive.not() : spec(() => true));
+const winBackAudience = active.and(paid).and(recentlySeen.not());
 
-const catalog = [
-  { name: 'Acropora', minPar: 300, flows: ['high'], sweeperTentacles: false },
-  { name: 'Duncan', minPar: 80, flows: ['low', 'medium'], sweeperTentacles: false },
-  { name: 'Galaxea', minPar: 150, flows: ['medium'], sweeperTentacles: true },
+const users = [
+  { email: 'ana@example.com', plan: 'pro', lastSeen: '2026-02-20' },
+  { email: 'leo@example.com', plan: 'free', lastSeen: '2026-01-02' },
+  { email: 'mia@example.com', plan: 'team', lastSeen: '2026-03-19' },
 ];
 
-console.log(catalog.filter(suitable.isSatisfiedBy).map((c) => c.name)); // ['Duncan']`,
+console.log(users.filter(winBackAudience.isSatisfiedBy).map((u) => u.email)); // ['ana@example.com']`,
   },
   related: ['interpreter', 'repository', 'strategy'],
 };

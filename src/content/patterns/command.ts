@@ -59,32 +59,34 @@ export const command: Pattern = {
   },
   example: {
     title: {
-      en: 'Doser with undo',
-      es: 'Dosificadora con deshacer',
-      'pt-BR': 'Dosadora com desfazer',
+      en: 'Undo in a text editor',
+      es: 'Deshacer en un editor de texto',
+      'pt-BR': 'Desfazer em um editor de texto',
     },
     scenario: {
-      en: 'When dosing by hand, a typo can add 50 ml of alkalinity instead of 5. Every dose goes into the history and the last one can be reverted from the log.',
-      es: 'Al dosificar a mano, un error de tipeo puede meter 50 ml de alcalinidad en vez de 5. Cada dosis queda en el historial y la última se puede revertir del registro.',
+      en: 'The notes editor needs undo for typing and deleting. Every edit becomes an object that knows how to apply and revert itself.',
+      es: 'El editor de notas necesita deshacer al escribir y borrar. Cada edición es un objeto que sabe aplicarse y revertirse.',
       'pt-BR':
-        'Ao dosar manualmente, um erro de digitação pode colocar 50 ml de alcalinidade em vez de 5. Cada dose fica no histórico e a última pode ser revertida do registro.',
+        'O editor de notas precisa de desfazer ao digitar e apagar. Cada edição vira um objeto que sabe se aplicar e se reverter.',
     },
-    code: `class DoseCommand {
-  constructor(tank, element, ml) {
-    this.tank = tank;
-    this.element = element;
-    this.ml = ml;
+    code: `class InsertText {
+  constructor(doc, text) {
+    this.doc = doc;
+    this.text = text;
   }
   execute() {
-    this.tank.dosed[this.element] = (this.tank.dosed[this.element] ?? 0) + this.ml;
+    this.doc.content += this.text;
   }
   undo() {
-    this.tank.dosed[this.element] -= this.ml;
+    this.doc.content = this.doc.content.slice(0, -this.text.length);
   }
 }
 
-class DoserConsole {
+class Editor {
   #history = [];
+  constructor(doc) {
+    this.doc = doc;
+  }
   run(command) {
     command.execute();
     this.#history.push(command);
@@ -92,18 +94,15 @@ class DoserConsole {
   undo() {
     this.#history.pop()?.undo();
   }
-  get history() {
-    return this.#history.map((c) => c.element + ' ' + c.ml + ' ml');
-  }
 }
 
-const tank = { dosed: {} };
-const doser = new DoserConsole();
-
-doser.run(new DoseCommand(tank, 'alk', 5));
-doser.run(new DoseCommand(tank, 'alk', 50)); // typo!
-doser.undo();
-console.log(tank.dosed, doser.history); // { alk: 5 } ['alk 5 ml']`,
+const doc = { content: '' };
+const editor = new Editor(doc);
+editor.run(new InsertText(doc, 'Hello'));
+editor.run(new InsertText(doc, ', wrld')); // typo!
+editor.undo();
+editor.run(new InsertText(doc, ', world'));
+console.log(doc.content); // 'Hello, world'`,
   },
   related: ['memento', 'chain-of-responsibility', 'flux', 'strategy'],
 };

@@ -59,51 +59,47 @@ export const mvvm: Pattern = {
   },
   example: {
     title: {
-      en: 'ViewModel for the parameter panel',
-      es: 'ViewModel del panel de parámetros',
-      'pt-BR': 'ViewModel do painel de parâmetros',
+      en: 'ViewModel for a signup form',
+      es: 'ViewModel de un formulario de registro',
+      'pt-BR': 'ViewModel de um formulário de cadastro',
     },
     scenario: {
-      en: 'The panel view only shows text and colors. The ViewModel turns the raw model readings into labels, statuses and a command to log a new one.',
-      es: 'La vista del panel solo muestra textos y colores. El ViewModel transforma las lecturas crudas del modelo en etiquetas, estados y un comando para registrar una nueva.',
+      en: 'The signup view only shows inputs, errors and a button. The ViewModel turns raw field values into error messages, a "can submit" flag and a submit command.',
+      es: 'La vista de registro solo muestra inputs, errores y un botón. El ViewModel transforma los valores crudos en mensajes de error, un "se puede enviar" y un comando de envío.',
       'pt-BR':
-        'A visão do painel só mostra textos e cores. O ViewModel transforma as leituras cruas do modelo em rótulos, estados e um comando para registrar uma nova.',
+        'A visão de cadastro só mostra inputs, erros e um botão. O ViewModel transforma os valores crus em mensagens de erro, um "pode enviar" e um comando de envio.',
     },
-    code: `// Model: domain data and rules
-const model = {
-  readings: [{ param: 'kh', value: 6.4 }, { param: 'ca', value: 420 }],
-  ranges: { kh: [7, 9], ca: [400, 450] },
-};
+    code: `// Model: raw data and the API
+const model = { email: '', password: '', api: { register: (data) => ({ ok: true, ...data }) } };
 
-function createParamsViewModel(model, onChange) {
-  const statusOf = ({ param, value }) => {
-    const [min, max] = model.ranges[param];
-    return value < min ? 'low' : value > max ? 'high' : 'ok';
-  };
-
+function createSignupViewModel(model, onChange) {
   return {
     // State ready to display: the view computes nothing
-    get rows() {
-      return model.readings.map((r) => ({
-        label: r.param.toUpperCase(),
-        text: r.value + (r.param === 'kh' ? ' dKH' : ' ppm'),
-        status: statusOf(r),
-      }));
+    get errors() {
+      return {
+        email: model.email.includes('@') ? null : 'Enter a valid email',
+        password: model.password.length >= 8 ? null : 'At least 8 characters',
+      };
     },
-    get alerts() {
-      return this.rows.filter((r) => r.status !== 'ok').length;
+    get canSubmit() {
+      return Object.values(this.errors).every((e) => e === null);
     },
-    // Command the view binds to a button
-    addReading(param, value) {
-      model.readings.push({ param, value: Number(value) });
+    // Commands the view binds to inputs and the button
+    setField(name, value) {
+      model[name] = value;
       onChange();
+    },
+    submit() {
+      return this.canSubmit ? model.api.register({ email: model.email }) : null;
     },
   };
 }
 
-const vm = createParamsViewModel(model, () => console.log('Re-render'));
-console.log(vm.rows, vm.alerts); // 1 alert: low KH
-vm.addReading('kh', '7.8');`,
+const vm = createSignupViewModel(model, () => console.log('re-render'));
+vm.setField('email', 'ana@example.com');
+console.log(vm.errors, vm.canSubmit); // password still too short
+vm.setField('password', 'correct-horse');
+console.log(vm.submit());`,
   },
   related: ['mvc', 'custom-hooks', 'observer'],
 };

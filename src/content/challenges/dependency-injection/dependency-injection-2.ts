@@ -4,29 +4,29 @@ export const dependencyInjection2: Challenge = {
   id: 'dependency-injection-2',
   patternId: 'dependency-injection',
   title: {
-    en: 'Feeder with an injectable clock',
-    es: 'Alimentador con reloj inyectable',
-    'pt-BR': 'Alimentador com relógio injetável',
+    en: 'Daily digest with an injectable clock',
+    es: 'Resumen diario con reloj inyectable',
+    'pt-BR': 'Resumo diário com relógio injetável',
   },
   difficulty: 'media',
   story: {
-    en: 'The feeder must dispense food at 10 and 18 h, once per hour. Because it uses `new Date()` internally, the tests only pass when run at those hours.',
-    es: 'El alimentador debe largar comida a las 10 y a las 18 h, una sola vez por hora. Como usa `new Date()` adentro, los tests solo pasan si se corren a esas horas.',
+    en: 'The digest job must email users at 9 and 18 h, once per hour. Because it uses `new Date()` internally, the tests only pass when run at those hours.',
+    es: 'El job de resúmenes tiene que mandar emails a las 9 y a las 18 h, una sola vez por hora. Como usa `new Date()` por dentro, los tests solo pasan si se corren a esas horas.',
     'pt-BR':
-      'O alimentador deve soltar comida às 10 e às 18 h, uma única vez por hora. Como usa `new Date()` por dentro, os testes só passam se rodarem nesses horários.',
+      'O job de resumos precisa mandar emails às 9 e às 18 h, uma única vez por hora. Como usa `new Date()` por dentro, os testes só passam se rodarem nesses horários.',
   },
   instructions: {
-    en: 'Implement `FeedingSchedule` with `constructor({ clock, feeder, hours })`:\n- `clock.now()` returns a `Date`; `feeder.dispense(grams)` dispenses food.\n- `tick(grams)`: if the current hour is in `hours` and feeding has not happened yet in that hour of that day, call `feeder.dispense(grams)` and return `true`. Otherwise return `false`.',
-    es: 'Implementá `FeedingSchedule` con `constructor({ clock, feeder, hours })`:\n- `clock.now()` devuelve un `Date`; `feeder.dispense(grams)` larga comida.\n- `tick(grams)`: si la hora actual está en `hours` y todavía no se alimentó en esa hora de ese día, llama a `feeder.dispense(grams)` y devuelve `true`. Si no, devuelve `false`.',
+    en: 'Implement `DigestScheduler` with `constructor({ clock, mailer, hours })`:\n- `clock.now()` returns a `Date`; `mailer.send(subject)` sends the digest.\n- `tick(subject)`: if the current hour is in `hours` and nothing was sent yet in that hour of that day, call `mailer.send(subject)` and return `true`. Otherwise return `false`.',
+    es: 'Implementá `DigestScheduler` con `constructor({ clock, mailer, hours })`:\n- `clock.now()` devuelve un `Date`; `mailer.send(subject)` manda el resumen.\n- `tick(subject)`: si la hora actual está en `hours` y todavía no se mandó nada en esa hora de ese día, llamá a `mailer.send(subject)` y devolvé `true`. Si no, devolvé `false`.',
     'pt-BR':
-      'Implemente `FeedingSchedule` com `constructor({ clock, feeder, hours })`:\n- `clock.now()` devolve um `Date`; `feeder.dispense(grams)` solta comida.\n- `tick(grams)`: se a hora atual estiver em `hours` e ainda não houve alimentação nessa hora daquele dia, chama `feeder.dispense(grams)` e devolve `true`. Caso contrário, devolve `false`.',
+      'Implemente `DigestScheduler` com `constructor({ clock, mailer, hours })`:\n- `clock.now()` devolve um `Date`; `mailer.send(subject)` envia o resumo.\n- `tick(subject)`: se a hora atual estiver em `hours` e ainda não foi enviado nada nessa hora daquele dia, chame `mailer.send(subject)` e devolva `true`. Caso contrário, devolva `false`.',
   },
-  starterCode: `class FeedingSchedule {
+  starterCode: `class DigestScheduler {
   constructor({ hours }) {
     this.hours = hours;
   }
 
-  tick(grams) {
+  tick(subject) {
     const hour = new Date().getHours();
     return this.hours.includes(hour);
   }
@@ -35,27 +35,27 @@ export const dependencyInjection2: Challenge = {
   tests: [
     {
       name: {
-        en: 'feeds at the scheduled hour',
-        es: 'alimenta a la hora programada',
-        'pt-BR': 'alimenta no horário programado',
+        en: 'sends at the scheduled hour',
+        es: 'manda a la hora programada',
+        'pt-BR': 'envia no horário programado',
       },
-      code: `const feeder = { dispense: fn() };
-const clock = { now: () => new Date(2026, 4, 1, 10, 5) };
-const schedule = new FeedingSchedule({ clock, feeder, hours: [10, 18] });
-expect(schedule.tick(0.4)).toBe(true);
-expect(feeder.dispense.calls).toEqual([[0.4]]);`,
+      code: `const mailer = { send: fn() };
+const clock = { now: () => new Date(2026, 4, 1, 9, 5) };
+const scheduler = new DigestScheduler({ clock, mailer, hours: [9, 18] });
+expect(scheduler.tick('Your daily digest')).toBe(true);
+expect(mailer.send.calls).toEqual([['Your daily digest']]);`,
     },
     {
       name: {
-        en: 'does not feed outside the schedule',
-        es: 'no alimenta fuera de horario',
-        'pt-BR': 'não alimenta fora do horário',
+        en: 'does not send outside the schedule',
+        es: 'no manda fuera de horario',
+        'pt-BR': 'não envia fora do horário',
       },
-      code: `const feeder = { dispense: fn() };
+      code: `const mailer = { send: fn() };
 const clock = { now: () => new Date(2026, 4, 1, 13, 0) };
-const schedule = new FeedingSchedule({ clock, feeder, hours: [10, 18] });
-expect(schedule.tick(0.4)).toBe(false);
-expect(feeder.dispense).toHaveBeenCalledTimes(0);`,
+const scheduler = new DigestScheduler({ clock, mailer, hours: [9, 18] });
+expect(scheduler.tick('Digest')).toBe(false);
+expect(mailer.send).toHaveBeenCalledTimes(0);`,
     },
     {
       name: {
@@ -64,46 +64,46 @@ expect(feeder.dispense).toHaveBeenCalledTimes(0);`,
         'pt-BR': 'uma única vez por hora e por dia',
       },
       code: `let now = new Date(2026, 4, 1, 18, 0);
-const feeder = { dispense: fn() };
-const schedule = new FeedingSchedule({ clock: { now: () => now }, feeder, hours: [18] });
-schedule.tick(1);
+const mailer = { send: fn() };
+const scheduler = new DigestScheduler({ clock: { now: () => now }, mailer, hours: [18] });
+scheduler.tick('Digest');
 now = new Date(2026, 4, 1, 18, 40);
-expect(schedule.tick(1)).toBe(false);
+expect(scheduler.tick('Digest')).toBe(false);
 now = new Date(2026, 4, 2, 18, 1);
-expect(schedule.tick(1)).toBe(true);
-expect(feeder.dispense).toHaveBeenCalledTimes(2);`,
+expect(scheduler.tick('Digest')).toBe(true);
+expect(mailer.send).toHaveBeenCalledTimes(2);`,
     },
   ],
   hints: {
     en: [
-      'Store `clock` and `feeder` in the constructor instead of using `new Date()` and hidden effects.',
-      'For "once per hour and per day", keep a key like `date-hour` (for example `toDateString() + "-" + hour`) of the last feeding.',
+      'Store `clock` and `mailer` in the constructor instead of using `new Date()` and hidden effects.',
+      'For "once per hour and per day", keep a key like `toDateString() + "-" + hour` of the last send.',
     ],
     es: [
-      'Guardá `clock` y `feeder` en el constructor en lugar de usar `new Date()` y efectos ocultos.',
-      'Para “una vez por hora y por día”, guardá una clave como `fecha-hora` (por ejemplo `toDateString() + "-" + hora`) de la última alimentación.',
+      'Guardá `clock` y `mailer` en el constructor en lugar de usar `new Date()` y efectos ocultos.',
+      'Para "una vez por hora y por día", guardá una clave como `toDateString() + "-" + hora` del último envío.',
     ],
     'pt-BR': [
-      'Guarde `clock` e `feeder` no construtor em vez de usar `new Date()` e efeitos ocultos.',
-      'Para "uma vez por hora e por dia", guarde uma chave como `data-hora` (por exemplo `toDateString() + "-" + hour`) da última alimentação.',
+      'Guarde `clock` e `mailer` no construtor em vez de usar `new Date()` e efeitos ocultos.',
+      'Para "uma vez por hora e por dia", guarde uma chave como `toDateString() + "-" + hora` do último envio.',
     ],
   },
-  solution: `class FeedingSchedule {
-  #lastFed = null;
+  solution: `class DigestScheduler {
+  #lastSent = null;
 
-  constructor({ clock, feeder, hours }) {
+  constructor({ clock, mailer, hours }) {
     this.clock = clock;
-    this.feeder = feeder;
+    this.mailer = mailer;
     this.hours = hours;
   }
 
-  tick(grams) {
+  tick(subject) {
     const now = this.clock.now();
     const hour = now.getHours();
     const key = now.toDateString() + '-' + hour;
-    if (!this.hours.includes(hour) || this.#lastFed === key) return false;
-    this.feeder.dispense(grams);
-    this.#lastFed = key;
+    if (!this.hours.includes(hour) || this.#lastSent === key) return false;
+    this.mailer.send(subject);
+    this.#lastSent = key;
     return true;
   }
 }

@@ -53,45 +53,45 @@ export const flyweight: Pattern = {
   },
   example: {
     title: {
-      en: 'A school of fish in the simulator',
-      es: 'Cardumen en el simulador',
-      'pt-BR': 'Cardume no simulador',
+      en: 'Shared cell formats in a spreadsheet',
+      es: 'Formatos compartidos en una planilla',
+      'pt-BR': 'Formatos compartilhados em uma planilha',
     },
     scenario: {
-      en: 'The reef simulator draws thousands of fish. Species, colors and speed are shared per species; each fish only stores its position.',
-      es: 'El simulador del arrecife dibuja miles de peces. Especie, colores y velocidad se comparten por especie; cada pez solo guarda su posición.',
+      en: 'A spreadsheet view renders 100,000 cells. Font, color and number format are shared objects; each cell only stores its value and a reference to its format.',
+      es: 'Una vista de planilla renderiza 100.000 celdas. La fuente, el color y el formato numérico son objetos compartidos; cada celda solo guarda su valor y una referencia al formato.',
       'pt-BR':
-        'O simulador do recife desenha milhares de peixes. Espécie, cores e velocidade são compartilhadas por espécie; cada peixe só guarda sua posição.',
+        'Uma visão de planilha renderiza 100.000 células. A fonte, a cor e o formato numérico são objetos compartilhados; cada célula só guarda seu valor e uma referência ao formato.',
     },
-    code: `class FishSpecies {
-  constructor(name, colors, speed) {
-    Object.assign(this, { name, colors, speed });
+    code: `class CellFormat {
+  constructor(font, color, numberFormat) {
+    Object.assign(this, { font, color, numberFormat });
     Object.freeze(this);
   }
 }
 
-const speciesPool = new Map();
-function getSpecies(name, colors, speed) {
-  if (!speciesPool.has(name)) speciesPool.set(name, new FishSpecies(name, colors, speed));
-  return speciesPool.get(name);
+const formats = new Map();
+function getFormat(font, color, numberFormat) {
+  const key = [font, color, numberFormat].join('|');
+  if (!formats.has(key)) formats.set(key, new CellFormat(font, color, numberFormat));
+  return formats.get(key);
 }
 
-// Extrinsic state: only what changes per fish
-function createFish(speciesName, x, y) {
-  const species =
-    speciesName === 'chromis'
-      ? getSpecies('Chromis viridis', ['green', 'blue'], 1.2)
-      : getSpecies('Amphiprion ocellaris', ['orange', 'white'], 0.8);
-  return { species, x, y };
+// Extrinsic state: only what changes per cell
+const createCell = (row, col, value) => ({
+  row,
+  col,
+  value,
+  format: col === 0 ? getFormat('Inter', '#111', 'text') : getFormat('Inter Mono', '#1d5b94', '0.00'),
+});
+
+const cells = [];
+for (let row = 0; row < 25_000; row++) {
+  for (let col = 0; col < 4; col++) cells.push(createCell(row, col, row * col));
 }
 
-const school = Array.from({ length: 5000 }, (_, i) =>
-  createFish(i % 10 === 0 ? 'clown' : 'chromis', i % 100, Math.floor(i / 100)),
-);
-
-console.log(school.length, 'fish,', speciesPool.size, 'species in memory'); // 5000 fish, 2 species
-console.log(school[0].species === school[1].species); // false: 0 is a clownfish, 1 is a chromis
-console.log(school[1].species === school[2].species); // true: they share the same species`,
+console.log(cells.length, 'cells,', formats.size, 'formats in memory'); // 100000 cells, 2 formats
+console.log(cells[1].format === cells[2].format); // true: shared format`,
   },
   related: ['object-pool', 'prototype', 'proxy'],
 };

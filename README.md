@@ -1,7 +1,8 @@
 # Reef Patterns
 
 A website to review 52 frontend-oriented design patterns and practice them with challenges that
-run in the browser. Nautical theme: reefs, aquariums and diving.
+run in the browser. The design is an old sailing ship; the examples and challenges use real-world
+situations (checkout, payments, API clients, notifications, feature flags…).
 
 **Live:** <https://mtorre4580.github.io/reef-patterns/>
 

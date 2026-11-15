@@ -62,43 +62,44 @@ export const dependencyInjection: Pattern = {
   },
   example: {
     title: {
-      en: 'Parameter monitor with an injected sensor',
-      es: 'Monitor de parámetros con sensor inyectado',
-      'pt-BR': 'Monitor de parâmetros com sensor injetado',
+      en: 'A user service with injected dependencies',
+      es: 'Servicio de usuarios con dependencias inyectadas',
+      'pt-BR': 'Serviço de usuários com dependências injetadas',
     },
     scenario: {
-      en: 'The pH monitor alerts when the value goes out of range. In the tank it uses the real probe; in tests and in the demo it uses a simulated sensor.',
-      es: 'El monitor de pH alerta si el valor sale de rango. En el acuario usa la sonda real; en los tests y en la demo usa un sensor simulado.',
+      en: 'The user service fetches profiles from the API and caches them. In production it uses the real HTTP client; in tests it gets a fake one, without a network.',
+      es: 'El servicio de usuarios trae perfiles de la API y los cachea. En producción usa el cliente HTTP real; en los tests recibe uno falso, sin red.',
       'pt-BR':
-        'O monitor de pH alerta se o valor sai da faixa. No aquário usa a sonda real; nos testes e na demo usa um sensor simulado.',
+        'O serviço de usuários busca perfis na API e os guarda em cache. Em produção usa o cliente HTTP real; nos testes recebe um falso, sem rede.',
     },
-    code: `class PhMonitor {
-  // The monitor does not create its sensor or notifier: they are handed to it
-  constructor({ sensor, notify }) {
-    this.sensor = sensor;
-    this.notify = notify;
+    code: `class UserService {
+  // The service does not create its collaborators: they are handed to it
+  constructor({ http, cache }) {
+    this.http = http;
+    this.cache = cache;
   }
 
-  check() {
-    const ph = this.sensor.read();
-    if (ph < 7.9 || ph > 8.4) this.notify('pH out of range: ' + ph);
-    return ph;
+  getUser(id) {
+    if (this.cache.has(id)) return this.cache.get(id);
+    const user = this.http.get('/users/' + id);
+    this.cache.set(id, user);
+    return user;
   }
 }
 
-// Real implementation (simplified)
-const probe = { read: () => 8.12 };
+// Test double: records calls and returns canned data
+const calls = [];
+const fakeHttp = {
+  get: (url) => {
+    calls.push(url);
+    return { id: url.split('/').at(-1), name: 'Ana' };
+  },
+};
 
-// Test double: always returns a low value
-const fakeLowSensor = { read: () => 7.7 };
-const sent = [];
-
-const monitor = new PhMonitor({ sensor: probe, notify: console.warn });
-monitor.check();
-
-const testMonitor = new PhMonitor({ sensor: fakeLowSensor, notify: (msg) => sent.push(msg) });
-testMonitor.check();
-console.log(sent); // ['pH out of range: 7.7']`,
+const service = new UserService({ http: fakeHttp, cache: new Map() });
+service.getUser('42');
+service.getUser('42');
+console.log(calls); // ['/users/42']: the second call came from the cache`,
   },
   related: ['provider', 'strategy', 'hexagonal', 'singleton'],
 };

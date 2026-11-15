@@ -58,36 +58,39 @@ export const prototype: Pattern = {
       'Object.create, structuredClone, a cadeia de protótipos do JS, os templates duplicáveis do Figma ou do Notion.',
   },
   example: {
-    title: { en: 'Frag template', es: 'Plantilla de frag', 'pt-BR': 'Modelo de frag' },
-    scenario: {
-      en: 'When fragging a colony, each frag inherits species, requirements and origin, and only size and location change. The mother colony is cloned instead of re-entering everything.',
-      es: 'Al fraguear una colonia, cada frag hereda especie, requisitos y origen, y solo cambia el tamaño y la ubicación. Se clona el frag madre en vez de cargar todo de nuevo.',
-      'pt-BR':
-        'Ao fraguear uma colônia, cada frag herda espécie, requisitos e origem, e só mudam o tamanho e o local. Clona-se a colônia mãe em vez de cadastrar tudo de novo.',
+    title: {
+      en: 'Dashboard widget templates',
+      es: 'Plantillas de widgets de un dashboard',
+      'pt-BR': 'Templates de widgets de um dashboard',
     },
-    code: `const motherColony = {
-  species: 'Acropora tenuis',
-  type: 'sps',
-  care: { par: [250, 350], flow: 'high', temperature: [24.5, 26.5] },
-  origin: 'Local aquaculture',
-  sizeCm: 20,
-  location: 'Main rock',
+    scenario: {
+      en: 'Users add widgets to their dashboard from templates. Each new widget starts as a copy of the template and only changes its title and position.',
+      es: 'Los usuarios agregan widgets a su dashboard desde plantillas. Cada widget nuevo arranca como copia de la plantilla y solo cambia el título y la posición.',
+      'pt-BR':
+        'Os usuários adicionam widgets ao dashboard a partir de templates. Cada widget novo começa como cópia do template e só muda o título e a posição.',
+    },
+    code: `const revenueChart = {
+  type: 'line-chart',
+  query: { metric: 'revenue', groupBy: 'day', range: '30d' },
+  style: { color: '#1d5b94', showLegend: true },
+  title: 'Revenue',
+  position: { x: 0, y: 0 },
 };
 
-function fragFrom(prototype, overrides) {
-  // structuredClone copies deeply: each frag gets its own care object
-  return { ...structuredClone(prototype), ...overrides, parent: prototype.species };
+function widgetFrom(template, overrides) {
+  // structuredClone copies deeply: each widget gets its own query and style
+  return { ...structuredClone(template), ...overrides, id: crypto.randomUUID() };
 }
 
-const frag1 = fragFrom(motherColony, { sizeCm: 3, location: 'Frag rack A1' });
-const frag2 = fragFrom(motherColony, { sizeCm: 2.5, location: 'Frag rack A2' });
+const euRevenue = widgetFrom(revenueChart, { title: 'Revenue · EU', position: { x: 1, y: 0 } });
+const usRevenue = widgetFrom(revenueChart, { title: 'Revenue · US', position: { x: 2, y: 0 } });
 
-frag2.care.flow = 'medium'; // does not affect the mother colony or frag1
-console.log(motherColony.care.flow, frag1.care.flow, frag2.care.flow); // high high medium
+usRevenue.query.range = '7d'; // does not affect the template or the EU widget
+console.log(revenueChart.query.range, euRevenue.query.range, usRevenue.query.range); // 30d 30d 7d
 
 // Native prototypal version: inherits instead of copying
-const lazyFrag = Object.create(motherColony, { sizeCm: { value: 4 } });
-console.log(lazyFrag.species, lazyFrag.sizeCm);`,
+const compact = Object.create(revenueChart, { title: { value: 'Revenue (compact)' } });
+console.log(compact.type, compact.title);`,
   },
   related: ['factory-method', 'flyweight', 'memento'],
 };

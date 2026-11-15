@@ -59,43 +59,43 @@ export const singleton: Pattern = {
   },
   example: {
     title: {
-      en: 'A single tank controller',
-      es: 'Un único controlador del acuario',
-      'pt-BR': 'Um único controlador do aquário',
+      en: 'A single API client',
+      es: 'Un único cliente de API',
+      'pt-BR': 'Um único cliente de API',
     },
     scenario: {
-      en: 'Pumps, skimmer and lighting are managed from one controller. If every screen created its own, two of them could switch the same pump on and off at the same time.',
-      es: 'Las bombas, el skimmer y la iluminación se manejan desde un controlador. Si cada pantalla creara el suyo, dos podrían prender y apagar la misma bomba a la vez.',
+      en: 'Every module that talks to the backend needs the same base URL and the current auth token. If each one created its own client, logging in would only update some of them.',
+      es: 'Todos los módulos que hablan con el backend necesitan la misma URL base y el token de sesión actual. Si cada uno creara su propio cliente, al iniciar sesión solo se actualizarían algunos.',
       'pt-BR':
-        'As bombas, o skimmer e a iluminação são controlados por um controlador. Se cada tela criasse o seu, duas poderiam ligar e desligar a mesma bomba ao mesmo tempo.',
+        'Todos os módulos que falam com o backend precisam da mesma URL base e do token atual. Se cada um criasse seu próprio cliente, ao fazer login só alguns seriam atualizados.',
     },
-    code: `class ReefController {
+    code: `class ApiClient {
   static #instance = null;
-  #devices = new Map();
+  #token = null;
+  baseUrl = 'https://api.example.com';
 
   static getInstance() {
-    if (!ReefController.#instance) ReefController.#instance = new ReefController();
-    return ReefController.#instance;
+    if (!ApiClient.#instance) ApiClient.#instance = new ApiClient();
+    return ApiClient.#instance;
   }
 
-  setDevice(name, on) {
-    this.#devices.set(name, on);
+  setToken(token) {
+    this.#token = token;
   }
 
-  status() {
-    return Object.fromEntries(this.#devices);
+  headers() {
+    return this.#token ? { Authorization: 'Bearer ' + this.#token } : {};
   }
 }
 
-// Two different modules ask for the controller…
-const fromDashboard = ReefController.getInstance();
-const fromScheduler = ReefController.getInstance();
+// The login page and the orders page ask for the client…
+const fromLogin = ApiClient.getInstance();
+const fromOrders = ApiClient.getInstance();
 
-fromDashboard.setDevice('returnPump', true);
-fromScheduler.setDevice('skimmer', false);
+fromLogin.setToken('eyJhbGciOi...');
 
-console.log(fromDashboard === fromScheduler); // true
-console.log(fromScheduler.status()); // { returnPump: true, skimmer: false }`,
+console.log(fromLogin === fromOrders); // true
+console.log(fromOrders.headers()); // the orders page already sees the token`,
   },
   related: ['module', 'dependency-injection', 'provider'],
 };

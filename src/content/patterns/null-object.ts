@@ -46,38 +46,49 @@ export const nullObject: Pattern = {
       'Loggers silenciosos (noop logger), um AbortSignal que nunca é abortado, o operador ?. como alternativa moderna, os controladores dummy nos testes.',
   },
   example: {
-    title: { en: 'Optional notifier', es: 'Notificador opcional', 'pt-BR': 'Notificador opcional' },
+    title: {
+      en: 'Guest user instead of null',
+      es: 'Usuario invitado en lugar de null',
+      'pt-BR': 'Usuário convidado em vez de null',
+    },
     scenario: {
-      en: 'Not every tank has the phone app set up. Instead of asking on every alarm whether a notifier exists, a do-nothing one is used.',
-      es: 'No todos los acuarios tienen la app del celular configurada. En lugar de preguntar en cada alarma si existe un notificador, se usa uno que no hace nada.',
+      en: 'Many components check "if (user && user.can(...))". A guest user object with the same interface removes those checks and makes "not logged in" an explicit case.',
+      es: 'Muchos componentes chequean "if (user && user.can(...))". Un usuario invitado con la misma interfaz elimina esos chequeos y vuelve explícito el caso "sin sesión".',
       'pt-BR':
-        'Nem todo aquário tem o app do celular configurado. Em vez de perguntar a cada alarme se existe um notificador, usa-se um que não faz nada.',
+        'Muitos componentes verificam "if (user && user.can(...))". Um usuário convidado com a mesma interface elimina essas verificações e torna explícito o caso "sem sessão".',
     },
-    code: `class PushNotifier {
-  constructor(token) {
-    this.token = token;
-    this.sent = [];
+    code: `class User {
+  constructor(name, permissions) {
+    this.name = name;
+    this.permissions = new Set(permissions);
   }
-  send(message) {
-    this.sent.push(message); // in real life, an API call
+  can(action) {
+    return this.permissions.has(action);
+  }
+  get isGuest() {
+    return false;
   }
 }
 
-const silentNotifier = Object.freeze({ send() {} });
+const guest = Object.freeze({
+  name: 'Guest',
+  can: () => false,
+  isGuest: true,
+});
 
-function createAlarm(notifier = silentNotifier) {
-  return {
-    check(param, value, [min, max]) {
-      // No if (notifier): there is always an object with send()
-      if (value < min || value > max) notifier.send(param + ' out of range: ' + value);
-    },
-  };
+const currentUser = (session) => (session ? new User(session.name, session.permissions) : guest);
+
+function toolbar(user) {
+  // No null checks: there is always an object with can() and name
+  return [
+    'Hi, ' + user.name,
+    user.can('orders:refund') ? 'Refund' : null,
+    user.isGuest ? 'Sign in' : 'Sign out',
+  ].filter(Boolean);
 }
 
-const withApp = new PushNotifier('abc123');
-createAlarm(withApp).check('pH', 7.6, [7.9, 8.4]);
-createAlarm().check('pH', 7.6, [7.9, 8.4]); // does not break and does not notify
-console.log(withApp.sent);`,
+console.log(toolbar(currentUser({ name: 'Ana', permissions: ['orders:refund'] })));
+console.log(toolbar(currentUser(null)));`,
   },
   related: ['strategy', 'proxy', 'dependency-injection'],
 };

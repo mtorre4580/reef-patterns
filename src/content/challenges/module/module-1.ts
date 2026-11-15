@@ -4,47 +4,49 @@ export const module1: Challenge = {
   id: 'module-1',
   patternId: 'module',
   title: {
-    en: 'Private salinity history',
-    es: 'Historial de salinidad privado',
-    'pt-BR': 'Histórico de salinidade privado',
+    en: 'Private recent searches',
+    es: 'Búsquedas recientes privadas',
+    'pt-BR': 'Buscas recentes privadas',
   },
   difficulty: 'facil',
   story: {
-    en: 'The salinity history used to be an object with a public array. An export script emptied it by mistake and the salinity alert stopped working.',
-    es: 'El historial de salinidad era un objeto con un array público. Un script de exportación lo vació por error y la alerta de salinidad dejó de funcionar.',
+    en: 'Recent searches lived in a global array. A component cleared it by mistake while rendering and the dropdown stopped showing suggestions.',
+    es: 'Las búsquedas recientes vivían en un array global. Un componente lo vació por error al renderizar y el desplegable dejó de mostrar sugerencias.',
     'pt-BR':
-      'O histórico de salinidade era um objeto com um array público. Um script de exportação o esvaziou por engano e o alerta de salinidade parou de funcionar.',
+      'As buscas recentes ficavam em um array global. Um componente o esvaziou por engano ao renderizar e o dropdown parou de mostrar sugestões.',
   },
   instructions: {
-    en: 'Implement `createSalinityLog()`, which returns a frozen object with only three functions:\n- `record(ppt)`: throws `RangeError` if it is outside 25–45; keeps at most the last 10 readings.\n- `average()`: average rounded to 2 decimals (0 when there are no readings).\n- `isOff()`: `true` if the average is more than 1 ppt away from 35.\nThe readings must not be reachable from outside.',
-    es: 'Implementá `createSalinityLog()`, que devuelve un objeto congelado con solo tres funciones:\n- `record(ppt)`: lanza `RangeError` si está fuera de 25–45; guarda como máximo las últimas 10 lecturas.\n- `average()`: promedio redondeado a 2 decimales (0 si no hay lecturas).\n- `isOff()`: `true` si el promedio se aleja más de 1 ppt de 35.\nLas lecturas no deben ser accesibles desde afuera.',
+    en: 'Implement `createRecentSearches()`, which returns a frozen object with only three functions:\n- `add(term)`: trims the term; throws `TypeError` if it is empty; moves a repeated term to the front; keeps at most the last 5.\n- `list()`: returns a copy, newest first.\n- `clear()`: empties the list.\nThe list must not be reachable from outside.',
+    es: 'Implementá `createRecentSearches()`, que devuelve un objeto congelado con solo tres funciones:\n- `add(term)`: recorta espacios; lanza `TypeError` si queda vacío; mueve al principio un término repetido; guarda como máximo los últimos 5.\n- `list()`: devuelve una copia, el más nuevo primero.\n- `clear()`: vacía la lista.\nLa lista no debe ser accesible desde afuera.',
     'pt-BR':
-      'Implemente `createSalinityLog()`, que devolve um objeto congelado com apenas três funções:\n- `record(ppt)`: lança `RangeError` se estiver fora de 25–45; guarda no máximo as últimas 10 leituras.\n- `average()`: média arredondada a 2 decimais (0 se não houver leituras).\n- `isOff()`: `true` se a média se afastar mais de 1 ppt de 35.\nAs leituras não devem ser acessíveis de fora.',
+      'Implemente `createRecentSearches()`, que devolve um objeto congelado com apenas três funções:\n- `add(term)`: remove espaços das pontas; lança `TypeError` se ficar vazio; move para o começo um termo repetido; guarda no máximo os últimos 5.\n- `list()`: devolve uma cópia, o mais novo primeiro.\n- `clear()`: esvazia a lista.\nA lista não deve ser acessível de fora.',
   },
-  starterCode: `function createSalinityLog() {
+  starterCode: `function createRecentSearches() {
   return {
-    readings: [],
-    record(ppt) {
-      this.readings.push(ppt);
+    items: [],
+    add(term) {
+      this.items.unshift(term);
     },
-    average() {
-      return this.readings.reduce((a, b) => a + b, 0) / this.readings.length;
+    list() {
+      return this.items;
     },
-    isOff() {
-      return Math.abs(this.average() - 35) > 1;
+    clear() {
+      this.items = [];
     },
   };
 }
 `,
   tests: [
     {
-      name: { en: 'computes the average', es: 'calcula el promedio', 'pt-BR': 'calcula a média' },
-      code: `const log = createSalinityLog();
-expect(log.average()).toBe(0);
-log.record(34.8);
-log.record(35.3);
-expect(log.average()).toBe(35.05);
-expect(log.isOff()).toBe(false);`,
+      name: {
+        en: 'keeps the newest first',
+        es: 'guarda la más nueva primero',
+        'pt-BR': 'guarda a mais nova primeiro',
+      },
+      code: `const recent = createRecentSearches();
+recent.add('shoes');
+recent.add(' jackets ');
+expect(recent.list()).toEqual(['jackets', 'shoes']);`,
     },
     {
       name: {
@@ -52,79 +54,80 @@ expect(log.isOff()).toBe(false);`,
         es: 'expone solo la API pública',
         'pt-BR': 'expõe só a API pública',
       },
-      code: `const log = createSalinityLog();
-log.record(35);
-expect(Object.keys(log).sort()).toEqual(['average', 'isOff', 'record']);
-expect(Object.isFrozen(log)).toBe(true);`,
+      code: `const recent = createRecentSearches();
+expect(Object.keys(recent).sort()).toEqual(['add', 'clear', 'list']);
+expect(Object.isFrozen(recent)).toBe(true);`,
     },
     {
       name: {
-        en: 'rejects impossible readings',
-        es: 'rechaza lecturas imposibles',
-        'pt-BR': 'rejeita leituras impossíveis',
+        en: 'the list cannot be changed from outside',
+        es: 'la lista no se puede cambiar desde afuera',
+        'pt-BR': 'a lista não pode ser mudada de fora',
       },
-      code: `expect(() => createSalinityLog().record(60)).toThrow();`,
+      code: `const recent = createRecentSearches();
+recent.add('shoes');
+recent.list().length = 0;
+expect(recent.list()).toEqual(['shoes']);`,
     },
     {
       name: {
-        en: 'keeps only the last 10',
-        es: 'guarda solo las últimas 10',
-        'pt-BR': 'guarda só as últimas 10',
+        en: 'moves repeats to the front and keeps the last 5',
+        es: 'mueve los repetidos al principio y guarda los últimos 5',
+        'pt-BR': 'move os repetidos para o começo e guarda os últimos 5',
       },
-      code: `const log = createSalinityLog();
-log.record(25);
-for (let i = 0; i < 10; i++) log.record(37);
-expect(log.average()).toBe(37);
-expect(log.isOff()).toBe(true);`,
+      code: `const recent = createRecentSearches();
+for (const t of ['a', 'b', 'c', 'd', 'e', 'f']) recent.add(t);
+recent.add('c');
+expect(recent.list()).toEqual(['c', 'f', 'e', 'd', 'b']);`,
     },
     {
       name: {
-        en: 'each history is independent',
-        es: 'cada historial es independiente',
-        'pt-BR': 'cada histórico é independente',
+        en: 'rejects empty terms and each list is independent',
+        es: 'rechaza términos vacíos y cada lista es independiente',
+        'pt-BR': 'rejeita termos vazios e cada lista é independente',
       },
-      code: `const a = createSalinityLog();
-const b = createSalinityLog();
-a.record(30);
-expect(b.average()).toBe(0);`,
+      code: `const a = createRecentSearches();
+const b = createRecentSearches();
+expect(() => a.add('   ')).toThrow();
+a.add('x');
+expect(b.list()).toEqual([]);`,
     },
   ],
   hints: {
     en: [
       'Declare the array inside the function: the closure keeps it alive and private.',
-      'Return `Object.freeze({ record, average, isOff })`.',
-      '`readings.shift()` drops the oldest once you go past 10.',
+      '`list()` should return `[...items]` so callers cannot mutate the original.',
+      'Return `Object.freeze({ add, list, clear })`.',
     ],
     es: [
       'Declará el array dentro de la función: el closure lo mantiene vivo y privado.',
-      'Devolvé `Object.freeze({ record, average, isOff })`.',
-      'Con `readings.shift()` descartás la más vieja cuando pasás de 10.',
+      '`list()` debería devolver `[...items]` para que nadie mute el original.',
+      'Devolvé `Object.freeze({ add, list, clear })`.',
     ],
     'pt-BR': [
       'Declare o array dentro da função: o closure o mantém vivo e privado.',
-      'Devolva `Object.freeze({ record, average, isOff })`.',
-      'Com `readings.shift()` você descarta a mais antiga quando passar de 10.',
+      '`list()` deveria devolver `[...items]` para que ninguém altere o original.',
+      'Devolva `Object.freeze({ add, list, clear })`.',
     ],
   },
-  solution: `function createSalinityLog() {
-  const readings = [];
+  solution: `function createRecentSearches() {
+  let items = [];
 
-  function record(ppt) {
-    if (ppt < 25 || ppt > 45) throw new RangeError('Impossible reading: ' + ppt);
-    readings.push(ppt);
-    if (readings.length > 10) readings.shift();
+  function add(term) {
+    const clean = String(term).trim();
+    if (!clean) throw new TypeError('Empty search term');
+    items = [clean, ...items.filter((t) => t !== clean)].slice(0, 5);
   }
 
-  function average() {
-    if (readings.length === 0) return 0;
-    return +(readings.reduce((a, b) => a + b, 0) / readings.length).toFixed(2);
+  function list() {
+    return [...items];
   }
 
-  function isOff() {
-    return Math.abs(average() - 35) > 1;
+  function clear() {
+    items = [];
   }
 
-  return Object.freeze({ record, average, isOff });
+  return Object.freeze({ add, list, clear });
 }
 `,
 };

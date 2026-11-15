@@ -53,15 +53,15 @@ export const saga: Pattern = {
   },
   example: {
     title: {
-      en: 'Booking a dive trip',
-      es: 'Reserva de una salida de buceo',
-      'pt-BR': 'Reserva de uma saída de mergulho',
+      en: 'Order saga with compensations',
+      es: 'Saga de una orden con compensaciones',
+      'pt-BR': 'Saga de um pedido com compensações',
     },
     scenario: {
-      en: 'Booking a trip means a seat on the boat, gear rental and payment. If payment fails, the gear and the boat seat are released. Simulated in memory.',
-      es: 'Reservar una salida implica lugar en el barco, alquiler de equipo y cobro. Si el cobro falla, se libera el equipo y el lugar en el barco. Simulado en memoria.',
+      en: 'Placing an order reserves stock, charges the card and creates a shipment in three different services. If shipping fails, the charge is refunded and the stock released. Simulated in memory.',
+      es: 'Crear una orden reserva stock, cobra la tarjeta y crea un envío en tres servicios distintos. Si el envío falla, se reintegra el cobro y se libera el stock. Simulado en memoria.',
       'pt-BR':
-        'Reservar uma saída implica lugar no barco, aluguel de equipamento e pagamento. Se o pagamento falhar, libera-se o equipamento e o lugar no barco. Simulado em memória.',
+        'Criar um pedido reserva estoque, cobra o cartão e cria um envio em três serviços diferentes. Se o envio falhar, o pagamento é estornado e o estoque liberado. Simulado em memória.',
     },
     code: `async function runSaga(steps) {
   const done = [];
@@ -70,36 +70,35 @@ export const saga: Pattern = {
       await step.action();
       done.push(step);
     }
-    return 'confirmed';
+    return 'completed';
   } catch (error) {
     // Compensate, in reverse order, whatever was done
     for (const step of done.reverse()) await step.compensate();
-    return 'cancelled: ' + error.message;
+    return 'rolled back: ' + error.message;
   }
 }
 
-const boat = { seats: 1 };
-const gear = { tanks: 3 };
+const stock = { 'SKU-1': 1 };
 const log = [];
 
-const bookDive = runSaga([
+const placeOrder = runSaga([
   {
-    action: async () => (boat.seats--, log.push('seat booked')),
-    compensate: async () => (boat.seats++, log.push('seat released')),
+    action: async () => (stock['SKU-1']--, log.push('stock reserved')),
+    compensate: async () => (stock['SKU-1']++, log.push('stock released')),
   },
   {
-    action: async () => (gear.tanks--, log.push('tank rented')),
-    compensate: async () => (gear.tanks++, log.push('tank returned')),
+    action: async () => log.push('card charged'),
+    compensate: async () => log.push('charge refunded'),
   },
   {
     action: async () => {
-      throw new Error('card declined');
+      throw new Error('carrier API down');
     },
     compensate: async () => {},
   },
 ]);
 
-bookDive.then((result) => console.log(result, log, boat, gear)); // everything goes back to where it was`,
+placeOrder.then((result) => console.log(result, log, stock)); // everything is undone`,
   },
   related: ['unit-of-work', 'command', 'circuit-breaker'],
 };

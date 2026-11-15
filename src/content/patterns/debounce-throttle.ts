@@ -51,15 +51,15 @@ export const debounceThrottle: Pattern = {
   },
   example: {
     title: {
-      en: 'Species search and a noisy sensor',
-      es: 'Buscador de especies y sensor ruidoso',
-      'pt-BR': 'Busca de espécies e um sensor ruidoso',
+      en: 'Search as you type and scroll tracking',
+      es: 'Búsqueda mientras escribís y tracking de scroll',
+      'pt-BR': 'Busca enquanto digita e tracking de scroll',
     },
     scenario: {
-      en: 'The species search only queries the database when the user stops typing. The flow sensor emits dozens of readings per second and the chart updates at most once per second.',
-      es: 'El buscador de especies consulta la base solo cuando el usuario deja de tipear. El sensor de flujo emite decenas de lecturas por segundo y el gráfico se actualiza como máximo una vez por segundo.',
+      en: 'The search box only queries the API when the user stops typing. Scroll depth analytics are sent at most once per second, not on every scroll event.',
+      es: 'El buscador solo consulta la API cuando el usuario deja de escribir. El tracking de profundidad de scroll se manda como máximo una vez por segundo, no en cada evento.',
       'pt-BR':
-        'A busca de espécies só consulta a base quando o usuário para de digitar. O sensor de fluxo emite dezenas de leituras por segundo e o gráfico se atualiza no máximo uma vez por segundo.',
+        'A busca só consulta a API quando o usuário para de digitar. O tracking de profundidade de scroll é enviado no máximo uma vez por segundo, não a cada evento.',
     },
     code: `function debounce(fn, waitMs) {
   let timer;
@@ -79,16 +79,16 @@ function throttle(fn, intervalMs, now = Date.now) {
   };
 }
 
-const searchSpecies = debounce((q) => console.log('Query the database:', q), 300);
-searchSpecies('a');
-searchSpecies('acr');
-searchSpecies('acropora'); // only this one reaches the database, 300 ms later
+const searchProducts = debounce((q) => console.log('GET /search?q=' + q), 300);
+searchProducts('s');
+searchProducts('sne');
+searchProducts('sneakers'); // only this one reaches the API, 300 ms later
 
 let fakeTime = 0;
-const drawFlow = throttle((lph) => console.log('Chart:', lph, 'L/h'), 1000, () => fakeTime);
-for (const reading of [3100, 3150, 3120, 3300]) {
-  drawFlow(reading);
-  fakeTime += 400; // readings every 400 ms: the 1st and 4th are drawn
+const trackScroll = throttle((pct) => console.log('track scroll_depth', pct + '%'), 1000, () => fakeTime);
+for (const pct of [10, 25, 40, 70]) {
+  trackScroll(pct);
+  fakeTime += 400; // events every 400 ms: only the 1st and 4th are sent
 }`,
   },
   related: ['proxy', 'decorator', 'custom-hooks'],

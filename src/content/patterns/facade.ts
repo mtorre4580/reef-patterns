@@ -52,46 +52,44 @@ export const facade: Pattern = {
   },
   example: {
     title: {
-      en: 'Tank maintenance mode',
-      es: 'Modo mantenimiento del acuario',
-      'pt-BR': 'Modo manutenção do aquário',
+      en: 'Placing an order in one call',
+      es: 'Crear una orden en una llamada',
+      'pt-BR': 'Criar um pedido em uma chamada',
     },
     scenario: {
-      en: 'To clean the glass you must turn off the return pump, the skimmer and the ATO in that order, and restore them in reverse order afterwards. Nobody should have to remember the sequence.',
-      es: 'Para limpiar el vidrio hay que apagar la bomba de retorno, el skimmer y el ATO en ese orden, y al terminar restaurarlos en el orden inverso. Nadie debería recordar la secuencia.',
+      en: 'Placing an order means reserving stock, charging the card and sending a confirmation email, in that order. Every screen that buys something should do it with one call.',
+      es: 'Crear una orden implica reservar stock, cobrar la tarjeta y mandar el email de confirmación, en ese orden. Cada pantalla que compra algo debería hacerlo con una sola llamada.',
       'pt-BR':
-        'Para limpar o vidro é preciso desligar a bomba de retorno, o skimmer e o ATO nessa ordem e, ao terminar, religá-los na ordem inversa. Ninguém deveria precisar lembrar a sequência.',
+        'Criar um pedido implica reservar estoque, cobrar o cartão e enviar o email de confirmação, nessa ordem. Cada tela que compra algo deveria fazer isso com uma única chamada.',
     },
-    code: `const returnPump = { on: true, stop() { this.on = false; }, start() { this.on = true; } };
-const skimmer = { on: true, stop() { this.on = false; }, start() { this.on = true; } };
-const ato = { on: true, stop() { this.on = false; }, start() { this.on = true; } };
+    code: `const inventory = {
+  reserve: (items) => 'res_' + items.length,
+  release: (id) => console.log('released ' + id),
+};
+const payments = { charge: (amount) => 'pay_' + amount };
+const mailer = { send: (to, subject) => console.log('mail to ' + to + ': ' + subject) };
 
-class TankFacade {
-  #saved = null;
-
-  constructor(devices) {
-    this.devices = devices; // shutdown order
+class CheckoutFacade {
+  constructor({ inventory, payments, mailer }) {
+    Object.assign(this, { inventory, payments, mailer });
   }
 
-  maintenanceMode() {
-    this.#saved = this.devices.map((d) => d.on);
-    for (const device of this.devices) device.stop();
-  }
-
-  resume() {
-    // Restore in reverse: return pump first, ATO last
-    [...this.devices].reverse().forEach((device, i, list) => {
-      if (this.#saved[list.length - 1 - i]) device.start();
-    });
-    this.#saved = null;
+  placeOrder({ items, total, email }) {
+    const reservation = this.inventory.reserve(items);
+    try {
+      const paymentId = this.payments.charge(total);
+      this.mailer.send(email, 'Order confirmed');
+      return { reservation, paymentId };
+    } catch (error) {
+      // If the charge fails, give the stock back
+      this.inventory.release(reservation);
+      throw error;
+    }
   }
 }
 
-const tank = new TankFacade([ato, skimmer, returnPump]);
-tank.maintenanceMode();
-console.log(returnPump.on, skimmer.on, ato.on); // false false false
-tank.resume();
-console.log(returnPump.on, skimmer.on, ato.on); // true true true`,
+const checkout = new CheckoutFacade({ inventory, payments, mailer });
+console.log(checkout.placeOrder({ items: ['SKU-1', 'SKU-2'], total: 59, email: 'ana@example.com' }));`,
   },
   related: ['adapter', 'mediator', 'module'],
 };

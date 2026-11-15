@@ -4,44 +4,44 @@ export const singleton2: Challenge = {
   id: 'singleton-2',
   patternId: 'singleton',
   title: {
-    en: 'Preferences loaded once',
-    es: 'Preferencias cargadas una sola vez',
-    'pt-BR': 'Preferências carregadas uma única vez',
+    en: 'Configuration loaded once',
+    es: 'Configuración cargada una sola vez',
+    'pt-BR': 'Configuração carregada uma única vez',
   },
   difficulty: 'media',
   story: {
-    en: 'Unit preferences are read from a slow file. Every screen calls `getSettings()` and today each call reads it again. Also, tests need to be able to start from scratch.',
-    es: 'Las preferencias de unidades se leen de un archivo lento. Cada pantalla llama a `getSettings()` y hoy cada llamada vuelve a leerlo. Además, los tests necesitan poder empezar de cero.',
+    en: 'The app config comes from a slow `/config.json` request. Every module calls `getConfig()` and today each call fetches it again. Also, tests need to be able to start from scratch.',
+    es: 'La configuración de la app viene de un request lento a `/config.json`. Cada módulo llama a `getConfig()` y hoy cada llamada la vuelve a pedir. Además, los tests necesitan poder empezar de cero.',
     'pt-BR':
-      'As preferências de unidades são lidas de um arquivo lento. Cada tela chama `getSettings()` e hoje cada chamada volta a lê-lo. Além disso, os testes precisam poder começar do zero.',
+      'A configuração do app vem de uma requisição lenta a `/config.json`. Cada módulo chama `getConfig()` e hoje cada chamada a busca de novo. Além disso, os testes precisam poder começar do zero.',
   },
   instructions: {
-    en: 'Keep `loadDefaults()` as it is and implement:\n- `getSettings()`: the first time it calls `loadDefaults()` and stores the result; later calls return the same object.\n- `resetSettings()`: discards the instance so the next call loads again.',
-    es: 'Mantené `loadDefaults()` tal como está e implementá:\n- `getSettings()`: la primera vez llama a `loadDefaults()` y guarda el resultado; las siguientes devuelven el mismo objeto.\n- `resetSettings()`: descarta la instancia para que la próxima llamada vuelva a cargar.',
+    en: 'Keep `loadConfig()` as it is and implement:\n- `getConfig()`: the first time it calls `loadConfig()` and stores the result; later calls return the same object.\n- `resetConfig()`: discards the instance so the next call loads again.',
+    es: 'Mantené `loadConfig()` tal como está e implementá:\n- `getConfig()`: la primera vez llama a `loadConfig()` y guarda el resultado; las siguientes devuelven el mismo objeto.\n- `resetConfig()`: descarta la instancia para que la próxima llamada vuelva a cargar.',
     'pt-BR':
-      'Mantenha `loadDefaults()` como está e implemente:\n- `getSettings()`: na primeira vez chama `loadDefaults()` e guarda o resultado; as seguintes devolvem o mesmo objeto.\n- `resetSettings()`: descarta a instância para que a próxima chamada carregue de novo.',
+      'Mantenha `loadConfig()` como está e implemente:\n- `getConfig()`: na primeira vez chama `loadConfig()` e guarda o resultado; as seguintes devolvem o mesmo objeto.\n- `resetConfig()`: descarta a instância para que a próxima chamada carregue de novo.',
   },
   starterCode: `let loads = 0;
 
-// Do not modify this function: it simulates a slow read
-function loadDefaults() {
+// Do not modify this function: it simulates a slow request
+function loadConfig() {
   loads++;
-  return { temperatureUnit: 'C', salinityUnit: 'ppt' };
+  return { apiUrl: 'https://api.example.com', featureFlags: { newCheckout: false } };
 }
 
-function getSettings() {
-  return loadDefaults();
+function getConfig() {
+  return loadConfig();
 }
 
-function resetSettings() {}
+function resetConfig() {}
 `,
   tests: [
     {
       name: { en: 'loads only once', es: 'carga una sola vez', 'pt-BR': 'carrega uma única vez' },
-      code: `resetSettings();
+      code: `resetConfig();
 const before = loads;
-const a = getSettings();
-const b = getSettings();
+const a = getConfig();
+const b = getConfig();
 expect(a).toBe(b);
 expect(loads - before).toBe(1);`,
     },
@@ -51,57 +51,57 @@ expect(loads - before).toBe(1);`,
         es: 'los cambios se ven desde cualquier lugar',
         'pt-BR': 'as mudanças são vistas de qualquer lugar',
       },
-      code: `resetSettings();
-getSettings().temperatureUnit = 'F';
-expect(getSettings().temperatureUnit).toBe('F');`,
+      code: `resetConfig();
+getConfig().featureFlags.newCheckout = true;
+expect(getConfig().featureFlags.newCheckout).toBe(true);`,
     },
     {
       name: {
-        en: 'resetSettings forces a new load',
-        es: 'resetSettings fuerza una carga nueva',
-        'pt-BR': 'resetSettings força uma nova carga',
+        en: 'resetConfig forces a new load',
+        es: 'resetConfig fuerza una carga nueva',
+        'pt-BR': 'resetConfig força uma nova carga',
       },
-      code: `const first = getSettings();
-resetSettings();
-const second = getSettings();
+      code: `const first = getConfig();
+resetConfig();
+const second = getConfig();
 expect(first === second).toBe(false);
-expect(second.temperatureUnit).toBe('C');`,
+expect(second.featureFlags.newCheckout).toBe(false);`,
     },
   ],
   hints: {
     en: [
-      'A `let settings = null` variable in module scope holds the instance.',
-      '`getSettings` can use `settings ??= loadDefaults()`.',
-      '`resetSettings` just sets `settings = null` again.',
+      'A `let config = null` variable in module scope holds the instance.',
+      '`getConfig` can use `config ??= loadConfig()`.',
+      '`resetConfig` just sets `config = null` again.',
     ],
     es: [
-      'Una variable `let settings = null` en el ámbito del módulo guarda la instancia.',
-      '`getSettings` puede usar `settings ??= loadDefaults()`.',
-      '`resetSettings` solo vuelve a poner `settings = null`.',
+      'Una variable `let config = null` en el ámbito del módulo guarda la instancia.',
+      '`getConfig` puede usar `config ??= loadConfig()`.',
+      '`resetConfig` solo vuelve a poner `config = null`.',
     ],
     'pt-BR': [
-      'Uma variável `let settings = null` no escopo do módulo guarda a instância.',
-      '`getSettings` pode usar `settings ??= loadDefaults()`.',
-      '`resetSettings` só volta a fazer `settings = null`.',
+      'Uma variável `let config = null` no escopo do módulo guarda a instância.',
+      '`getConfig` pode usar `config ??= loadConfig()`.',
+      '`resetConfig` só volta a fazer `config = null`.',
     ],
   },
   solution: `let loads = 0;
 
-// Do not modify this function: it simulates a slow read
-function loadDefaults() {
+// Do not modify this function: it simulates a slow request
+function loadConfig() {
   loads++;
-  return { temperatureUnit: 'C', salinityUnit: 'ppt' };
+  return { apiUrl: 'https://api.example.com', featureFlags: { newCheckout: false } };
 }
 
-let settings = null;
+let config = null;
 
-function getSettings() {
-  settings ??= loadDefaults();
-  return settings;
+function getConfig() {
+  config ??= loadConfig();
+  return config;
 }
 
-function resetSettings() {
-  settings = null;
+function resetConfig() {
+  config = null;
 }
 `,
 };

@@ -3,51 +3,55 @@ import type { Challenge } from '../../types';
 export const factoryMethod1: Challenge = {
   id: 'factory-method-1',
   patternId: 'factory-method',
-  title: { en: 'Coral factory', es: 'Fábrica de corales', 'pt-BR': 'Fábrica de corais' },
+  title: {
+    en: 'Notification channel factory',
+    es: 'Fábrica de canales de notificación',
+    'pt-BR': 'Fábrica de canais de notificação',
+  },
   difficulty: 'facil',
   story: {
-    en: 'When adding a new frag, the inventory screen picks the type from a dropdown. Today every screen builds the coral by hand and the light requirements end up inconsistent.',
-    es: 'Al cargar un frag nuevo, la pantalla de inventario elige el tipo en un selector. Hoy cada pantalla arma el coral a mano y los requisitos de luz quedan inconsistentes.',
+    en: 'Users choose how to be notified. Every screen that sends notifications builds the notifier by hand, and the SMS length limit is only enforced in one of them.',
+    es: 'Los usuarios eligen cómo recibir avisos. Cada pantalla que manda notificaciones arma el notificador a mano, y el límite de largo de los SMS solo se respeta en una.',
     'pt-BR':
-      'Ao cadastrar um frag novo, a tela de inventário escolhe o tipo em um seletor. Hoje cada tela monta o coral à mão e os requisitos de luz ficam inconsistentes.',
+      'Os usuários escolhem como receber avisos. Cada tela que envia notificações monta o notificador à mão, e o limite de tamanho do SMS só é respeitado em uma delas.',
   },
   instructions: {
-    en: 'Implement:\n- Classes `SpsCoral` (par `[250, 400]`, flow `"high"`), `LpsCoral` (`[100, 200]`, `"medium"`) and `SoftCoral` (`[50, 150]`, `"low"`), all with `name`, `type` and `describe()`, which returns `"<name> · PAR <min>-<max>"`.\n- `createCoral(type, name)` for `"sps"`, `"lps"` and `"soft"`. An unknown type throws `Error("Unknown coral type: <type>")`.\n- `registerCoral(type, CoralClass)` to add new types without touching `createCoral`. No `switch`.',
-    es: 'Implementá:\n- Clases `SpsCoral` (par `[250, 400]`, flow `"high"`), `LpsCoral` (`[100, 200]`, `"medium"`) y `SoftCoral` (`[50, 150]`, `"low"`), todas con `name`, `type` y `describe()` que devuelve `"<name> · PAR <min>-<max>"`.\n- `createCoral(type, name)` para `"sps"`, `"lps"` y `"soft"`. Un tipo desconocido lanza `Error("Unknown coral type: <type>")`.\n- `registerCoral(type, CoralClass)` para sumar tipos nuevos sin tocar `createCoral`. Sin `switch`.',
+    en: 'Implement:\n- Classes `EmailNotifier` (`channel = "email"`), `SmsNotifier` (`"sms"`, which cuts the message to 160 characters) and `PushNotifier` (`"push"`), all with `send(to, message)` returning `"[<channel>] <to>: <message>"`.\n- `createNotifier(type)` for `"email"`, `"sms"` and `"push"`. An unknown type throws `Error("Unknown channel: <type>")`.\n- `registerNotifier(type, NotifierClass)` to add new channels without touching `createNotifier`. No `switch`.',
+    es: 'Implementá:\n- Clases `EmailNotifier` (`channel = "email"`), `SmsNotifier` (`"sms"`, que corta el mensaje a 160 caracteres) y `PushNotifier` (`"push"`), todas con `send(to, message)` que devuelve `"[<channel>] <to>: <message>"`.\n- `createNotifier(type)` para `"email"`, `"sms"` y `"push"`. Un tipo desconocido lanza `Error("Unknown channel: <type>")`.\n- `registerNotifier(type, NotifierClass)` para sumar canales sin tocar `createNotifier`. Sin `switch`.',
     'pt-BR':
-      'Implemente:\n- As classes `SpsCoral` (par `[250, 400]`, flow `"high"`), `LpsCoral` (`[100, 200]`, `"medium"`) e `SoftCoral` (`[50, 150]`, `"low"`), todas com `name`, `type` e `describe()`, que devolve `"<name> · PAR <min>-<max>"`.\n- `createCoral(type, name)` para `"sps"`, `"lps"` e `"soft"`. Um tipo desconhecido lança `Error("Unknown coral type: <type>")`.\n- `registerCoral(type, CoralClass)` para adicionar tipos novos sem mexer em `createCoral`. Sem `switch`.',
+      'Implemente:\n- As classes `EmailNotifier` (`channel = "email"`), `SmsNotifier` (`"sms"`, que corta a mensagem em 160 caracteres) e `PushNotifier` (`"push"`), todas com `send(to, message)` que devolve `"[<channel>] <to>: <message>"`.\n- `createNotifier(type)` para `"email"`, `"sms"` e `"push"`. Um tipo desconhecido lança `Error("Unknown channel: <type>")`.\n- `registerNotifier(type, NotifierClass)` para adicionar canais sem mexer em `createNotifier`. Sem `switch`.',
   },
-  starterCode: `function createCoral(type, name) {
+  starterCode: `function createNotifier(type) {
   switch (type) {
-    case 'sps':
-      return { name, type, par: [250, 400], flow: 'high' };
-    case 'lps':
-      return { name, type, par: [100, 200], flow: 'medium' };
+    case 'email':
+      return { channel: 'email', send: (to, msg) => '[email] ' + to + ': ' + msg };
+    case 'sms':
+      return { channel: 'sms', send: (to, msg) => '[sms] ' + to + ': ' + msg };
     default:
-      return { name, type, par: [50, 150], flow: 'low' };
+      return { channel: 'push', send: (to, msg) => '[push] ' + to + ': ' + msg };
   }
 }
 `,
   tests: [
     {
       name: {
-        en: 'creates an SPS with its requirements',
-        es: 'crea un SPS con sus requisitos',
-        'pt-BR': 'cria um SPS com seus requisitos',
+        en: 'creates an email notifier',
+        es: 'crea un notificador de email',
+        'pt-BR': 'cria um notificador de email',
       },
-      code: `const coral = createCoral('sps', 'Acropora');
-expect(coral instanceof SpsCoral).toBe(true);
-expect(coral.par).toEqual([250, 400]);
-expect(coral.describe()).toBe('Acropora · PAR 250-400');`,
+      code: `const notifier = createNotifier('email');
+expect(notifier instanceof EmailNotifier).toBe(true);
+expect(notifier.send('ana@example.com', 'Hi')).toBe('[email] ana@example.com: Hi');`,
     },
     {
       name: {
-        en: 'creates LPS and soft corals',
-        es: 'crea LPS y blandos',
-        'pt-BR': 'cria LPS e moles',
+        en: 'SMS messages are cut to 160 characters',
+        es: 'los SMS se cortan a 160 caracteres',
+        'pt-BR': 'os SMS são cortados em 160 caracteres',
       },
-      code: `expect(createCoral('lps', 'Hammer').flow).toBe('medium');
-expect(createCoral('soft', 'Zoanthus') instanceof SoftCoral).toBe(true);`,
+      code: `const sent = createNotifier('sms').send('+541100000000', 'x'.repeat(200));
+expect(sent.length).toBe('[sms] +541100000000: '.length + 160);
+expect(createNotifier('push') instanceof PushNotifier).toBe(true);`,
     },
     {
       name: {
@@ -55,21 +59,22 @@ expect(createCoral('soft', 'Zoanthus') instanceof SoftCoral).toBe(true);`,
         es: 'un tipo desconocido lanza un error',
         'pt-BR': 'um tipo desconhecido lança um erro',
       },
-      code: `expect(() => createCoral('algae', 'Caulerpa')).toThrow('Unknown coral type: algae');`,
+      code: `expect(() => createNotifier('fax')).toThrow('Unknown channel: fax');`,
     },
     {
       name: {
-        en: 'registerCoral adds types without touching the factory',
-        es: 'registerCoral suma tipos sin tocar la fábrica',
-        'pt-BR': 'registerCoral adiciona tipos sem mexer na fábrica',
+        en: 'registerNotifier adds channels without touching the factory',
+        es: 'registerNotifier suma canales sin tocar la fábrica',
+        'pt-BR': 'registerNotifier adiciona canais sem mexer na fábrica',
       },
-      code: `class ZoaCoral {
-  constructor(name) { this.name = name; this.type = 'zoa'; }
+      code: `class SlackNotifier {
+  channel = 'slack';
+  send(to, message) { return 'slack ' + to + ' ' + message; }
 }
-registerCoral('zoa', ZoaCoral);
-const coral = createCoral('zoa', 'Rasta');
-expect(coral instanceof ZoaCoral).toBe(true);
-expect(coral.name).toBe('Rasta');`,
+registerNotifier('slack', SlackNotifier);
+const notifier = createNotifier('slack');
+expect(notifier instanceof SlackNotifier).toBe(true);
+expect(notifier.send('#ops', 'deploy done')).toBe('slack #ops deploy done');`,
     },
   ],
   checks: [
@@ -77,66 +82,62 @@ expect(coral.name).toBe('Rasta');`,
       rule: 'forbidNode',
       node: 'SwitchStatement',
       message: {
-        en: 'No switch: use a type registry',
-        es: 'Sin switch: usá un registro de tipos',
-        'pt-BR': 'Sem switch: use um registro de tipos',
+        en: 'No switch: use a registry',
+        es: 'Sin switch: usá un registro',
+        'pt-BR': 'Sem switch: use um registro',
       },
     },
   ],
   hints: {
     en: [
-      'A base `Coral` class with `describe()` avoids repeating code in the three classes.',
-      'Keep the types in an object or a `Map`: `{ sps: SpsCoral, lps: LpsCoral, soft: SoftCoral }`.',
-      '`createCoral` looks up the class in the registry and does `new CoralClass(name)`; `registerCoral` only adds an entry.',
+      'A base `Notifier` class with `send()` avoids repeating code in the three classes.',
+      'Keep the types in a `Map`: `new Map([["email", EmailNotifier], …])`.',
+      '`createNotifier` looks up the class and does `new NotifierClass()`; `registerNotifier` only adds an entry.',
     ],
     es: [
-      'Una clase base `Coral` con `describe()` evita repetir código en las tres clases.',
-      'Guardá los tipos en un objeto o `Map`: `{ sps: SpsCoral, lps: LpsCoral, soft: SoftCoral }`.',
-      '`createCoral` busca la clase en el registro y hace `new CoralClass(name)`; `registerCoral` solo agrega una entrada.',
+      'Una clase base `Notifier` con `send()` evita repetir código en las tres clases.',
+      'Guardá los tipos en un `Map`: `new Map([["email", EmailNotifier], …])`.',
+      '`createNotifier` busca la clase y hace `new NotifierClass()`; `registerNotifier` solo agrega una entrada.',
     ],
     'pt-BR': [
-      'Uma classe base `Coral` com `describe()` evita repetir código nas três classes.',
-      'Guarde os tipos em um objeto ou `Map`: `{ sps: SpsCoral, lps: LpsCoral, soft: SoftCoral }`.',
-      '`createCoral` busca a classe no registro e faz `new CoralClass(name)`; `registerCoral` só adiciona uma entrada.',
+      'Uma classe base `Notifier` com `send()` evita repetir código nas três classes.',
+      'Guarde os tipos em um `Map`: `new Map([["email", EmailNotifier], …])`.',
+      '`createNotifier` busca a classe e faz `new NotifierClass()`; `registerNotifier` só adiciona uma entrada.',
     ],
   },
-  solution: `class Coral {
-  constructor(name, type) {
-    this.name = name;
-    this.type = type;
-  }
-  describe() {
-    return this.name + ' · PAR ' + this.par[0] + '-' + this.par[1];
+  solution: `class Notifier {
+  send(to, message) {
+    return '[' + this.channel + '] ' + to + ': ' + message;
   }
 }
 
-class SpsCoral extends Coral {
-  par = [250, 400];
-  flow = 'high';
+class EmailNotifier extends Notifier {
+  channel = 'email';
 }
-class LpsCoral extends Coral {
-  par = [100, 200];
-  flow = 'medium';
+class SmsNotifier extends Notifier {
+  channel = 'sms';
+  send(to, message) {
+    return super.send(to, message.slice(0, 160));
+  }
 }
-class SoftCoral extends Coral {
-  par = [50, 150];
-  flow = 'low';
+class PushNotifier extends Notifier {
+  channel = 'push';
 }
 
 const registry = new Map([
-  ['sps', SpsCoral],
-  ['lps', LpsCoral],
-  ['soft', SoftCoral],
+  ['email', EmailNotifier],
+  ['sms', SmsNotifier],
+  ['push', PushNotifier],
 ]);
 
-function registerCoral(type, CoralClass) {
-  registry.set(type, CoralClass);
+function registerNotifier(type, NotifierClass) {
+  registry.set(type, NotifierClass);
 }
 
-function createCoral(type, name) {
-  const CoralClass = registry.get(type);
-  if (!CoralClass) throw new Error('Unknown coral type: ' + type);
-  return new CoralClass(name, type);
+function createNotifier(type) {
+  const NotifierClass = registry.get(type);
+  if (!NotifierClass) throw new Error('Unknown channel: ' + type);
+  return new NotifierClass();
 }
 `,
 };

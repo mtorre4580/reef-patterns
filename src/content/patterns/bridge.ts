@@ -61,15 +61,15 @@ export const bridge: Pattern = {
       'pt-BR': 'Alertas por canais diferentes',
     },
     scenario: {
-      en: 'There are different kinds of alerts (informational, urgent) and delivery channels (phone, email, siren). Any alert can go out over any channel.',
-      es: 'Hay alertas de distintos tipos (informativa, urgente) y canales de envío (celular, email, sirena). Cualquier alerta puede salir por cualquier canal.',
+      en: 'There are alert types (informational, urgent) and delivery channels (email, Slack, SMS). Any alert can go out over any channel.',
+      es: 'Hay tipos de alerta (informativa, urgente) y canales de envío (email, Slack, SMS). Cualquier alerta puede salir por cualquier canal.',
       'pt-BR':
-        'Há alertas de tipos diferentes (informativo, urgente) e canais de envio (celular, email, sirene). Qualquer alerta pode sair por qualquer canal.',
+        'Há tipos de alerta (informativo, urgente) e canais de envio (email, Slack, SMS). Qualquer alerta pode sair por qualquer canal.',
     },
     code: `// Implementations: how it is sent
-const phoneChannel = { deliver: (text) => 'Push: ' + text };
 const emailChannel = { deliver: (text) => 'Email: ' + text };
-const sirenChannel = { deliver: (text) => 'Siren: ' + text.toUpperCase() };
+const slackChannel = { deliver: (text) => 'Slack #alerts: ' + text };
+const smsChannel = { deliver: (text) => 'SMS: ' + text.slice(0, 160) };
 
 // Abstractions: what is sent, delegating the how
 class Alert {
@@ -92,13 +92,13 @@ class InfoAlert extends Alert {
 
 class UrgentAlert extends Alert {
   format(message) {
-    return '‼ ' + message + ' — check the tank now';
+    return '🚨 ' + message.toUpperCase() + ' — on-call, please check now';
   }
 }
 
-console.log(new InfoAlert(emailChannel).send('Water change scheduled'));
-console.log(new UrgentAlert(phoneChannel).send('Temperature 31 °C'));
-console.log(new UrgentAlert(sirenChannel).send('Leak in the sump'));
+console.log(new InfoAlert(emailChannel).send('Nightly backup finished'));
+console.log(new UrgentAlert(slackChannel).send('Checkout error rate above 5%'));
+console.log(new UrgentAlert(smsChannel).send('Database disk at 95%'));
 // 2 abstractions × 3 channels = 6 combinations with 5 pieces`,
   },
   related: ['adapter', 'strategy', 'abstract-factory'],

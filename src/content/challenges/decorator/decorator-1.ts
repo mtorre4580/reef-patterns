@@ -3,54 +3,54 @@ import type { Challenge } from '../../types';
 export const decorator1: Challenge = {
   id: 'decorator-1',
   patternId: 'decorator',
-  title: { en: 'Dive accessories', es: 'Accesorios de buceo', 'pt-BR': 'Acessórios de mergulho' },
+  title: { en: 'Plan add-ons', es: 'Add-ons de un plan', 'pt-BR': 'Add-ons de um plano' },
   difficulty: 'facil',
   story: {
-    en: 'Every diver starts with a wetsuit, a tank and a regulator. Depending on the dive they add a torch or a camera. A subclass per combination (DiverWithTorchAndCamera…) no longer scales.',
-    es: 'Cada buzo arranca con traje, tanque y regulador. Según la inmersión suma linterna o cámara. Hacer una subclase por combinación (BuzoConLinternaYCamara…) ya no escala.',
+    en: 'The pricing page builds plans with optional add-ons: priority support and extra storage. A subclass per combination (ProWithSupportAndStorage…) no longer scales.',
+    es: 'La página de precios arma planes con add-ons opcionales: soporte prioritario y almacenamiento extra. Una subclase por combinación (ProConSoporteYStorage…) ya no escala.',
     'pt-BR':
-      'Todo mergulhador começa com roupa, cilindro e regulador. Conforme o mergulho, soma lanterna ou câmera. Fazer uma subclasse por combinação (MergulhadorComLanternaECamera…) já não escala.',
+      'A página de preços monta planos com add-ons opcionais: suporte prioritário e armazenamento extra. Uma subclasse por combinação (ProComSuporteEStorage…) já não escala.',
   },
   instructions: {
-    en: 'Given `baseDiver` (with `gear()` and `weightKg()`), implement two decorators that return a new diver with the same interface, without modifying the original:\n- `withTorch(diver)`: appends `"torch"` to `gear()` and adds 1 kg.\n- `withCamera(diver)`: appends `"camera"`, adds 3 kg and adds `canShoot()`, which returns `true`.\nThey must combine in any order and with any diver.',
-    es: 'Dado `baseDiver` (con `gear()` y `weightKg()`), implementá dos decoradores que devuelvan un buzo nuevo con la misma interfaz, sin modificar el original:\n- `withTorch(diver)`: suma `"torch"` al final de `gear()` y 1 kg.\n- `withCamera(diver)`: suma `"camera"` y 3 kg, y agrega `canShoot()` que devuelve `true`.\nTienen que poder combinarse en cualquier orden y con cualquier buzo.',
+    en: 'Given `basePlan` (with `features()` and `price()`), implement two decorators that return a new plan with the same interface, without modifying the original:\n- `withSupport(plan)`: appends `"priority support"` to `features()` and adds 10 to the price.\n- `withStorage(plan)`: appends `"100 GB storage"`, adds 5 and adds `hasStorage()`, which returns `true`.\nThey must combine in any order and with any plan.',
+    es: 'Dado `basePlan` (con `features()` y `price()`), implementá dos decoradores que devuelvan un plan nuevo con la misma interfaz, sin modificar el original:\n- `withSupport(plan)`: suma `"priority support"` al final de `features()` y 10 al precio.\n- `withStorage(plan)`: suma `"100 GB storage"` y 5, y agrega `hasStorage()` que devuelve `true`.\nTienen que poder combinarse en cualquier orden y con cualquier plan.',
     'pt-BR':
-      'Dado `baseDiver` (com `gear()` e `weightKg()`), implemente dois decoradores que devolvam um mergulhador novo com a mesma interface, sem modificar o original:\n- `withTorch(diver)`: adiciona `"torch"` ao final de `gear()` e 1 kg.\n- `withCamera(diver)`: adiciona `"camera"` e 3 kg, e acrescenta `canShoot()`, que devolve `true`.\nPrecisam poder ser combinados em qualquer ordem e com qualquer mergulhador.',
+      'Dado `basePlan` (com `features()` e `price()`), implemente dois decoradores que devolvam um plano novo com a mesma interface, sem modificar o original:\n- `withSupport(plan)`: adiciona `"priority support"` ao final de `features()` e 10 ao preço.\n- `withStorage(plan)`: adiciona `"100 GB storage"` e 5, e acrescenta `hasStorage()`, que devolve `true`.\nPrecisam poder ser combinados em qualquer ordem e com qualquer plano.',
   },
-  starterCode: `const baseDiver = {
-  gear: () => ['wetsuit', 'tank', 'regulator'],
-  weightKg: () => 18,
+  starterCode: `const basePlan = {
+  features: () => ['5 projects', 'email support'],
+  price: () => 20,
 };
 
-function withTorch(diver) {
-  diver.gear = () => ['wetsuit', 'tank', 'regulator', 'torch'];
-  return diver;
+function withSupport(plan) {
+  plan.features = () => ['5 projects', 'email support', 'priority support'];
+  return plan;
 }
 
-function withCamera(diver) {
-  return diver;
+function withStorage(plan) {
+  return plan;
 }
 `,
   tests: [
     {
       name: {
-        en: 'withTorch adds the torch and its weight',
-        es: 'withTorch suma la linterna y su peso',
-        'pt-BR': 'withTorch adiciona a lanterna e seu peso',
+        en: 'withSupport adds the feature and its price',
+        es: 'withSupport suma la feature y su precio',
+        'pt-BR': 'withSupport adiciona a feature e seu preço',
       },
-      code: `const diver = withTorch(baseDiver);
-expect(diver.gear()).toEqual(['wetsuit', 'tank', 'regulator', 'torch']);
-expect(diver.weightKg()).toBe(19);`,
+      code: `const plan = withSupport(basePlan);
+expect(plan.features()).toEqual(['5 projects', 'email support', 'priority support']);
+expect(plan.price()).toBe(30);`,
     },
     {
       name: {
-        en: 'does not modify the original diver',
-        es: 'no modifica al buzo original',
-        'pt-BR': 'não modifica o mergulhador original',
+        en: 'does not modify the original plan',
+        es: 'no modifica el plan original',
+        'pt-BR': 'não modifica o plano original',
       },
-      code: `withCamera(withTorch(baseDiver));
-expect(baseDiver.gear()).toEqual(['wetsuit', 'tank', 'regulator']);
-expect(baseDiver.weightKg()).toBe(18);`,
+      code: `withStorage(withSupport(basePlan));
+expect(basePlan.features()).toEqual(['5 projects', 'email support']);
+expect(basePlan.price()).toBe(20);`,
     },
     {
       name: {
@@ -58,57 +58,57 @@ expect(baseDiver.weightKg()).toBe(18);`,
         es: 'se combinan en cualquier orden',
         'pt-BR': 'combinam-se em qualquer ordem',
       },
-      code: `const a = withCamera(withTorch(baseDiver));
-const b = withTorch(withCamera(baseDiver));
-expect(a.weightKg()).toBe(22);
-expect(b.weightKg()).toBe(22);
-expect(a.gear().at(-1)).toBe('camera');
-expect(b.gear().at(-1)).toBe('torch');
-expect(b.canShoot()).toBe(true);`,
+      code: `const a = withStorage(withSupport(basePlan));
+const b = withSupport(withStorage(basePlan));
+expect(a.price()).toBe(35);
+expect(b.price()).toBe(35);
+expect(a.features().at(-1)).toBe('100 GB storage');
+expect(b.features().at(-1)).toBe('priority support');
+expect(b.hasStorage()).toBe(true);`,
     },
     {
       name: {
-        en: 'works with any diver',
-        es: 'funciona con cualquier buzo',
-        'pt-BR': 'funciona com qualquer mergulhador',
+        en: 'works with any plan',
+        es: 'funciona con cualquier plan',
+        'pt-BR': 'funciona com qualquer plano',
       },
-      code: `const freediver = { gear: () => ['fins'], weightKg: () => 2 };
-expect(withTorch(freediver).gear()).toEqual(['fins', 'torch']);`,
+      code: `const freePlan = { features: () => ['1 project'], price: () => 0 };
+expect(withSupport(freePlan).features()).toEqual(['1 project', 'priority support']);`,
     },
   ],
   hints: {
     en: [
-      'Return a new object: `{ ...diver, gear: () => [...diver.gear(), "torch"] }`.',
-      "For the weight, call the wrapped diver's: `weightKg: () => diver.weightKg() + 1`.",
+      'Return a new object: `{ ...plan, features: () => [...plan.features(), "priority support"] }`.',
+      "For the price, call the wrapped plan's: `price: () => plan.price() + 10`.",
     ],
     es: [
-      'Devolvé un objeto nuevo: `{ ...diver, gear: () => [...diver.gear(), "torch"] }`.',
-      'Para el peso, llamá al del buzo envuelto: `weightKg: () => diver.weightKg() + 1`.',
+      'Devolvé un objeto nuevo: `{ ...plan, features: () => [...plan.features(), "priority support"] }`.',
+      'Para el precio, llamá al del plan envuelto: `price: () => plan.price() + 10`.',
     ],
     'pt-BR': [
-      'Devolva um objeto novo: `{ ...diver, gear: () => [...diver.gear(), "torch"] }`.',
-      'Para o peso, chame o do mergulhador envolvido: `weightKg: () => diver.weightKg() + 1`.',
+      'Devolva um objeto novo: `{ ...plan, features: () => [...plan.features(), "priority support"] }`.',
+      'Para o preço, chame o do plano envolvido: `price: () => plan.price() + 10`.',
     ],
   },
-  solution: `const baseDiver = {
-  gear: () => ['wetsuit', 'tank', 'regulator'],
-  weightKg: () => 18,
+  solution: `const basePlan = {
+  features: () => ['5 projects', 'email support'],
+  price: () => 20,
 };
 
-function withTorch(diver) {
+function withSupport(plan) {
   return {
-    ...diver,
-    gear: () => [...diver.gear(), 'torch'],
-    weightKg: () => diver.weightKg() + 1,
+    ...plan,
+    features: () => [...plan.features(), 'priority support'],
+    price: () => plan.price() + 10,
   };
 }
 
-function withCamera(diver) {
+function withStorage(plan) {
   return {
-    ...diver,
-    gear: () => [...diver.gear(), 'camera'],
-    weightKg: () => diver.weightKg() + 3,
-    canShoot: () => true,
+    ...plan,
+    features: () => [...plan.features(), '100 GB storage'],
+    price: () => plan.price() + 5,
+    hasStorage: () => true,
   };
 }
 `,

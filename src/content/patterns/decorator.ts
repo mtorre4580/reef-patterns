@@ -59,40 +59,44 @@ export const decorator: Pattern = {
   },
   example: {
     title: {
-      en: 'Dive gear that adds capabilities',
-      es: 'Equipo de buceo que suma capacidades',
-      'pt-BR': 'Equipamento de mergulho que soma capacidades',
+      en: 'Composable HTTP client',
+      es: 'Cliente HTTP componible',
+      'pt-BR': 'Cliente HTTP componível',
     },
     scenario: {
-      en: 'A diver starts with a wetsuit and a tank. Depending on the dive, they add a torch for a cave or a camera to photograph corals, and each accessory adds weight and capabilities.',
-      es: 'Un buzo arranca con traje y tanque. Según la inmersión suma linterna para una cueva o cámara para fotografiar corales, y cada accesorio agrega peso y capacidades.',
+      en: 'The base fetcher only performs requests. Some calls need an auth header, others need logging, and some need both, without creating a subclass per combination.',
+      es: 'El fetcher base solo hace requests. Algunas llamadas necesitan header de autenticación, otras logging y algunas ambas, sin crear una subclase por combinación.',
       'pt-BR':
-        'Um mergulhador começa com roupa e cilindro. Conforme o mergulho, soma uma lanterna para uma caverna ou uma câmera para fotografar corais, e cada acessório adiciona peso e capacidades.',
+        'O fetcher base só faz requisições. Algumas chamadas precisam de header de autenticação, outras de logging e algumas das duas coisas, sem criar uma subclasse por combinação.',
     },
-    code: `const baseDiver = {
-  gear: () => ['wetsuit', 'tank', 'regulator'],
-  weightKg: () => 18,
+    code: `// Base client: a fake transport that echoes the request
+const baseClient = {
+  get: (url, headers = {}) => ({ status: 200, url, headers }),
 };
 
-// Each decorator receives a diver and returns another one with the same interface
-const withTorch = (diver) => ({
-  ...diver,
-  gear: () => [...diver.gear(), 'torch'],
-  weightKg: () => diver.weightKg() + 0.8,
+// Each decorator receives a client and returns another one with the same interface
+const withAuth = (client, token) => ({
+  ...client,
+  get: (url, headers = {}) => client.get(url, { ...headers, Authorization: 'Bearer ' + token }),
 });
 
-const withCamera = (diver) => ({
-  ...diver,
-  gear: () => [...diver.gear(), 'camera with housing'],
-  weightKg: () => diver.weightKg() + 2.5,
-  canShoot: () => true,
+const withLogging = (client, log) => ({
+  ...client,
+  get: (url, headers) => {
+    log.push('GET ' + url);
+    const response = client.get(url, headers);
+    log.push(response.status + ' ' + url);
+    return response;
+  },
 });
 
-const caveDiver = withTorch(baseDiver);
-const photoDiver = withCamera(withTorch(baseDiver));
+const log = [];
+const publicClient = withLogging(baseClient, log);
+const privateClient = withLogging(withAuth(baseClient, 'abc123'), log);
 
-console.log(caveDiver.gear()); // [..., 'torch']
-console.log(photoDiver.gear(), photoDiver.weightKg()); // 21.3 kg`,
+publicClient.get('/products');
+console.log(privateClient.get('/me').headers); // { Authorization: 'Bearer abc123' }
+console.log(log);`,
   },
   related: ['proxy', 'hoc', 'middleware', 'adapter'],
 };
