@@ -40,7 +40,7 @@ knowledge to understand an exercise.
 | Static checks | acorn + acorn-walk | Per-challenge AST rules |
 | Tests | Vitest + React Testing Library + `@testing-library/user-event` + jsdom | |
 | Lint/format | ESLint (flat config) + Prettier | |
-| Git hooks | husky + commitlint (`@commitlint/config-conventional`) | `.husky/pre-push` runs `pnpm lint`; `.husky/commit-msg` validates the message |
+| Git hooks | husky + commitlint (`@commitlint/config-conventional`) | `.husky/pre-push` runs `pnpm lint` and `pnpm test:run`; `.husky/commit-msg` validates the message |
 | CI | GitHub Actions | lint, typecheck, validate content, unit tests, build + bundle budget, `pnpm audit`, dependency review, Playwright + axe (both themes), Lighthouse CI, CodeQL |
 | Browser tests | Playwright + `@axe-core/playwright` | `e2e/`, runs against the production build |
 | Performance | Lighthouse CI (`lighthouserc.json`) + `bundle-budget.json` | Gzip limits per chunk |
@@ -289,8 +289,11 @@ register it in `content/challenges/index.ts`; run `pnpm validate:content`.
   lowercase, no trailing period, header ≤ 72 chars (enforced). Pick the type by what the change
   does (`refactor:` changes no behavior, `fix:` corrects a bug). One logical change per commit;
   add a body only when the *why* is not obvious. E.g. `refactor: extract sector math from helm`.
-- Hooks are installed by `pnpm install` (`prepare: husky`). `pre-push` runs `pnpm lint` and blocks the
-  push if it fails. Do not skip hooks with `--no-verify`.
+- Hooks are installed by `pnpm install` (`prepare: husky`). `pre-push` runs `pnpm lint` and
+  `pnpm test:run` and blocks the push if either fails. Do not skip hooks with `--no-verify`.
+- Claude Code hooks live in `.claude/settings.json`: after every `Edit`/`Write`, a `PostToolUse` hook
+  (`.claude/hooks/format-file.mjs`) formats that file with Prettier. Edits made through Bash are not
+  covered, so run `pnpm format` if you edit files that way.
 - Every PR fills in `.github/pull_request_template.md` (GitHub loads it automatically); write
   “N/A” for sections that do not apply.
 - One PR per iteration. When PRs are stacked, retarget each one to `main` before merging it.
