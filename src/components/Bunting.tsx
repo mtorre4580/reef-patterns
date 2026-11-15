@@ -1,4 +1,5 @@
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
 
 const COLORS = [
   'var(--color-lagoon)',
@@ -9,7 +10,7 @@ const COLORS = [
 
 /** Signal flags strung on a rope; they drop in one by one when all tests pass. */
 export const Bunting = ({ flags = 9 }: { flags?: number }) => {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const width = 300;
   const step = width / flags;
   return (

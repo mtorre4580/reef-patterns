@@ -41,6 +41,14 @@ const pairs: [string, string, number][] = [
   ['biolum', 'abyss', 3],
   ['cat-creacional', 'abyss', 3],
   ['cat-frontend', 'abyss', 3],
+  // Text on the wooden header, signs and tabs (wood is the same in both themes)
+  ['on-wood', 'wood', 4.5],
+  ['on-wood', 'wood-dark', 4.5],
+  ['on-wood-muted', 'wood', 4.5],
+  ['on-wood-muted', 'wood-dark', 4.5],
+  // Active chips and zone tags
+  ['lagoon-ink', 'lagoon', 4.5],
+  ['kelp', 'abyss', 4.5],
 ];
 
 describe.each([

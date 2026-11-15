@@ -38,12 +38,12 @@ export const CatalogPage = () => {
     <div className="mx-auto w-full max-w-4xl px-4 pb-24 sm:px-6 lg:pr-36">
       <div className="relative my-8 overflow-hidden rounded-panel border-2 border-wood-deep sm:my-10">
         <div className="parchment grid items-end gap-4 rounded-none border-0 px-6 pt-8 sm:grid-cols-[1fr_15rem] sm:px-8">
-          <div className="pb-12">
+          <div className="pb-2 sm:pb-12">
             <p className="font-mono text-sm text-kelp">{t('catalog.eyebrow')}</p>
             <h1 className="mt-2 text-3xl leading-tight sm:text-4xl">{t('catalog.title')}</h1>
             <p className="mt-3 max-w-xl text-kelp">{t('catalog.intro')}</p>
           </div>
-          <SailingShip className="mx-auto -mb-2 w-48 sm:w-full" />
+          <SailingShip className="mx-auto -mb-2 w-36 sm:w-full" />
         </div>
         <div aria-hidden className="sea h-6 motion-safe:animate-waves" />
         <div aria-hidden className="rope h-[7px] rounded-none" />

@@ -1,4 +1,5 @@
-import { animate, motion, useMotionValue, useReducedMotion } from 'motion/react';
+import { animate, motion, useMotionValue } from 'motion/react';
+import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
 import { useEffect, useId, useRef, type PointerEvent } from 'react';
 import { useI18n } from '@/i18n';
 import { cn } from '@/lib/utils';
@@ -84,7 +85,7 @@ export const Helm = ({
   spinning,
   className,
 }: HelmProps) => {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const { t } = useI18n();
   const uid = useId().replace(/:/g, '');
   const rotation = useMotionValue(0);
@@ -175,7 +176,8 @@ export const Helm = ({
       velocity: 0,
       moved: false,
     };
-    e.currentTarget.setPointerCapture(e.pointerId);
+    // Optional chaining: some environments (jsdom, old browsers) lack pointer capture
+    e.currentTarget.setPointerCapture?.(e.pointerId);
   };
 
   const onPointerMove = (e: PointerEvent<HTMLButtonElement>) => {
