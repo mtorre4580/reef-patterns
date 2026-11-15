@@ -117,7 +117,7 @@ export const DepthGauge = ({ zones }: DepthGaugeProps) => {
                 className={cn(
                   'block rounded-control border px-1.5 py-px text-right font-mono text-[0.7rem] whitespace-nowrap transition-colors',
                   reading.zone?.tier === zone.tier
-                    ? 'border-brass bg-lagoon text-lagoon-ink'
+                    ? 'border-brass bg-marine text-on-marine'
                     : 'border-line bg-trench text-kelp hover:text-foam',
                 )}
               >

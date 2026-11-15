@@ -46,6 +46,11 @@
   /* Interactive accent (sea blue) */
   --color-lagoon: #6cb4ee;
   --color-lagoon-ink: #0a1724;
+  /* Primary actions: navy paint with white lettering, framed in brass */
+  --color-marine: #1f5385;
+  --color-marine-hover: #276299;
+  --color-marine-deep: #12324f;
+  --color-on-marine: #ffffff;
   /* Focus and active states (lantern brass) */
   --color-biolum: #f2c14e;
   --color-coral: #ff9a8a;
@@ -122,6 +127,9 @@
   --color-kelp: #5b4530;
   --color-lagoon: #1d5b94;
   --color-lagoon-ink: #ffffff;
+  --color-marine: #163f69;
+  --color-marine-hover: #1c4f82;
+  --color-marine-deep: #0c2742;
   --color-biolum: #0f3f6b;
   --color-coral: #a12a1b;
   --color-anemone: #2c6b3a;
