@@ -1,0 +1,21 @@
+name: Bug report
+description: Something on the site does not work as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected and what you got instead.
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: Page URL
+      placeholder: https://mtorre4580.github.io/reef-patterns/patterns/strategy/
+  - type: input
+    id: env
+    attributes:
+      label: Browser, theme and language
+      placeholder: Chrome 140, dark, Spanish

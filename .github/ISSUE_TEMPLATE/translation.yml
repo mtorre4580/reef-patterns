@@ -1,0 +1,18 @@
+name: Translation fix
+description: A text is wrong or unnatural in English, Spanish or Portuguese
+labels: [i18n]
+body:
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language
+      options: [English, Spanish, Portuguese (Brazil)]
+    validations:
+      required: true
+  - type: textarea
+    id: text
+    attributes:
+      label: Current text and suggested text
+      description: Include the page URL where it shows up.
+    validations:
+      required: true

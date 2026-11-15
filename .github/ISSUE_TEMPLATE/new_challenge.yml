@@ -1,0 +1,23 @@
+name: New challenge
+description: Propose a challenge for a pattern
+labels: [content, good first issue]
+body:
+  - type: input
+    id: pattern
+    attributes:
+      label: Pattern
+      placeholder: circuit-breaker
+    validations:
+      required: true
+  - type: textarea
+    id: story
+    attributes:
+      label: Real-world situation
+      description: The work context the challenge is based on (checkout, API client, notifications…).
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Behavior the tests should check
+      description: Something that only passes when the pattern is applied.
