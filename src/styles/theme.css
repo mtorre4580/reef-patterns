@@ -353,9 +353,16 @@
   color: var(--shiki-light);
 }
 
-/* View Transitions between catalog and detail */
+/* View Transitions between catalog and detail (React <ViewTransition> in CatalogLayout).
+   Only the catalog boundary cross-fades: the rest of the page (root) swaps instantly, so
+   navigations to and from the playground do not animate. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
+  animation: none;
+}
+::view-transition-group(.catalog-page),
+::view-transition-old(.catalog-page),
+::view-transition-new(.catalog-page) {
   animation-duration: 200ms;
 }
 
@@ -370,6 +377,11 @@
   }
   svg animateTransform {
     display: none;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }
 

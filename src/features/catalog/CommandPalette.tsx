@@ -54,7 +54,7 @@ export const CommandPaletteProvider = ({ children }: { children: ReactNode }) =>
     (to: string) => {
       setOpen(false);
       setQuery('');
-      navigate(to, { viewTransition: true });
+      navigate(to);
     },
     [navigate],
   );
