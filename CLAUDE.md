@@ -1,269 +1,271 @@
 # CLAUDE.md — Reef Patterns
 
-Guía de contexto para trabajar en este repo. Leela completa antes de tocar código.
+Context guide for working in this repo. Read all of it before touching code.
 
-## Qué es
+## What it is
 
-Web para que cualquier dev repase patrones de diseño, orientada a frontend.
-Tiene dos partes:
+A website where any developer can review design patterns, with a frontend focus.
+It has two parts:
 
-1. **Catálogo**: 52 patrones ordenados por frecuencia de uso, con buscador, filtros por grupo y
-   detalle (cuándo usarlo, beneficios, contras, ejemplo en JavaScript).
-2. **Playground**: editor tipo VS Code a la izquierda y panel de resultados a la derecha. El usuario
-   gira un timón (rueda) que elige un challenge al azar que obliga a aplicar un patrón, escribe la
-   solución y los tests se ejecutan en el navegador. No hay backend.
+1. **Catalog**: 52 patterns sorted by how often they are used, with search, group filters and a
+   detail page (when to use it, benefits, drawbacks, JavaScript example).
+2. **Playground**: a VS Code–like editor on the left and a results panel on the right. The user
+   spins a ship's helm (wheel) that randomly picks a challenge that forces them to apply a
+   pattern, writes the solution, and the tests run in the browser. There is no backend.
 
-Todo el contenido y el diseño tienen temática oceánica: mar, arrecife, acuario de arrecife (reef) y
-buceo. Los ejemplos de código usan ese dominio (sensores de acuario, dosificadoras, corales,
-computadoras de buceo, etc.).
+All content and design follow a nautical theme: the sea, reefs, reef aquariums and diving. Code
+examples use that domain (aquarium sensors, dosing pumps, corals, dive computers, etc.).
 
 ## Stack
 
-| Área | Elección | Notas |
+| Area | Choice | Notes |
 |---|---|---|
-| Runtime | Node LTS (24) | `.nvmrc` en la raíz |
-| Paquetes | pnpm | Nunca usar npm ni yarn. Commitear `pnpm-lock.yaml` |
-| Build | Vite (última estable) + `@vitejs/plugin-react` | |
-| UI | React 19 | Componentes funcionales y hooks únicamente |
-| Lenguaje de la app | TypeScript estricto | Los **ejemplos y challenges** son JavaScript puro (ver Convenciones) |
-| Estilos | Tailwind CSS v4 (`@tailwindcss/vite`) | Tokens en `src/styles/theme.css` con `@theme` |
-| Componentes base | shadcn/ui (primitivas Radix) | Se copian a `src/components/ui`, se adaptan al tema |
-| Íconos | lucide-react | |
-| Animación | Motion (`motion/react`) | Respetar `prefers-reduced-motion` |
-| Routing | React Router (modo librería) | |
-| Búsqueda | Fuse.js + paleta de comandos `cmdk` (⌘K) | |
-| i18n | Propia: Context + diccionarios tipados en `src/i18n` | en (default), es, pt-BR; sin dependencias |
-| Editor | Monaco vía `@monaco-editor/react` | Cargado con `React.lazy`; Monaco local, no CDN |
-| Resaltado de código (solo lectura) | Shiki | Tema propio “Abyss Reef” |
-| Ejecución de challenges | Web Worker + mini librería de asserts propia | Ver “Runner” |
-| Chequeos estáticos | acorn + acorn-walk | Reglas AST por challenge |
+| Runtime | Node LTS (24) | `.nvmrc` at the root |
+| Packages | pnpm | Never use npm or yarn. Commit `pnpm-lock.yaml` |
+| Build | Vite (latest stable) + `@vitejs/plugin-react` | |
+| UI | React 19 | Function components and hooks only |
+| App language | Strict TypeScript | **Examples and challenges** are plain JavaScript (see Conventions) |
+| Styling | Tailwind CSS v4 (`@tailwindcss/vite`) | Tokens in `src/styles/theme.css` via `@theme` |
+| Base components | shadcn/ui (Radix primitives) | Copied into `src/components/ui`, adapted to the theme |
+| Icons | lucide-react | |
+| Animation | Motion (`motion/react`) | Respect `prefers-reduced-motion` |
+| Routing | React Router (library mode) | |
+| Search | Fuse.js + `cmdk` command palette (⌘K) | |
+| i18n | Custom: Context + typed dictionaries in `src/i18n` | en (default), es, pt-BR; no dependencies |
+| Editor | Monaco via `@monaco-editor/react` | Loaded with `React.lazy`; local Monaco, no CDN |
+| Read-only code highlighting | Shiki | Custom “Abyss Reef” theme |
+| Challenge execution | Web Worker + small custom assertion library | See “Runner” |
+| Static checks | acorn + acorn-walk | Per-challenge AST rules |
 | Tests | Vitest + React Testing Library + `@testing-library/user-event` + jsdom | |
 | Lint/format | ESLint (flat config) + Prettier | |
-| CI | GitHub Actions | lint, typecheck, test, build |
-| Deploy | GitHub Pages con `HashRouter` (`createHashRouter`) | Workflow `deploy.yml` en cada push a `main`; `base: '/reef-patterns/'` |
+| CI | GitHub Actions | lint, typecheck, validate content, test, build |
+| Deploy | GitHub Pages with `HashRouter` (`createHashRouter`) | `deploy.yml` workflow on every push to `main`; `base: '/reef-patterns/'` |
 
-## Comandos
+## Commands
 
 ```bash
 pnpm install
-pnpm dev            # servidor de desarrollo
-pnpm build          # build de producción
-pnpm preview        # previsualizar el build
-pnpm test           # Vitest en modo watch
-pnpm test:run       # Vitest una vez (CI)
+pnpm dev                # development server
+pnpm build              # production build
+pnpm preview            # preview the build (served under /reef-patterns/)
+pnpm test               # Vitest in watch mode
+pnpm test:run           # Vitest once (CI)
 pnpm lint
-pnpm typecheck      # tsc --noEmit
-pnpm validate:content   # verifica patrones y challenges (ver Testing)
+pnpm typecheck          # tsc --noEmit
+pnpm validate:content   # checks patterns and challenges (see Testing)
 ```
 
-## Estructura
+## Structure
 
 ```
 src/
-  app/                 # router, providers, layout raíz
-  components/ui/       # shadcn/ui adaptados al tema
-  components/          # componentes compartidos (DepthGauge, CodeBlock, Helm…)
+  app/                 # router, providers, root layout
+  components/ui/       # shadcn/ui adapted to the theme
+  components/          # shared components (DepthGauge, CodeBlock, Helm…)
   features/
-    catalog/           # lista, filtros, búsqueda, detalle de patrón
-    playground/        # editor, panel de resultados, rueda, runner
-    progress/          # progreso del usuario (localStorage)
+    catalog/           # list, filters, search, pattern detail
+    playground/        # editor, results panel, helm, runner wiring
+    progress/          # user progress (localStorage)
   content/
     categories.ts
     tiers.ts
-    patterns/<id>.ts   # un archivo por patrón
+    patterns/<id>.ts   # one file per pattern
     challenges/<patternId>/<challengeId>.ts
-    index.ts           # registro: patterns, patternsById, challengesByPattern
+    index.ts           # registry: patterns, patternsById, challengesByPattern
+  i18n/                # I18nProvider, useI18n, LanguageSwitcher, messages/{en,es,pt-BR}.ts
   lib/
-    runner/            # worker, asserts, chequeos AST, tipos de resultado
+    runner/            # worker, assertions, AST checks, result types, localized messages
     search.ts
-    random.ts          # rng inyectable para la rueda
-  i18n/               # I18nProvider, useI18n, LanguageSwitcher, messages/{en,es,pt-BR}.ts
+    random.ts          # injectable rng for the helm
   styles/theme.css
-  test/                # setup de Vitest y helpers
+  test/                # Vitest setup and helpers
 scripts/
   validate-content.ts
 ```
 
-Regla: cada feature exporta su API pública desde `features/<x>/index.ts`. No importar archivos
-internos de otra feature.
+Rule: each feature exports its public API from `features/<x>/index.ts`. Do not import internal
+files from another feature.
 
-## Modelo de contenido
+## Content model
 
 ```ts
 type CategoryId = 'creacional' | 'estructural' | 'comportamiento'
   | 'arquitectura' | 'resiliencia' | 'frontend';
-type Tier = 1 | 2 | 3 | 4; // 1 Esencial … 4 Poco común
-type Localized<T> = Record<'en' | 'es' | 'pt-BR', T>;  // todo texto visible, en los 3 idiomas
+type Tier = 1 | 2 | 3 | 4; // 1 Essential … 4 Rare
+type Localized<T> = Record<'en' | 'es' | 'pt-BR', T>;  // every visible text, in all 3 languages
 
 interface Pattern {
-  id: string;            // kebab-case, estable: se usa en URLs
-  rank: number;          // orden global 1..N, sin huecos
-  name: string;          // nombre canónico en inglés (Strategy)
+  id: string;                    // kebab-case, stable: used in URLs
+  rank: number;                  // global order 1..N, no gaps
+  name: string;                  // canonical English name (Strategy)
   localName: Localized<string>;  // Strategy / Estrategia / Estratégia
   category: CategoryId;
   tier: Tier;
   gof: boolean;
-  summary: Localized<string>;    // 1 oración
-  when: Localized<string>;       // cuándo usarlo
-  pros: Localized<string[]>;     // 2-4, misma cantidad en cada idioma
+  summary: Localized<string>;    // one sentence
+  when: Localized<string>;       // when to use it
+  pros: Localized<string[]>;     // 2-4, same count in every language
   cons: Localized<string[]>;     // 2-4
-  realWorld: Localized<string>;  // dónde aparece en el ecosistema JS
-  example: { title: Localized<string>; scenario: Localized<string>; code: string }; // code: JS en inglés
-  related: string[];     // ids existentes
+  realWorld: Localized<string>;  // where it shows up in the JS ecosystem
+  example: { title: Localized<string>; scenario: Localized<string>; code: string }; // code: English JS
+  related: string[];             // existing ids
 }
 
 interface Challenge {
-  id: string;            // `${patternId}-${n}`
+  id: string;                       // `${patternId}-${n}`
   patternId: string;
   title: Localized<string>;
   difficulty: 'facil' | 'media' | 'dificil';
-  story: Localized<string>;         // contexto narrativo oceánico
-  instructions: Localized<string>;  // qué implementar, con nombres exactos de API
-  starterCode: string;              // JS en inglés
-  tests: { name: Localized<string>; code: string }[];  // usan expect() del runner
-  checks?: AstCheck<Localized<string>>[];              // reglas estáticas opcionales
+  story: Localized<string>;         // nautical narrative context
+  instructions: Localized<string>;  // what to implement, with exact API names
+  starterCode: string;              // English JS
+  tests: { name: Localized<string>; code: string }[];  // use the runner's expect()
+  checks?: AstCheck<Localized<string>>[];              // optional static rules
   hints: Localized<string[]>;
-  solution: string;                 // JS en inglés, debe pasar todos los tests
+  solution: string;                 // English JS, must pass every test
 }
 ```
 
-Los 52 patrones y su orden vienen del listado original (Esencial → Poco común). Si se agrega uno,
-recalcular `rank` y correr `pnpm validate:content`.
+The 52 patterns and their order come from the original list (Essential → Rare). When adding one,
+recompute `rank` and run `pnpm validate:content`.
 
-`challengesByPattern` es un `Map<string, Challenge[]>` construido en `content/index.ts`. La rueda
-nunca accede a challenges por otra vía.
+`challengesByPattern` is a `Map<string, Challenge[]>` built in `content/index.ts`. The helm never
+reaches challenges any other way.
 
-## Runner (ejecución de código del usuario)
+## Runner (running user code)
 
-- Corre en un **Web Worker** creado con
+- Runs in a **Web Worker** created with
   `new Worker(new URL('./runner.worker.ts', import.meta.url), { type: 'module' })`.
-- Entrada: `{ code, tests, timeoutMs }`. El worker arma un único script con el código del
-  usuario seguido de cada test, lo ejecuta con `new Function` y devuelve
-  `{ results: { name, passed, error? }[], logs: { level, args }[], durationMs }`.
-- `console.*` se intercepta dentro del worker y se reenvía al panel Consola.
-- Timeout por defecto 2000 ms: el hilo principal hace `worker.terminate()` y reporta
-  “Tiempo agotado: ¿hay un bucle infinito?”. Se crea un worker nuevo por ejecución.
+- Input: `{ code, tests, checks, timeoutMs, locale }`. The worker builds a single script with the
+  user code followed by each test, runs it with `new Function` and returns
+  `{ results: { name, passed, error?, kind }[], logs: { level, args }[], durationMs }`.
+- `console.*` is intercepted inside the worker and forwarded to the Console panel.
+- Default timeout is 2000 ms: the main thread calls `worker.terminate()` and reports
+  “Time is up: is there an infinite loop?” (localized). A new worker is created per run.
 - `lib/runner/expect.ts`: `toBe`, `toEqual` (deep), `toBeTruthy`, `toThrow`,
-  `toHaveBeenCalled`/`toHaveBeenCalledTimes` con un `fn()` espía propio. Nada más sin necesidad.
-- Chequeos AST (acorn) corren en el worker antes de los tests. Reglas soportadas:
-  `forbidNode` (p. ej. `SwitchStatement`), `requireClass`, `requireMethod`,
-  `maxIfStatements`. Un chequeo fallido se muestra como resultado más, con su mensaje.
-- Los tests deben verificar **comportamiento que solo se logra aplicando el patrón**
-  (p. ej. Singleton: dos llamadas devuelven la misma instancia; Observer: un suscriptor
-  desuscripto no recibe notificaciones), no la forma exacta del código.
+  `toHaveBeenCalled`/`toHaveBeenCalledTimes` with a custom `fn()` spy. Nothing more unless needed.
+  Assertion messages come from `lib/runner/messages.ts` in the active language.
+- AST checks (acorn) run in the worker before the tests. Supported rules: `forbidNode`
+  (e.g. `SwitchStatement`), `requireClass`, `requireMethod`, `maxIfStatements`. A failed check
+  shows up as one more result, with its message.
+- Tests must check **behavior that can only be achieved by applying the pattern** (e.g.
+  Singleton: two calls return the same instance; Observer: an unsubscribed listener gets no
+  notifications), not the exact shape of the code.
 
-## Rueda (timón)
+## Helm (wheel)
 
-- `pickChallenge(pool, completedIds, rng)` en `features/playground/pick.ts` es una función pura.
-  `rng` se inyecta (por defecto `Math.random`) para poder testearla.
-- Pool = challenges de los patrones que pasan los filtros activos. Prioriza los no completados;
-  si están todos completos, elige entre todos.
-- La animación del timón es solo visual: el resultado se calcula **antes** de animar y la
-  animación termina en el sector elegido.
-- Progreso y borradores en `localStorage` con claves `reef-patterns:progress` y
-  `reef-patterns:draft:<challengeId>`, siempre envueltos en try/catch.
+- `pickChallenge(pool, completedIds, rng)` in `features/playground/pick.ts` is a pure function.
+  `rng` is injected (`Math.random` by default) so it can be tested.
+- Pool = challenges of the patterns that pass the active filters. Unsolved ones come first; if all
+  are solved, it picks among all of them.
+- The helm animation is purely visual: the result is computed **before** animating and the
+  animation ends on the chosen sector.
+- Progress and drafts live in `localStorage` under `reef-patterns:progress` and
+  `reef-patterns:draft:<challengeId>`, always wrapped in try/catch.
 
-## Diseño
+## Design
 
-Dirección: minimalista, oscuro por defecto, con modo claro. La metáfora central es la
-**profundidad**: los niveles de uso son zonas de buceo.
+Direction: minimal, dark by default, with a light mode. The central metaphor is **depth**: usage
+tiers are dive zones.
 
-| Tier | Nombre | Zona | Profundidad mostrada |
+| Tier | Name | Zone | Depth shown |
 |---|---|---|---|
-| 1 | Esencial | Superficie | 0–10 m |
-| 2 | Muy usado | Arrecife | 10–30 m |
-| 3 | Situacional | Drop-off | 30–60 m |
-| 4 | Poco común | Abismo | 60 m+ |
+| 1 | Essential | Surface | 0–10 m |
+| 2 | Widely used | Reef | 10–30 m |
+| 3 | Situational | Drop-off | 30–60 m |
+| 4 | Rare | Abyss | 60 m+ |
 
-- Un profundímetro (`DepthGauge`) fijo en el lateral indica la zona mientras se scrollea el
-  catálogo; el fondo se oscurece levemente con la profundidad. Es el único elemento “wow”:
-  todo lo demás es sobrio.
-- Tokens en `src/styles/theme.css` (definir en `@theme`, valores oscuros por defecto):
-  - `--color-abyss` fondo, `--color-trench` superficies, `--color-current` bordes,
-    `--color-foam` texto, `--color-kelp` texto secundario,
-    `--color-lagoon` acento interactivo (turquesa), `--color-biolum` foco y estados activos,
-    `--color-coral` errores y tests fallidos, `--color-anemone` tests aprobados.
-  - Colores por categoría: `--cat-<id>`; nunca transmitir información solo por color.
-- Tipografía: Geist (UI) y Geist Mono (código). Escala modular 1.25.
-- Radios: 6 px controles, 12 px paneles. Sin sombras genéricas: la profundidad se marca con
-  luminosidad de superficie, no con `box-shadow`.
-- Motion: transiciones de 150–250 ms, solo como respuesta a acciones; View Transitions al
-  navegar entre catálogo y detalle cuando el navegador lo soporte.
-- Iconografía y copy náuticos con moderación: el texto debe seguir siendo claro para alguien
-  que no bucea (“Ejecutar tests”, no “Sumergirse”).
-- Monaco y Shiki comparten el tema “Abyss Reef” definido en `src/lib/editor-theme.ts`.
+- A depth gauge (`DepthGauge`) fixed on the side shows the zone while scrolling the catalog; the
+  background darkens slightly with depth. It is the only “wow” element: everything else is quiet.
+- Tokens in `src/styles/theme.css` (defined in `@theme`, dark values by default):
+  - `--color-abyss` background, `--color-trench` surfaces, `--color-current` borders,
+    `--color-foam` text, `--color-kelp` secondary text, `--color-lagoon` interactive accent
+    (turquoise), `--color-biolum` focus and active states, `--color-coral` errors and failed
+    tests, `--color-anemone` passed tests.
+  - Category colors: `--cat-<id>`; never convey information through color alone.
+- Typography: Geist (UI) and Geist Mono (code). 1.25 modular scale.
+- Radii: 6 px controls, 12 px panels. No generic shadows: depth is shown through surface
+  lightness, not `box-shadow`.
+- Motion: 150–250 ms transitions, only in response to actions; View Transitions between catalog
+  and detail when the browser supports them.
+- Nautical iconography and copy in moderation: text must stay clear for someone who doesn't dive
+  (“Run tests”, not “Dive in”).
+- Monaco and Shiki share the “Abyss Reef” theme defined in `src/lib/editor-theme.ts`.
 
-## Accesibilidad (obligatorio)
+## Accessibility (mandatory)
 
-WCAG 2.2 AA. Navegación completa por teclado (incluida la rueda: Enter/Espacio la gira), foco
-visible con `--color-biolum`, `aria-live` en el panel de resultados, contraste verificado en
-ambos temas, `prefers-reduced-motion` desactiva el giro animado (muestra el resultado directo).
+WCAG 2.2 AA. Full keyboard navigation (including the helm: Enter/Space spins it), visible focus
+with `--color-biolum`, `aria-live` on the results panel, contrast verified in both themes,
+`prefers-reduced-motion` disables the spin animation (shows the result directly).
 
-## Convenciones
+## Conventions
 
-- **Código de ejemplos y challenges: JavaScript moderno (ES2023), sin TypeScript, sin
-  dependencias, sin APIs del DOM** (corre en un worker). Identificadores en inglés.
-- **Todos los comentarios del código van en inglés**, sin excepción: app, scripts, tests y el
-  JS de ejemplos y challenges que ve el usuario. Es el estándar del equipo. El código de
-  ejemplos y challenges es único para los tres idiomas: comentarios, strings y mensajes de error
-  en inglés; solo la prosa (`Localized`) se traduce. `runnableChallenge(challenge, locale)` arma
-  los nombres de tests y chequeos en el idioma activo para el runner.
-- Dominio de los ejemplos: acuario de arrecife (sensores de temperatura, salinidad, pH,
-  dosificadoras de kalkwasser o métodos tipo Triton, skimmer, ATO, iluminación, corales SPS/LPS/
-  blandos, fragging) y buceo (computadora de buceo, paradas de seguridad, plan de inmersión,
-  equipo, log de inmersiones). Cada ejemplo cuenta una situación concreta, no clases `Foo`/`Bar`.
-- **i18n**: la UI está en inglés por defecto y se puede cambiar a español (`es`) y portugués
-  (`pt-BR`) desde el header; la elección se guarda en `reef-patterns:locale`. Ningún texto visible
-  va hardcodeado en un componente: todo sale de `useI18n().t('clave')`. Las claves viven en
-  `src/i18n/messages/en.ts` (fuente de verdad); `es.ts` y `pt-BR.ts` deben tener exactamente las
-  mismas claves (lo garantiza el tipo `Messages`). Plurales con `{ one, other }` + `{count}`.
-- Tono: inglés claro; español rioplatense neutro (“buscá”, “probá”); portugués de Brasil. Sentence
-  case en los tres.
-- Componentes: un componente por archivo, nombre en PascalCase, props tipadas, sin `default
-  export` salvo carga lazy.
-- **Los componentes se definen siempre como arrow functions** asignadas a `const`
-  (`export const Button = ({ … }: ButtonProps) => …`). Nunca `function Button()`. Para carga
-  lazy: `const MonacoEditor = () => …; export default MonacoEditor;`.
-- Estado: local con hooks; estado compartido con Context + `useReducer`. No agregar librerías de
-  estado sin discutirlo.
-- No agregar dependencias nuevas sin justificar en el PR por qué no alcanza con lo existente.
+- **Example and challenge code: modern JavaScript (ES2023), no TypeScript, no dependencies, no
+  DOM APIs** (it runs in a worker). Identifiers in English.
+- **Every code comment is written in English**, no exceptions: app, scripts, tests and the JS
+  of examples and challenges shown to users. This is the team standard. Example and challenge
+  code is shared by all three languages: comments, strings and error messages are in English;
+  only the prose (`Localized`) is translated. `runnableChallenge(challenge, locale)` builds the
+  test and check names in the active language for the runner.
+- Example domain: reef aquariums (temperature, salinity and pH sensors, kalkwasser or
+  Triton-style dosing, skimmer, ATO, lighting, SPS/LPS/soft corals, fragging) and diving (dive
+  computer, safety stops, dive plan, gear, dive log). Each example tells a concrete story, no
+  `Foo`/`Bar` classes.
+- **i18n**: the UI is in English by default and can be switched to Spanish (`es`) and Portuguese
+  (`pt-BR`) from the header; the choice is stored in `reef-patterns:locale`. No visible text is
+  hardcoded in a component: everything comes from `useI18n().t('key')`. Keys live in
+  `src/i18n/messages/en.ts` (source of truth); `es.ts` and `pt-BR.ts` must have exactly the same
+  keys (enforced by the `Messages` type). Plurals use `{ one, other }` + `{count}`.
+- Tone: plain English; neutral Rioplatense Spanish (“buscá”, “probá”); Brazilian Portuguese.
+  Sentence case in all three.
+- Components: one component per file, PascalCase name, typed props, no `default export` except
+  for lazy loading.
+- **Components are always arrow functions** assigned to `const`
+  (`export const Button = ({ … }: ButtonProps) => …`). Never `function Button()`; ESLint enforces
+  it. For lazy loading: `const MonacoEditor = () => …; export default MonacoEditor;`.
+- State: local with hooks; shared state with Context + `useReducer`. Do not add state libraries
+  without discussing it first.
+- Do not add new dependencies without explaining in the PR why the existing ones are not enough.
 
 ## Testing
 
-- Componentes: React Testing Library, consultas por rol y texto accesible
-  (`getByRole`, `getByLabelText`); nada de selectores por clase.
-- Lógica pura (`search`, `pickChallenge`, `expect`, chequeos AST): tests unitarios.
-- Runner: tests con un worker simulado; cubrir éxito, fallo, excepción y timeout.
-- **Contenido** (`pnpm validate:content`, también corre en CI):
-  - ids únicos, `rank` contiguo, `related` apunta a ids existentes;
-  - el `example.code` de cada patrón parsea con acorn;
-  - para cada challenge, la `solution` pasa todos los tests y chequeos, y el `starterCode`
-    falla al menos uno.
-- Un PR no se mergea con tests en rojo.
+- Components: React Testing Library, queries by role and accessible text (`getByRole`,
+  `getByLabelText`); no class selectors.
+- Pure logic (`search`, `pickChallenge`, `expect`, AST checks): unit tests.
+- Runner: tests with a fake worker; cover success, failure, exception and timeout.
+- **Content** (`pnpm validate:content`, also runs in CI):
+  - unique ids, contiguous `rank`, `related` points to existing ids;
+  - every text exists in all three languages and lists have the same length in each;
+  - each pattern's `example.code` parses with acorn;
+  - for each challenge, the `solution` passes every test and check, and the `starterCode` fails
+    at least one.
+- A PR is not merged with failing tests.
 
-## Cómo agregar…
+## How to add…
 
-**Un patrón**: crear `src/content/patterns/<id>.ts` con todos los textos en `en`, `es` y `pt-BR`,
-registrarlo en `content/index.ts`, ajustar `rank` y correr `pnpm validate:content` (falla si falta
-un idioma o si las listas no tienen la misma cantidad en todos).
+**A pattern**: create `src/content/patterns/<id>.ts` with every text in `en`, `es` and `pt-BR`,
+register it in `content/index.ts`, adjust `rank` and run `pnpm validate:content` (it fails if a
+language is missing or lists differ in length between languages).
 
-**Un challenge**: crear `src/content/challenges/<patternId>/<patternId>-<n>.ts` con
-`starterCode`, `tests`, `hints` y `solution` (código en inglés, textos en los 3 idiomas);
-registrarlo; correr `pnpm validate:content`.
+**A challenge**: create `src/content/challenges/<patternId>/<patternId>-<n>.ts` with
+`starterCode`, `tests`, `hints` and `solution` (code in English, texts in all 3 languages);
+register it in `content/challenges/index.ts`; run `pnpm validate:content`.
 
 ## Git
 
-- Rama principal `main`. Ramas `feat/…`, `fix/…`, `content/…`.
-- Commits convencionales: `feat:`, `fix:`, `content:`, `test:`, `chore:`, `docs:`.
-- Actualizar la sección “Estado” de este archivo al cerrar cada fase.
+- Main branch `main`. Branches `feat/…`, `fix/…`, `content/…`, `docs/…`, `chore/…`.
+- Conventional commits: `feat:`, `fix:`, `content:`, `test:`, `chore:`, `docs:`.
+- One PR per iteration. When PRs are stacked, retarget each one to `main` before merging it.
+- Update the “Status” section of this file when closing each phase.
 
-## Estado
+## Status
 
-- [x] Fase 0 — Setup
-- [x] Fase 1 — Contenido
-- [x] Fase 2 — Catálogo
-- [x] Fase 3 — Playground y runner
-- [x] Fase 4 — Challenges y rueda
-- [x] Fase 5 — Pulido y deploy (GitHub Pages)
+- [x] Phase 0 — Setup
+- [x] Phase 1 — Content
+- [x] Phase 2 — Catalog
+- [x] Phase 3 — Playground and runner
+- [x] Phase 4 — Challenges and helm
+- [x] Phase 5 — Polish and deploy (GitHub Pages)
+- [x] i18n — UI and content in en, es and pt-BR
 
-Ver `docs/PLAN.md` para el detalle de cada fase.
+See `docs/PLAN.md` for the details of each phase.
