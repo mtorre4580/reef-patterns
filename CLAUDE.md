@@ -282,6 +282,8 @@ register it in `content/challenges/index.ts`; run `pnpm validate:content`.
   `style`, `ci`, `build`, `revert`). Enforced by the `commit-msg` hook (`commitlint.config.js`).
 - Hooks are installed by `pnpm install` (`prepare: husky`). `pre-push` runs `pnpm lint` and blocks the
   push if it fails. Do not skip hooks with `--no-verify`.
+- Every PR fills in `.github/pull_request_template.md` (GitHub loads it automatically); write
+  “N/A” for sections that do not apply.
 - One PR per iteration. When PRs are stacked, retarget each one to `main` before merging it.
 - Update the “Status” section of this file when closing each phase.
 
