@@ -13,6 +13,8 @@ export default tseslint.config(
     languageOptions: {
       ecmaVersion: 2023,
       globals: { ...globals.browser, ...globals.node },
+      // Type-aware linting, needed by `@typescript-eslint/no-deprecated`
+      parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
     },
     plugins: {
       'react-hooks': reactHooks,
@@ -29,6 +31,8 @@ export default tseslint.config(
       ],
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/consistent-type-imports': 'error',
+      // Team standard: no new code may use APIs marked `@deprecated` (React, Node, libs, our own)
+      '@typescript-eslint/no-deprecated': 'error',
       // Team standard: components are arrow functions, never `function Component()`
       'no-restricted-syntax': [
         'error',

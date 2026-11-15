@@ -47,7 +47,12 @@ export const PatternDetailPage = () => {
   return (
     <article className="mx-auto w-full max-w-3xl px-4 pt-8 pb-24 sm:px-6">
       <nav aria-label={t('detail.breadcrumb')} className="text-sm text-kelp">
-        <Link to="/" viewTransition className="inline-flex items-center gap-1 hover:text-foam">
+        <Link
+          to="/"
+          // eslint-disable-next-line @typescript-eslint/no-deprecated -- TODO: migrate to React <ViewTransition>
+          viewTransition
+          className="inline-flex items-center gap-1 hover:text-foam"
+        >
           <ArrowLeft className="size-4" aria-hidden /> {t('detail.catalog')}
         </Link>
       </nav>
@@ -133,6 +138,7 @@ export const PatternDetailPage = () => {
                   <li key={rid}>
                     <Link
                       to={`/patterns/${rid}`}
+                      // eslint-disable-next-line @typescript-eslint/no-deprecated -- TODO: migrate to React <ViewTransition>
                       viewTransition
                       className="inline-flex h-8 items-center rounded-full border border-dashed border-line px-3.5 text-sm text-kelp transition-colors hover:border-solid hover:border-brass hover:bg-reef hover:text-foam"
                     >
@@ -153,6 +159,7 @@ export const PatternDetailPage = () => {
         {prev ? (
           <Link
             to={`/patterns/${prev.id}`}
+            // eslint-disable-next-line @typescript-eslint/no-deprecated -- TODO: migrate to React <ViewTransition>
             viewTransition
             className="flex flex-col gap-1 text-kelp hover:text-foam"
           >
@@ -167,6 +174,7 @@ export const PatternDetailPage = () => {
         {next && (
           <Link
             to={`/patterns/${next.id}`}
+            // eslint-disable-next-line @typescript-eslint/no-deprecated -- TODO: migrate to React <ViewTransition>
             viewTransition
             className="flex flex-col items-end gap-1 text-kelp hover:text-foam"
           >

@@ -18,7 +18,10 @@ if (!window.matchMedia) {
       matches: false,
       media: query,
       onchange: null,
+      // The MediaQueryList type still requires the legacy listener API
+      // eslint-disable-next-line @typescript-eslint/no-deprecated
       addListener: () => {},
+      // eslint-disable-next-line @typescript-eslint/no-deprecated
       removeListener: () => {},
       addEventListener: () => {},
       removeEventListener: () => {},

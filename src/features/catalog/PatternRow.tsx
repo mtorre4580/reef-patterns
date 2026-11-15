@@ -11,6 +11,7 @@ export const PatternRow = ({ pattern }: { pattern: Pattern }) => {
     <li>
       <Link
         to={`/patterns/${pattern.id}`}
+        // eslint-disable-next-line @typescript-eslint/no-deprecated -- TODO: migrate to React <ViewTransition>
         viewTransition
         className="group relative flex items-center gap-3 rounded-control px-3 py-3 transition-[background-color,transform] duration-200 hover:-translate-y-px hover:bg-reef"
       >

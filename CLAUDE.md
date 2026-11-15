@@ -250,6 +250,11 @@ with `--color-biolum`, `aria-live` on the results panel, contrast verified in bo
 - State: local with hooks; shared state with Context + `useReducer`. Do not add state libraries
   without discussing it first.
 - Do not add new dependencies without explaining in the PR why the existing ones are not enough.
+- **No deprecated APIs** in any new or changed function, method, helper, prop or dependency.
+  `@typescript-eslint/no-deprecated` enforces it for typed code; before committing or opening a
+  PR, run the `check-deprecations` skill (`.claude/skills/`) to also cover what the linter cannot
+  see (untyped deprecations, deprecated packages, legacy JS in example/challenge code). Existing
+  `eslint-disable … no-deprecated` lines marked `TODO: migrate` are baseline, never a precedent.
 
 ## Testing
 
@@ -280,6 +285,10 @@ register it in `content/challenges/index.ts`; run `pnpm validate:content`.
 - Main branch `main`. Branches `feat/…`, `fix/…`, `content/…`, `docs/…`, `chore/…`.
 - Conventional commits: `feat:`, `fix:`, `content:`, `test:`, `chore:`, `docs:` (also `refactor`, `perf`,
   `style`, `ci`, `build`, `revert`). Enforced by the `commit-msg` hook (`commitlint.config.js`).
+- Commit messages are short and clear: `type: subject` (optional scope), imperative mood,
+  lowercase, no trailing period, header ≤ 72 chars (enforced). Pick the type by what the change
+  does (`refactor:` changes no behavior, `fix:` corrects a bug). One logical change per commit;
+  add a body only when the *why* is not obvious. E.g. `refactor: extract sector math from helm`.
 - Hooks are installed by `pnpm install` (`prepare: husky`). `pre-push` runs `pnpm lint` and blocks the
   push if it fails. Do not skip hooks with `--no-verify`.
 - Every PR fills in `.github/pull_request_template.md` (GitHub loads it automatically); write
