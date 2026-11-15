@@ -1,5 +1,5 @@
 import type { RouteObject } from 'react-router';
-import { CatalogPage, PatternDetailPage } from '@/features/catalog';
+import { CatalogLayout, CatalogPage, PatternDetailPage } from '@/features/catalog';
 import { Layout } from './Layout';
 import { NotFoundPage } from './NotFoundPage';
 import { PageLoading } from './PageLoading';
@@ -9,8 +9,14 @@ export const routes: RouteObject[] = [
     path: '/',
     element: <Layout />,
     children: [
-      { index: true, element: <CatalogPage /> },
-      { path: 'patterns/:id', element: <PatternDetailPage /> },
+      {
+        // Pathless layout: wraps catalog and detail in one <ViewTransition> boundary
+        element: <CatalogLayout />,
+        children: [
+          { index: true, element: <CatalogPage /> },
+          { path: 'patterns/:id', element: <PatternDetailPage /> },
+        ],
+      },
       {
         path: 'playground',
         HydrateFallback: PageLoading,
