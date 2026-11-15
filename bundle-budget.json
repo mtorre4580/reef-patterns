@@ -1,0 +1,15 @@
+{
+  "$comment": "Gzip size limits in KB. Chunks are matched by name without the content hash. Monaco chunks are lazy (playground only), so they get their own limits.",
+  "initial": 280,
+  "defaultChunk": 120,
+  "chunks": {
+    "index.js": 275,
+    "playground.js": 120,
+    "runner.worker.js": 45,
+    "MonacoEditor.js": 10,
+    "editor.api.js": 760,
+    "editor.worker.js": 100,
+    "ts.worker.js": 1600,
+    "tsMode.js": 330
+  }
+}

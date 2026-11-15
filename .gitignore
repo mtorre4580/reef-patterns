@@ -7,3 +7,8 @@ coverage
 .DS_Store
 *.tsbuildinfo
 .vite
+
+# Browser tests and Lighthouse output
+.lighthouseci
+playwright-report
+test-results

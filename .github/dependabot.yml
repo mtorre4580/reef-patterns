@@ -1,0 +1,36 @@
+version: 2
+updates:
+  # npm ecosystem: Dependabot detects pnpm from pnpm-lock.yaml
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      react:
+        patterns: ['react', 'react-dom', '@types/react', '@types/react-dom']
+      vite-vitest:
+        patterns: ['vite', '@vitejs/*', 'vitest', '@tailwindcss/vite', 'tailwindcss']
+      lint-format:
+        patterns: ['eslint', '@eslint/*', 'eslint-*', 'typescript-eslint', 'prettier', 'globals']
+      testing:
+        patterns: ['@testing-library/*', 'jsdom', '@playwright/test', '@axe-core/*', 'axe-core']
+      # Everything else: minor and patch updates in a single PR
+      minor-and-patch:
+        update-types: ['minor', 'patch']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      actions:
+        patterns: ['*']
