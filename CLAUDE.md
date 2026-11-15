@@ -40,8 +40,11 @@ knowledge to understand an exercise.
 | Static checks | acorn + acorn-walk | Per-challenge AST rules |
 | Tests | Vitest + React Testing Library + `@testing-library/user-event` + jsdom | |
 | Lint/format | ESLint (flat config) + Prettier | |
-| CI | GitHub Actions | lint, typecheck, validate content, test, build |
-| Deploy | GitHub Pages with `HashRouter` (`createHashRouter`) | `deploy.yml` workflow on every push to `main`; `base: '/reef-patterns/'` |
+| CI | GitHub Actions | lint, typecheck, validate content, unit tests, build + bundle budget, `pnpm audit`, dependency review, Playwright + axe (both themes), Lighthouse CI, CodeQL |
+| Browser tests | Playwright + `@axe-core/playwright` | `e2e/`, runs against the production build |
+| Performance | Lighthouse CI (`lighthouserc.json`) + `bundle-budget.json` | Gzip limits per chunk |
+| Dependencies | Dependabot (weekly, grouped) | `.github/dependabot.yml` |
+| Deploy | GitHub Pages with `HashRouter` (`createHashRouter`) | `deploy.yml` runs after CI passes on `main`; `base: '/reef-patterns/'` |
 
 ## Commands
 
@@ -55,6 +58,9 @@ pnpm test:run           # Vitest once (CI)
 pnpm lint
 pnpm typecheck          # tsc --noEmit
 pnpm validate:content   # checks patterns and challenges (see Testing)
+pnpm check:bundle       # gzip budget per chunk (after pnpm build)
+pnpm test:e2e           # Playwright + axe in dark and light (after pnpm build)
+pnpm lhci               # Lighthouse CI on the built site
 ```
 
 ## Structure

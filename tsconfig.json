@@ -18,7 +18,9 @@
     "skipLibCheck": true,
     "allowImportingTsExtensions": true,
     "types": ["vite/client", "node", "vitest/globals", "@testing-library/jest-dom/vitest"],
-    "paths": { "@/*": ["./src/*"] }
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": ["src", "scripts", "vite.config.ts", "eslint.config.js"]
+  "include": ["src", "scripts", "vite.config.ts", "eslint.config.js", "e2e", "playwright.config.ts"]
 }
