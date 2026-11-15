@@ -69,7 +69,7 @@ describe('pattern detail', () => {
     const { user } = renderRoute('/patterns/observer');
     expect(screen.getByRole('heading', { name: /^Example:/ })).toBeInTheDocument();
     expect(screen.getByText(/class TemperatureSensor/)).toBeInTheDocument();
-    const related = screen.getByRole('heading', { name: 'Related' }).parentElement!;
+    const related = screen.getByRole('heading', { name: 'Related' }).closest('section')!;
     await user.click(within(related).getByRole('link', { name: 'Pub/Sub' }));
     expect(await screen.findByRole('heading', { level: 1, name: 'Pub/Sub' })).toBeInTheDocument();
   });

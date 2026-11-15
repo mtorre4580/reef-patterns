@@ -36,11 +36,25 @@ const pairs: [string, string, number][] = [
   ['kelp', 'reef', 4.5],
   ['lagoon', 'abyss', 4.5],
   ['lagoon-ink', 'lagoon', 4.5],
+  // Primary buttons, active chips and the active depth tag
+  ['on-marine', 'marine', 7],
+  ['on-marine', 'marine-hover', 4.5],
   ['coral', 'trench', 4.5],
   ['anemone', 'trench', 4.5],
   ['biolum', 'abyss', 3],
   ['cat-creacional', 'abyss', 3],
   ['cat-frontend', 'abyss', 3],
+  // Text on the wooden header, signs and tabs (wood is the same in both themes)
+  ['on-wood', 'wood', 4.5],
+  ['on-wood', 'wood-dark', 4.5],
+  ['on-wood-muted', 'wood', 4.5],
+  ['on-wood-muted', 'wood-dark', 4.5],
+  // Active chips and zone tags
+  ['lagoon-ink', 'lagoon', 4.5],
+  // Primary buttons, active chips and the active depth tag
+  ['on-marine', 'marine', 7],
+  ['on-marine', 'marine-hover', 4.5],
+  ['kelp', 'abyss', 4.5],
 ];
 
 describe.each([

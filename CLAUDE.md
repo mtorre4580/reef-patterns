@@ -165,8 +165,9 @@ reaches challenges any other way.
 
 ## Design
 
-Direction: minimal, dark by default, with a light mode. The central metaphor is **depth**: usage
-tiers are dive zones.
+Direction: an **old sailing ship**. Weathered wood, hemp rope, sailcloth, brass fittings and sea
+blue. Dark by default (night watch: navy sea, walnut panels, brass lanterns) with a light mode
+(deck by day: sailcloth and parchment charts, navy ink). Usage tiers are still dive zones:
 
 | Tier | Name | Zone | Depth shown |
 |---|---|---|---|
@@ -175,22 +176,35 @@ tiers are dive zones.
 | 3 | Situational | Drop-off | 30–60 m |
 | 4 | Rare | Abyss | 60 m+ |
 
-- A depth gauge (`DepthGauge`) fixed on the side shows the zone while scrolling the catalog; the
-  background darkens slightly with depth. It is the only “wow” element: everything else is quiet.
-- Tokens in `src/styles/theme.css` (defined in `@theme`, dark values by default):
-  - `--color-abyss` background, `--color-trench` surfaces, `--color-current` borders,
-    `--color-foam` text, `--color-kelp` secondary text, `--color-lagoon` interactive accent
-    (turquoise), `--color-biolum` focus and active states, `--color-coral` errors and failed
-    tests, `--color-anemone` passed tests.
-  - Category colors: `--cat-<id>`; never convey information through color alone.
-- Typography: Geist (UI) and Geist Mono (code). 1.25 modular scale.
-- Radii: 6 px controls, 12 px panels. No generic shadows: depth is shown through surface
-  lightness, not `box-shadow`.
-- Motion: 150–250 ms transitions, only in response to actions; View Transitions between catalog
-  and detail when the browser supports them.
-- Nautical iconography and copy in moderation: text must stay clear for someone who doesn't dive
-  (“Run tests”, not “Dive in”).
-- Monaco and Shiki share the “Abyss Reef” theme defined in `src/lib/editor-theme.ts`.
+- **Tokens** in `src/styles/theme.css` (`@theme`, dark values by default; the original ocean
+  names are kept): `--color-abyss` background, `--color-trench` panels, `--color-reef` raised
+  panels, `--color-current` borders, `--color-foam` text, `--color-kelp` secondary text,
+  `--color-lagoon` interactive accent (sea blue), `--color-biolum` focus (brass in dark, navy in
+  light), `--color-coral` failures, `--color-anemone` passes. Ship materials are the same in both
+  themes: `--color-wood*`, `--color-rope*`, `--color-brass*`, `--color-sail`, `--color-navy`, and
+  `--color-on-wood*` for text on wood. Category colors: `--cat-<id>`; never convey information
+  through color alone.
+- **Material utilities** (CSS only, no images): `wood`, `planks` (header and tab bars), `rope` /
+  `rope-v` (dividers, progress, sounding line), `parchment` (cards and panels), `nailed` (two brass
+  nails on signs), `brass` (coins, badges, readouts), `sea` (animated waves).
+- **Typography**: IM Fell English (`--font-display`) for `h1`/`h2`, signs and the helm; Geist for
+  UI text; Geist Mono for code. 1.25 modular scale.
+- **Signature elements**: the wooden ship's helm (turned handles, brass hub, king spoke knot, brass
+  pointer that flicks per sector), the sounding-line depth gauge (rope pays out with a lead weight),
+  the hero sailing ship bobbing on the waves, wooden zone signs, signal flags when all tests pass.
+- **Interaction**: buttons sink 1 px when pressed; rows lift and a rope slides in under them; rank
+  coins flip on hover; results enter one by one. The helm spins on click, Enter/Space, or a drag
+  with enough speed (in either direction). All decorative motion (sway, bob, waves) stops with
+  `prefers-reduced-motion`; use `usePrefersReducedMotion` (Motion's hook caches the value).
+- **Sound** (`src/lib/sound.ts`, synthesized with Web Audio, no files): wooden creak when the helm
+  starts, a ratchet tick per sector, a ship's bell when it stops and two bells when every test
+  passes. On by default, muted from the header toggle and stored in `reef-patterns:sound`. Sounds
+  only play in response to a user action and are no-ops where Web Audio does not exist.
+- Shadows are allowed where they sell a physical object (wood, brass, the helm); keep panels flat
+  otherwise.
+- Copy stays plain: nautical look, clear words (“Run tests”, not “Weigh anchor”).
+- Monaco and Shiki share the “Abyss Reef” palette in `src/lib/editor-theme.ts` (night navy in
+  dark, sailcloth in light).
 
 ## Accessibility (mandatory)
 
@@ -267,5 +281,6 @@ register it in `content/challenges/index.ts`; run `pnpm validate:content`.
 - [x] Phase 4 — Challenges and helm
 - [x] Phase 5 — Polish and deploy (GitHub Pages)
 - [x] i18n — UI and content in en, es and pt-BR
+- [x] Nautical redesign — old ship look, wooden helm, ship sounds
 
 See `docs/PLAN.md` for the details of each phase.

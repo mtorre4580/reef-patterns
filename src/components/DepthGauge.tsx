@@ -56,6 +56,7 @@ export const DepthGauge = ({ zones }: DepthGaugeProps) => {
       aria-label={t('gauge.label')}
       className="fixed top-24 right-6 bottom-10 z-10 hidden w-24 flex-col items-end lg:flex"
     >
+      {/* Brass plate with the current reading */}
       <div
         role="meter"
         aria-label={t('gauge.meter')}
@@ -63,32 +64,61 @@ export const DepthGauge = ({ zones }: DepthGaugeProps) => {
         aria-valuemax={MAX_GAUGE_DEPTH}
         aria-valuenow={meters}
         aria-valuetext={`${meters} m, ${zoneName}`}
-        className="mb-3 text-right"
+        className="brass mb-3 rounded-control px-2.5 py-1.5 text-right"
       >
-        <p className="font-mono text-lg text-foam tabular-nums">{meters} m</p>
-        <p className="text-xs text-kelp">{zoneName}</p>
+        <p className="font-mono text-lg leading-none tabular-nums">{meters} m</p>
+        <p className="mt-0.5 font-display text-xs">{zoneName}</p>
       </div>
 
-      <div className="relative flex-1 pr-1">
-        <div aria-hidden className="absolute top-0 right-[7px] bottom-0 w-px bg-line" />
+      {/* Sounding line: the rope pays out as you go deeper, with a lead weight at its end */}
+      <div className="relative w-20 flex-1">
         <div
           aria-hidden
-          className="absolute right-0.5 size-[11px] rounded-full border-2 border-biolum bg-abyss transition-[top] duration-200"
-          style={{ top: `calc(${position * 100}% - 5px)` }}
+          className="absolute top-0 right-[10px] bottom-0 border-r border-dashed border-line"
         />
+        <div
+          aria-hidden
+          className="rope-v absolute top-0 right-[7px] transition-[height] duration-200"
+          style={{ height: `${position * 100}%` }}
+        />
+        <svg
+          aria-hidden
+          viewBox="0 0 20 28"
+          className="absolute right-0 w-5 drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)] transition-[top] duration-200"
+          style={{ top: `calc(${position * 100}% - 2px)` }}
+        >
+          <circle
+            cx="10"
+            cy="3"
+            r="2.5"
+            fill="none"
+            stroke="var(--color-rope-dark)"
+            strokeWidth="1.4"
+          />
+          <path d="M10 5 C 16 10 17 18 17 21 A 7 7 0 0 1 3 21 C 3 18 4 10 10 5 Z" fill="#6f7a84" />
+          <path
+            d="M8 10 C 6 13 6 17 6.5 20"
+            stroke="#c4ccd3"
+            strokeOpacity="0.6"
+            strokeWidth="1.2"
+            fill="none"
+          />
+        </svg>
         <ol className="relative h-full">
           {zones.map((zone) => (
             <li
               key={zone.tier}
-              className="absolute right-5"
-              style={{ top: `calc(${(zone.minDepth / MAX_GAUGE_DEPTH) * 100}% - 0.6em)` }}
+              className="absolute right-6"
+              style={{ top: `calc(${(zone.minDepth / MAX_GAUGE_DEPTH) * 100}% - 0.7em)` }}
             >
               <button
                 type="button"
                 onClick={() => scrollToId(zoneElementId(zone.tier))}
                 className={cn(
-                  'block rounded-control px-1 text-right font-mono text-[0.7rem] whitespace-nowrap transition-colors hover:text-foam',
-                  reading.zone?.tier === zone.tier ? 'text-biolum' : 'text-kelp',
+                  'block rounded-control border px-1.5 py-px text-right font-mono text-[0.7rem] whitespace-nowrap transition-colors',
+                  reading.zone?.tier === zone.tier
+                    ? 'border-brass bg-marine text-on-marine'
+                    : 'border-line bg-trench text-kelp hover:text-foam',
                 )}
               >
                 {zone.minDepth} m

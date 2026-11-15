@@ -5,10 +5,12 @@ import { categories } from '@/content/categories';
 import { tiers } from '@/content/tiers';
 import type { CategoryId, Challenge, Tier } from '@/content/types';
 import { Helm, type HelmSpin } from '@/components/Helm';
+import { RopeChip } from '@/components/RopeChip';
+import { useSound } from '@/app/SoundProvider';
+import { motion } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { useProgress, completedZones } from '@/features/progress';
 import { defaultRng, type Rng } from '@/lib/random';
-import { cn } from '@/lib/utils';
 import { useI18n } from '@/i18n';
 import { pickChallenge } from './pick';
 import { buildPool, defaultHelmFilters, type HelmFilters } from './pool';
@@ -22,33 +24,10 @@ function toggle<T>(list: T[], item: T): T[] {
   return list.includes(item) ? list.filter((x) => x !== item) : [...list, item];
 }
 
-const Chip = ({
-  pressed,
-  onClick,
-  children,
-}: {
-  pressed: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) => {
-  return (
-    <button
-      type="button"
-      aria-pressed={pressed}
-      onClick={onClick}
-      className={cn(
-        'h-7 rounded-control border px-2.5 text-xs transition-colors',
-        pressed ? 'border-lagoon bg-lagoon/15 text-foam' : 'border-line text-kelp hover:text-foam',
-      )}
-    >
-      {children}
-    </button>
-  );
-};
-
 /** Filters + helm + result. The challenge is picked before animating. */
 export const HelmPanel = ({ onChoose, rng = defaultRng }: HelmPanelProps) => {
   const { completed } = useProgress();
+  const sound = useSound();
   const { t, locale } = useI18n();
   const [filters, setFilters] = useState<HelmFilters>(defaultHelmFilters);
   const [spin, setSpin] = useState<(HelmSpin & { challenge: Challenge }) | null>(null);
@@ -70,15 +49,22 @@ export const HelmPanel = ({ onChoose, rng = defaultRng }: HelmPanelProps) => {
     setSettledKey(null);
   };
 
-  const doSpin = () => {
+  const doSpin = (direction: 1 | -1 = 1) => {
     const challenge = pickChallenge(pool, completed, rng);
     if (!challenge) return;
     const index = sectors.findIndex((p) => p.id === challenge.patternId);
     setSettledKey(null);
-    setSpin((prev) => ({ key: (prev?.key ?? 0) + 1, index, challenge }));
+    setSpin((prev) => ({ key: (prev?.key ?? 0) + 1, index, direction, challenge }));
   };
 
-  const onSettled = useCallback((key: number) => setSettledKey(key), []);
+  const { bell, tick, creak } = sound;
+  const onSettled = useCallback(
+    (key: number) => {
+      setSettledKey(key);
+      bell();
+    },
+    [bell],
+  );
   const result = spin && settledKey === spin.key ? spin.challenge : null;
   const resultPattern = result ? patterns.find((p) => p.id === result.patternId) : null;
   const spinning = !!spin && settledKey !== spin.key;
@@ -93,33 +79,36 @@ export const HelmPanel = ({ onChoose, rng = defaultRng }: HelmPanelProps) => {
         <legend className="mb-2 text-xs text-kelp">{t('helm.zones')}</legend>
         <div className="flex flex-wrap gap-1.5">
           {tiers.map((tier) => (
-            <Chip
+            <RopeChip
+              size="sm"
               key={tier.tier}
               pressed={filters.tiers.includes(tier.tier)}
               onClick={() => update({ tiers: toggle<Tier>(filters.tiers, tier.tier) })}
             >
               {t(`tiers.${tier.tier}.zone`)}
-            </Chip>
+            </RopeChip>
           ))}
-          <Chip
+          <RopeChip
+            size="sm"
             pressed={filters.pendingOnly}
             onClick={() => update({ pendingOnly: !filters.pendingOnly })}
           >
             {t('helm.pendingOnly')}
-          </Chip>
+          </RopeChip>
         </div>
       </fieldset>
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-2 text-xs text-kelp">{t('helm.categories')}</legend>
         <div className="flex flex-wrap gap-1.5">
           {categories.map((c) => (
-            <Chip
+            <RopeChip
+              size="sm"
               key={c.id}
               pressed={filters.categories.includes(c.id)}
               onClick={() => update({ categories: toggle<CategoryId>(filters.categories, c.id) })}
             >
               {t(`categories.${c.id}.label`)}
-            </Chip>
+            </RopeChip>
           ))}
         </div>
       </fieldset>
@@ -131,6 +120,8 @@ export const HelmPanel = ({ onChoose, rng = defaultRng }: HelmPanelProps) => {
             spin={spin}
             onSpin={doSpin}
             onSettled={onSettled}
+            onTick={tick}
+            onSpinStart={creak}
             spinning={spinning}
           />
           <p className="text-center text-xs text-kelp">
@@ -141,18 +132,21 @@ export const HelmPanel = ({ onChoose, rng = defaultRng }: HelmPanelProps) => {
           </p>
         </>
       ) : (
-        <p
-          role="status"
-          className="rounded-panel border border-line p-6 text-center text-sm text-kelp"
-        >
+        <p role="status" className="parchment rounded-panel p-6 text-center text-sm text-kelp">
           {t('helm.none')}
         </p>
       )}
 
       <div aria-live="polite" className="min-h-6">
         {result && resultPattern && (
-          <div className="flex flex-col items-center gap-3 rounded-panel border border-lagoon/40 bg-lagoon/10 p-4 text-center">
-            <p className="text-sm">
+          <motion.div
+            key={result.id + String(spin?.key)}
+            initial={{ opacity: 0, scale: 0.92, rotate: -2 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+            className="parchment nailed flex flex-col items-center gap-3 rounded-panel p-5 pt-6 text-center"
+          >
+            <p className="font-display text-lg leading-snug">
               {resultBefore}
               <strong>{resultPattern.name}</strong>
               {resultAfter}
@@ -164,7 +158,7 @@ export const HelmPanel = ({ onChoose, rng = defaultRng }: HelmPanelProps) => {
             <Button variant="primary" size="sm" onClick={() => onChoose(result)} autoFocus>
               <Compass aria-hidden /> {t('helm.start')}
             </Button>
-          </div>
+          </motion.div>
         )}
       </div>
 
@@ -172,12 +166,18 @@ export const HelmPanel = ({ onChoose, rng = defaultRng }: HelmPanelProps) => {
         <p className="text-xs text-kelp">
           {t('helm.progress', { done: completed.size, total: totalChallenges })}
         </p>
+        <div aria-hidden className="h-2 overflow-hidden rounded-full border border-line bg-reef">
+          <div
+            className="rope h-full rounded-none transition-[width] duration-500"
+            style={{ width: `${(completed.size / Math.max(1, totalChallenges)) * 100}%` }}
+          />
+        </div>
         {zones.length > 0 && (
           <ul className="flex flex-wrap gap-2">
             {zones.map((tier) => (
               <li
                 key={tier}
-                className="inline-flex items-center gap-1.5 rounded-control border border-anemone/40 px-2 py-1 text-xs text-anemone"
+                className="brass inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs"
               >
                 <Award aria-hidden className="size-3.5" />{' '}
                 {t('helm.zoneDone', { zone: t(`tiers.${tier}.zone`) })}

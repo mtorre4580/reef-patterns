@@ -39,16 +39,16 @@ export const CodeBlock = ({ code, label, className }: CodeBlockProps) => {
   return (
     <figure
       className={cn(
-        'relative overflow-hidden rounded-panel border border-line bg-trench',
+        'relative overflow-hidden rounded-panel border-2 border-wood-deep bg-[var(--code-bg)] shadow-[0_8px_20px_-12px_rgb(0_0_0/0.7)]',
         className,
       )}
     >
-      <figcaption className="flex items-center justify-between border-b border-line px-4 py-2 text-xs text-kelp">
+      <figcaption className="wood flex items-center justify-between border-b border-wood-deep px-4 py-2 text-xs text-on-wood-muted">
         <span>{label ?? t('code.example')} · JavaScript</span>
         <button
           type="button"
           onClick={copy}
-          className="inline-flex items-center gap-1 rounded-control px-2 py-1 hover:bg-reef hover:text-foam"
+          className="inline-flex items-center gap-1 rounded-control px-2 py-1 hover:bg-black/20 hover:text-on-wood"
         >
           {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
           {copied ? t('code.copied') : t('code.copy')}

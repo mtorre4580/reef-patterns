@@ -6,7 +6,7 @@ import { isLocale, locales } from './locales';
 export const LanguageSwitcher = () => {
   const { locale, setLocale, t } = useI18n();
   return (
-    <label className="relative inline-flex h-9 items-center gap-1.5 rounded-control px-2 text-sm text-kelp hover:bg-reef hover:text-foam">
+    <label className="relative inline-flex h-9 items-center gap-1.5 rounded-control px-2 text-sm text-on-wood-muted hover:bg-black/20 hover:text-on-wood">
       <Languages aria-hidden className="size-4" />
       <span className="sr-only">{t('nav.language')}</span>
       <span aria-hidden className="font-mono text-xs">

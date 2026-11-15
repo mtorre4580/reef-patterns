@@ -24,7 +24,7 @@ export default tseslint.config(
         'warn',
         {
           allowConstantExport: true,
-          allowExportNames: ['useTheme', 'useCommandPalette', 'useProgress', 'useI18n'],
+          allowExportNames: ['useTheme', 'useCommandPalette', 'useProgress', 'useI18n', 'useSound'],
         },
       ],
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],

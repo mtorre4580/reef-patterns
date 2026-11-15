@@ -17,6 +17,9 @@ export const es: Messages = {
     toLight: 'Cambiar a modo claro',
     toDark: 'Cambiar a modo oscuro',
     language: 'Idioma',
+    sound: 'Sonidos del barco',
+    soundOn: 'Sonido activado',
+    soundOff: 'Sonido desactivado',
   },
   categories: {
     creacional: { label: 'Creacional', description: 'Cómo se crean los objetos.' },
@@ -171,7 +174,7 @@ export const es: Messages = {
     patterns: { one: '{count} patrón', other: '{count} patrones' },
     challenges: { one: '{count} challenge', other: '{count} challenges' },
     inPlay:
-      '{patterns} · {challenges} en juego. Hacé clic en el timón o enfocalo y presioná Enter.',
+      '{patterns} · {challenges} en juego. Hacé clic en el timón, arrastralo para darle impulso o enfocalo y presioná Enter.',
     none: 'No quedan challenges con estos filtros. Probá con otras zonas o categorías.',
     result: 'Te tocó {pattern}: {title}',
     alreadySolved: ' (ya resuelto)',

@@ -14,14 +14,14 @@ export const ZoneSection = ({ zone, patterns }: ZoneSectionProps) => {
   const headingId = `${zoneElementId(zone.tier)}-title`;
   return (
     <section id={zoneElementId(zone.tier)} aria-labelledby={headingId} className="scroll-mt-24">
-      <header className="sticky top-14 z-[1] -mx-3 flex items-baseline gap-3 bg-abyss/85 px-3 py-3 backdrop-blur-sm">
-        <h2 id={headingId} className="text-lg font-semibold tracking-tight">
+      <header className="wood nailed sticky top-[60px] z-[1] flex items-baseline gap-3 rounded-panel border border-wood-deep px-6 py-3 shadow-[0_6px_14px_-8px_rgb(0_0_0/0.7)]">
+        <h2 id={headingId} className="text-xl text-on-wood">
           {t(`tiers.${zone.tier}.zone`)}
-          <span className="font-mono text-sm font-normal text-kelp"> · {zone.depth}</span>
+          <span className="font-mono text-sm text-on-wood-muted"> · {zone.depth}</span>
         </h2>
-        <span className="text-sm text-kelp">{t(`tiers.${zone.tier}.label`)}</span>
+        <span className="text-sm text-on-wood-muted">{t(`tiers.${zone.tier}.label`)}</span>
       </header>
-      <ol className="flex flex-col">
+      <ol className="parchment -mt-2 flex flex-col rounded-b-panel px-2 pt-4 pb-2">
         {patterns.map((p) => (
           <PatternRow key={p.id} pattern={p} />
         ))}
