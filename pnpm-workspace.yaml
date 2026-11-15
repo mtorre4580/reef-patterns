@@ -4,3 +4,6 @@ overrides:
   # monaco-editor 0.57.0 pins dompurify 3.4.15 (GHSA-cg2g-xh64-v4q7, GHSA-mrv2-3pqr-j5jr).
   # Drop this once monaco ships a patched version.
   dompurify: 3.4.18
+  # @lhci/cli -> proxy-agent -> get-uri pins basic-ftp ^5 (GHSA-c475-qrg2-pj4r, fixed in 6.2.1).
+  # Dev-only and Lighthouse never fetches ftp:// URLs. Drop once get-uri moves to basic-ftp 6.
+  get-uri>basic-ftp: 6.2.6

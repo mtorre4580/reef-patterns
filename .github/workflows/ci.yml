@@ -123,4 +123,6 @@ jobs:
         with:
           name: lighthouse-report
           path: .lighthouseci
+          # upload-artifact skips dot-folders unless told otherwise
+          include-hidden-files: true
           retention-days: 7
