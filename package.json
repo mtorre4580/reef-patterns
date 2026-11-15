@@ -2,6 +2,23 @@
   "name": "reef-patterns",
   "private": true,
   "version": "0.1.0",
+  "description": "Learn 52 design patterns for frontend developers with JavaScript examples and interactive challenges that run in the browser.",
+  "keywords": [
+    "design-patterns",
+    "javascript",
+    "frontend",
+    "react",
+    "typescript",
+    "gang-of-four",
+    "learning",
+    "coding-challenges"
+  ],
+  "homepage": "https://mtorre4580.github.io/reef-patterns/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mtorre4580/reef-patterns.git"
+  },
+  "license": "MIT",
   "type": "module",
   "packageManager": "pnpm@12.18.0",
   "engines": {
@@ -20,6 +37,7 @@
     "check:bundle": "tsx scripts/check-bundle.ts",
     "test:e2e": "playwright test",
     "lhci": "lhci autorun",
+    "media": "tsx scripts/capture-media.ts",
     "prepare": "husky"
   },
   "dependencies": {

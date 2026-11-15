@@ -62,6 +62,7 @@ pnpm validate:content   # checks patterns and challenges (see Testing)
 pnpm check:bundle       # gzip budget per chunk (after pnpm build)
 pnpm test:e2e           # Playwright + axe in dark and light (after pnpm build)
 pnpm lhci               # Lighthouse CI on the built site
+pnpm media              # README screenshots + helm GIF into docs/media (after pnpm build; needs ffmpeg)
 ```
 
 ## Structure

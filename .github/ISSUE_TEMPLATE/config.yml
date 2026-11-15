@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Open the site
+    url: https://mtorre4580.github.io/reef-patterns/
+    about: Browse the 52 patterns and try the playground.
