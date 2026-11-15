@@ -5,13 +5,27 @@
 @import '@fontsource/im-fell-english/400-italic.css';
 
 /*
+ * Metric-matched fallback for Geist, so the swap to the web font does not reflow the page (CLS).
+ * Arial, Liberation Sans and Arimo share metrics; Liberation Sans is what Linux usually has.
+ * Values measured against Geist Variable: average advance width and font ascent/descent.
+ */
+@font-face {
+  font-family: 'Geist Fallback';
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('Arimo');
+  size-adjust: 102.37%;
+  ascent-override: 98.66%;
+  descent-override: 28.33%;
+  line-gap-override: 0%;
+}
+
+/*
  * Reef Patterns tokens — an old sailing ship: weathered wood, hemp rope, sailcloth and sea blue.
  * Dark values by default (night watch: navy sea, walnut panels, brass lanterns); light mode
  * (deck by day: sailcloth, parchment charts, navy ink) redefines them under [data-theme='light'].
  * Token names are kept from the original ocean theme so components did not have to change.
  */
 @theme {
-  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Geist Variable', 'Geist Fallback', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
   /* Old logbook type, only for headings and signs */
   --font-display: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
