@@ -56,38 +56,41 @@ export const abstractFactory: Pattern = {
   },
   example: {
     title: {
-      en: 'Lighting kits by brand',
-      es: 'Kits de iluminación por marca',
-      'pt-BR': 'Kits de iluminação por marca',
+      en: 'Cloud services per environment',
+      es: 'Servicios cloud por entorno',
+      'pt-BR': 'Serviços de nuvem por ambiente',
     },
     scenario: {
-      en: "Each brand has its own lamp, controller and sunrise profile. One brand's controller doesn't understand another's profiles, so the whole kit is built from a single factory.",
-      es: 'Cada marca tiene su lámpara, su controlador y su perfil de amanecer. Un controlador de una marca no entiende los perfiles de otra, así que el kit se arma completo desde una fábrica.',
+      en: 'In production the app uses cloud storage and a managed queue; locally it uses the disk and an in-memory queue. Mixing a cloud queue with local storage breaks the upload flow.',
+      es: 'En producción la app usa storage en la nube y una cola administrada; en local usa el disco y una cola en memoria. Mezclar una cola de la nube con storage local rompe el flujo de subidas.',
       'pt-BR':
-        'Cada marca tem sua luminária, seu controlador e seu perfil de amanhecer. O controlador de uma marca não entende os perfis de outra, então o kit é montado completo a partir de uma fábrica.',
+        'Em produção o app usa storage na nuvem e uma fila gerenciada; localmente usa o disco e uma fila em memória. Misturar uma fila da nuvem com storage local quebra o fluxo de uploads.',
     },
-    code: `const abyssLightFactory = {
-  createLamp: () => ({ brand: 'Abyss', channels: ['blue', 'white', 'UV'] }),
-  createController: () => ({ brand: 'Abyss', protocol: 'abyss-link' }),
-  createProfile: () => ({ brand: 'Abyss', sunrise: '10:00', peak: 85 }),
+    code: `const cloudFactory = {
+  createStorage: () => ({ put: (key) => 's3://uploads/' + key }),
+  createQueue: () => ({ send: (msg) => 'sqs: ' + msg }),
 };
 
-const lagoonLightFactory = {
-  createLamp: () => ({ brand: 'Lagoon', channels: ['royal', 'cool white', 'violet'] }),
-  createController: () => ({ brand: 'Lagoon', protocol: 'wifi-lgn' }),
-  createProfile: () => ({ brand: 'Lagoon', sunrise: '11:00', peak: 70 }),
+const localFactory = {
+  createStorage: () => ({ put: (key) => './tmp/uploads/' + key }),
+  createQueue: () => {
+    const messages = [];
+    return { send: (msg) => (messages.push(msg), 'memory: ' + messages.length) };
+  },
 };
 
-function setupLighting(factory) {
-  const lamp = factory.createLamp();
-  const controller = factory.createController();
-  const profile = factory.createProfile();
-  // Every piece comes from the same family: always compatible
-  return lamp.brand + ' via ' + controller.protocol + ', peak ' + profile.peak + '%';
+function uploadAvatar(factory, userId) {
+  const storage = factory.createStorage();
+  const queue = factory.createQueue();
+  // Both pieces come from the same family: always compatible
+  const url = storage.put('avatar-' + userId + '.png');
+  return [url, queue.send('resize ' + url)];
 }
 
-console.log(setupLighting(abyssLightFactory));
-console.log(setupLighting(lagoonLightFactory));`,
+const env = 'development';
+const factory = env === 'production' ? cloudFactory : localFactory;
+console.log(uploadAvatar(factory, 42));
+console.log(uploadAvatar(cloudFactory, 42));`,
   },
   related: ['factory-method', 'builder', 'bridge'],
 };

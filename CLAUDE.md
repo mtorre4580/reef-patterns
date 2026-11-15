@@ -13,8 +13,10 @@ It has two parts:
    spins a ship's helm (wheel) that randomly picks a challenge that forces them to apply a
    pattern, writes the solution, and the tests run in the browser. There is no backend.
 
-All content and design follow a nautical theme: the sea, reefs, reef aquariums and diving. Code
-examples use that domain (aquarium sensors, dosing pumps, corals, dive computers, etc.).
+The **design** follows a nautical theme (an old sailing ship; see Design). The **content** does
+not: examples and challenges use situations a developer meets at work (checkout, payments,
+notifications, API clients, forms, feature flags, background jobs…), so nobody needs domain
+knowledge to understand an exercise.
 
 ## Stack
 
@@ -116,7 +118,7 @@ interface Challenge {
   patternId: string;
   title: Localized<string>;
   difficulty: 'facil' | 'media' | 'dificil';
-  story: Localized<string>;         // nautical narrative context
+  story: Localized<string>;         // real-world work context
   instructions: Localized<string>;  // what to implement, with exact API names
   starterCode: string;              // English JS
   tests: { name: Localized<string>; code: string }[];  // use the runner's expect()
@@ -221,10 +223,11 @@ with `--color-biolum`, `aria-live` on the results panel, contrast verified in bo
   code is shared by all three languages: comments, strings and error messages are in English;
   only the prose (`Localized`) is translated. `runnableChallenge(challenge, locale)` builds the
   test and check names in the active language for the runner.
-- Example domain: reef aquariums (temperature, salinity and pH sensors, kalkwasser or
-  Triton-style dosing, skimmer, ATO, lighting, SPS/LPS/soft corals, fragging) and diving (dive
-  computer, safety stops, dive plan, gear, dive log). Each example tells a concrete story, no
-  `Foo`/`Bar` classes.
+- **Example and challenge domain: real-world development**, not the nautical theme. Use situations
+  developers actually meet: e-commerce (cart, checkout, shipping, discounts, payments), auth and
+  sessions, API clients, pagination, notifications, analytics, feature flags, forms, file
+  uploads, background jobs, config, logging. Each example tells a concrete story, no `Foo`/`Bar`
+  classes, and must make sense without domain knowledge.
 - **i18n**: the UI is in English by default and can be switched to Spanish (`es`) and Portuguese
   (`pt-BR`) from the header; the choice is stored in `reef-patterns:locale`. No visible text is
   hardcoded in a component: everything comes from `useI18n().t('key')`. Keys live in

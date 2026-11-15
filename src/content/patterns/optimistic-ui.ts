@@ -47,18 +47,18 @@ export const optimisticUi: Pattern = {
   },
   example: {
     title: {
-      en: 'Turning on the wave pump',
-      es: 'Prender la bomba de olas',
-      'pt-BR': 'Ligar a bomba de ondas',
+      en: 'Optimistic like button',
+      es: 'Botón de like optimista',
+      'pt-BR': 'Botão de curtir otimista',
     },
     scenario: {
-      en: "When you tap the wave pump switch, the app shows it on immediately. If the controller doesn't answer, it goes back to the previous state and warns you.",
-      es: 'Al tocar el switch de la bomba de olas, la app la muestra encendida al instante. Si el controlador no responde, vuelve al estado anterior y avisa.',
+      en: 'When the user likes a post, the heart fills in immediately. If the API fails, it goes back to the previous state and shows a message.',
+      es: 'Cuando el usuario da like a un post, el corazón se llena al instante. Si la API falla, vuelve al estado anterior y muestra un mensaje.',
       'pt-BR':
-        'Ao tocar no switch da bomba de ondas, o app a mostra ligada na hora. Se o controlador não responder, volta ao estado anterior e avisa.',
+        'Quando o usuário curte um post, o coração se preenche na hora. Se a API falhar, volta ao estado anterior e mostra uma mensagem.',
     },
-    code: `function createPumpStore(api) {
-  let state = { wave: false, error: null };
+    code: `function createLikeStore(api) {
+  let state = { liked: false, count: 41, error: null };
   const listeners = new Set();
   const set = (patch) => {
     state = { ...state, ...patch };
@@ -67,22 +67,23 @@ export const optimisticUi: Pattern = {
 
   return {
     subscribe: (fn) => (listeners.add(fn), () => listeners.delete(fn)),
-    async toggleWave() {
-      const previous = state.wave;
-      set({ wave: !previous, error: null }); // 1. optimistic: change now
+    async toggle(postId) {
+      const previous = state;
+      const liked = !previous.liked;
+      set({ liked, count: previous.count + (liked ? 1 : -1), error: null }); // 1. optimistic
       try {
-        await api.setPump('wave', !previous); // 2. confirm in the background
+        await api.setLike(postId, liked); // 2. confirm in the background
       } catch {
-        set({ wave: previous, error: 'Could not switch the pump' }); // 3. revert
+        set({ ...previous, error: 'Could not save your like' }); // 3. revert
       }
     },
   };
 }
 
-const flakyApi = { setPump: () => Promise.reject(new Error('timeout')) };
-const store = createPumpStore(flakyApi);
+const flakyApi = { setLike: () => Promise.reject(new Error('timeout')) };
+const store = createLikeStore(flakyApi);
 store.subscribe((s) => console.log('Render:', s));
-store.toggleWave(); // Render: wave true… and then wave false with an error`,
+store.toggle('post_1'); // Render: liked true… then liked false with an error`,
   },
   related: ['command', 'flux', 'memento'],
 };

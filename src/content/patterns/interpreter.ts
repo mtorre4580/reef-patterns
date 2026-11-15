@@ -55,36 +55,34 @@ export const interpreter: Pattern = {
   },
   example: {
     title: {
-      en: 'Automation rules',
-      es: 'Reglas de automatización',
-      'pt-BR': 'Regras de automação',
+      en: 'Feature flag targeting rules',
+      es: 'Reglas de segmentación de feature flags',
+      'pt-BR': 'Regras de segmentação de feature flags',
     },
     scenario: {
-      en: 'The user defines rules like "if temperature > 27 and hour between 12 and 18, turn on the fans". Each rule is stored as a tree and evaluated against the current readings.',
-      es: 'El usuario define reglas como “si temperatura > 27 y hora entre 12 y 18, encender ventiladores”. Cada regla se guarda como un árbol y se evalúa con las lecturas actuales.',
+      en: 'Product managers define rollout rules like "plan is pro and country is AR or BR". Each rule is stored as a tree and evaluated against the current user.',
+      es: 'Los product managers definen reglas de rollout como "el plan es pro y el país es AR o BR". Cada regla se guarda como un árbol y se evalúa con el usuario actual.',
       'pt-BR':
-        'O usuário define regras como "se temperatura > 27 e hora entre 12 e 18, ligar os ventiladores". Cada regra é guardada como uma árvore e avaliada com as leituras atuais.',
+        'Os product managers definem regras de rollout como "o plano é pro e o país é AR ou BR". Cada regra é guardada como uma árvore e avaliada com o usuário atual.',
     },
     code: `const expr = {
-  value: (name) => ({ evaluate: (ctx) => ctx[name] }),
-  number: (n) => ({ evaluate: () => n }),
-  greater: (a, b) => ({ evaluate: (ctx) => a.evaluate(ctx) > b.evaluate(ctx) }),
-  between: (a, min, max) => ({
-    evaluate: (ctx) => a.evaluate(ctx) >= min && a.evaluate(ctx) <= max,
-  }),
-  and: (...rules) => ({ evaluate: (ctx) => rules.every((r) => r.evaluate(ctx)) }),
-  or: (...rules) => ({ evaluate: (ctx) => rules.some((r) => r.evaluate(ctx)) }),
+  attr: (name) => ({ evaluate: (user) => user[name] }),
+  value: (v) => ({ evaluate: () => v }),
+  equals: (a, b) => ({ evaluate: (user) => a.evaluate(user) === b.evaluate(user) }),
+  oneOf: (a, list) => ({ evaluate: (user) => list.includes(a.evaluate(user)) }),
+  and: (...rules) => ({ evaluate: (user) => rules.every((r) => r.evaluate(user)) }),
+  or: (...rules) => ({ evaluate: (user) => rules.some((r) => r.evaluate(user)) }),
 };
 
-// "temperature > 27 and hour between 12 and 18"
-const fansRule = expr.and(
-  expr.greater(expr.value('temp'), expr.number(27)),
-  expr.between(expr.value('hour'), 12, 18),
+// "plan is pro and country is AR or BR"
+const newBillingRule = expr.and(
+  expr.equals(expr.attr('plan'), expr.value('pro')),
+  expr.oneOf(expr.attr('country'), ['AR', 'BR']),
 );
 
-console.log(fansRule.evaluate({ temp: 27.6, hour: 15 })); // true
-console.log(fansRule.evaluate({ temp: 27.6, hour: 21 })); // false
-console.log(fansRule.evaluate({ temp: 25.9, hour: 15 })); // false`,
+console.log(newBillingRule.evaluate({ plan: 'pro', country: 'BR' })); // true
+console.log(newBillingRule.evaluate({ plan: 'free', country: 'BR' })); // false
+console.log(newBillingRule.evaluate({ plan: 'pro', country: 'US' })); // false`,
   },
   related: ['composite', 'specification', 'visitor'],
 };

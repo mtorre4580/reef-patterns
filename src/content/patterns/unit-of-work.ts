@@ -47,19 +47,19 @@ export const unitOfWork: Pattern = {
   },
   example: {
     title: {
-      en: 'Moving corals between tanks',
-      es: 'Mover corales entre acuarios',
-      'pt-BR': 'Mover corais entre aquários',
+      en: 'Bulk edit in an admin panel',
+      es: 'Edición masiva en un panel de admin',
+      'pt-BR': 'Edição em massa em um painel de admin',
     },
     scenario: {
-      en: 'Moving a coral from the quarantine tank to the display tank changes two inventories and the history. Either all three are saved, or none.',
-      es: 'Pasar un coral del acuario de cuarentena al principal cambia dos inventarios y el historial. O se guardan las tres cosas, o ninguna.',
+      en: 'An admin moves several products to another category and updates their prices. Either every change is saved in one write, or none of them.',
+      es: 'Un admin mueve varios productos a otra categoría y actualiza sus precios. O se guardan todos los cambios en una escritura, o ninguno.',
       'pt-BR':
-        'Passar um coral do aquário de quarentena para o principal muda dois inventários e o histórico. Ou se salvam as três coisas, ou nenhuma.',
+        'Um admin move vários produtos para outra categoria e atualiza seus preços. Ou todas as mudanças são salvas em uma escrita, ou nenhuma.',
     },
     code: `const db = {
-  tanks: { quarantine: ['Zoanthus'], display: ['Acropora'] },
-  history: [],
+  products: { p1: { category: 'shoes', price: 80 }, p2: { category: 'shoes', price: 60 } },
+  audit: [],
   writes: 0,
 };
 
@@ -77,25 +77,23 @@ class UnitOfWork {
     Object.assign(store, draft, { writes: store.writes + 1 });
     this.#changes = [];
   }
-
-  rollback() {
-    this.#changes = [];
-  }
 }
 
-function moveCoral(uow, coral, from, to) {
-  uow.register((d) => {
-    if (!d.tanks[from].includes(coral)) throw new Error(coral + ' is not in ' + from);
-    d.tanks[from] = d.tanks[from].filter((c) => c !== coral);
-  });
-  uow.register((d) => d.tanks[to].push(coral));
-  uow.register((d) => d.history.push(coral + ': ' + from + ' → ' + to));
+function moveToSale(uow, ids, discount) {
+  for (const id of ids) {
+    uow.register((d) => {
+      if (!d.products[id]) throw new Error('Unknown product ' + id);
+      d.products[id].category = 'sale';
+      d.products[id].price = Math.round(d.products[id].price * (1 - discount));
+    });
+  }
+  uow.register((d) => d.audit.push('moved ' + ids.join(', ') + ' to sale'));
 }
 
 const uow = new UnitOfWork();
-moveCoral(uow, 'Zoanthus', 'quarantine', 'display');
+moveToSale(uow, ['p1', 'p2'], 0.25);
 uow.commit(db);
-console.log(db.tanks, db.writes); // a single write with all three changes`,
+console.log(db.products, db.writes); // a single write with every change`,
   },
   related: ['repository', 'saga', 'command'],
 };

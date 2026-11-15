@@ -56,41 +56,40 @@ export const visitor: Pattern = {
   },
   example: {
     title: {
-      en: 'Equipment costs and power use',
-      es: 'Costos y consumo del equipamiento',
-      'pt-BR': 'Custos e consumo do equipamento',
+      en: 'Exporting a document tree',
+      es: 'Exportar un árbol de documento',
+      'pt-BR': 'Exportar uma árvore de documento',
     },
     scenario: {
-      en: "The inventory has pumps, lamps and heaters. One visitor computes monthly power consumption; another, replacement cost. The equipment doesn't change.",
-      es: 'El inventario tiene bombas, lámparas y calentadores. Un visitante calcula el consumo eléctrico mensual; otro, el costo de reposición. Los equipos no cambian.',
+      en: 'The CMS stores pages as a tree of headings, paragraphs and lists. One visitor exports HTML, another counts words for the SEO panel. The node types do not change.',
+      es: 'El CMS guarda las páginas como un árbol de títulos, párrafos y listas. Un visitante exporta HTML, otro cuenta palabras para el panel de SEO. Los tipos de nodo no cambian.',
       'pt-BR':
-        'O inventário tem bombas, luminárias e aquecedores. Um visitante calcula o consumo elétrico mensal; outro, o custo de reposição. Os equipamentos não mudam.',
+        'O CMS guarda as páginas como uma árvore de títulos, parágrafos e listas. Um visitante exporta HTML, outro conta palavras para o painel de SEO. Os tipos de nó não mudam.',
     },
-    code: `const equipment = [
-  { kind: 'pump', name: 'Return pump', watts: 35, price: 180 },
-  { kind: 'light', name: 'LED 120 W', watts: 120, hoursPerDay: 9, price: 450 },
-  { kind: 'heater', name: 'Heater', watts: 200, dutyCycle: 0.25, price: 40 },
+    code: `const page = [
+  { kind: 'heading', level: 1, text: 'Pricing' },
+  { kind: 'paragraph', text: 'Simple plans for teams of any size.' },
+  { kind: 'list', items: ['Free trial', 'Cancel anytime'] },
 ];
 
 // Each visitor defines what to do with each node type
-const monthlyKwh = {
-  pump: (e) => (e.watts * 24 * 30) / 1000,
-  light: (e) => (e.watts * e.hoursPerDay * 30) / 1000,
-  heater: (e) => (e.watts * 24 * e.dutyCycle * 30) / 1000,
+const toHtml = {
+  heading: (n) => '<h' + n.level + '>' + n.text + '</h' + n.level + '>',
+  paragraph: (n) => '<p>' + n.text + '</p>',
+  list: (n) => '<ul>' + n.items.map((i) => '<li>' + i + '</li>').join('') + '</ul>',
 };
 
-const replacementCost = {
-  pump: (e) => e.price,
-  light: (e) => e.price * 0.3, // only the LEDs are replaced
-  heater: (e) => e.price,
+const words = (text) => text.split(/\\s+/).filter(Boolean).length;
+const wordCount = {
+  heading: (n) => words(n.text),
+  paragraph: (n) => words(n.text),
+  list: (n) => n.items.reduce((sum, i) => sum + words(i), 0),
 };
 
-function visit(nodes, visitor) {
-  return nodes.reduce((total, node) => total + visitor[node.kind](node), 0);
-}
+const visit = (nodes, visitor) => nodes.map((node) => visitor[node.kind](node));
 
-console.log('kWh/month:', visit(equipment, monthlyKwh)); // 25.2 + 32.4 + 36 = 93.6
-console.log('Replacement:', visit(equipment, replacementCost)); // 355`,
+console.log(visit(page, toHtml).join('\\n'));
+console.log('Words:', visit(page, wordCount).reduce((a, b) => a + b, 0)); // 12`,
   },
   related: ['composite', 'iterator', 'interpreter'],
 };

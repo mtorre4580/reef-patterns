@@ -4,25 +4,25 @@ export const builder2: Challenge = {
   id: 'builder-2',
   patternId: 'builder',
   title: {
-    en: 'Saltwater recipe',
-    es: 'Receta de agua salada',
-    'pt-BR': 'Receita de água salgada',
+    en: 'Transactional email builder',
+    es: 'Builder de emails transaccionales',
+    'pt-BR': 'Builder de emails transacionais',
   },
   difficulty: 'facil',
   story: {
-    en: 'Preparing water for a change needs liters, salinity and temperature. Most people use 35 ppt and 25 °C, but quarantine tanks lower the salinity.',
-    es: 'Preparar agua para un cambio requiere litros, salinidad y temperatura. La mayoría usa 35 ppt y 25 °C, pero en cuarentena se baja la salinidad.',
+    en: 'Transactional emails are built with an object literal of many fields. Some were sent without a recipient, and one subject was so long that the provider rejected it.',
+    es: 'Los emails transaccionales se arman con un objeto literal de muchos campos. Algunos salieron sin destinatario, y un asunto era tan largo que el proveedor lo rechazó.',
     'pt-BR':
-      'Preparar água para uma troca exige litros, salinidade e temperatura. A maioria usa 35 ppt e 25 °C, mas na quarentena a salinidade é reduzida.',
+      'Os emails transacionais são montados com um objeto literal de muitos campos. Alguns saíram sem destinatário, e um assunto era tão longo que o provedor o rejeitou.',
   },
   instructions: {
-    en: 'Implement `SaltMixBuilder` with `liters(n)`, `salinity(ppt)` and `temperature(c)`, all chainable, and a `build()` that:\n- requires `liters` (if missing, `Error("Specify the liters")`);\n- defaults to 35 ppt and 25 °C;\n- rejects salinities outside 30–37 ppt with `RangeError("Salinity out of range")`;\n- returns `{ liters, salinity, temperature, saltGrams }` with `saltGrams = Math.round(liters * salinity * 1.02)`.',
-    es: 'Implementá `SaltMixBuilder` con `liters(n)`, `salinity(ppt)` y `temperature(c)`, todos encadenables, y `build()` que:\n- exige `liters` (si falta, `Error("Specify the liters")`);\n- usa 35 ppt y 25 °C por defecto;\n- rechaza salinidades fuera de 30–37 ppt con `RangeError("Salinity out of range")`;\n- devuelve `{ liters, salinity, temperature, saltGrams }` con `saltGrams = Math.round(liters * salinity * 1.02)`.',
+    en: 'Implement `EmailBuilder` with `to(address)`, `cc(address)` (can be called several times), `subject(text)` and `body(text)`, all chainable, and a `build()` that:\n- requires `to` (if missing, `Error("Missing recipient")`);\n- requires a subject of at most 120 characters (otherwise `RangeError("Invalid subject")`);\n- returns `{ to, cc, subject, body }` with `cc` as an array (`[]` by default) and `body` as `""` by default.',
+    es: 'Implementá `EmailBuilder` con `to(address)`, `cc(address)` (se puede llamar varias veces), `subject(text)` y `body(text)`, todos encadenables, y un `build()` que:\n- exige `to` (si falta, `Error("Missing recipient")`);\n- exige un asunto de como mucho 120 caracteres (si no, `RangeError("Invalid subject")`);\n- devuelve `{ to, cc, subject, body }` con `cc` como array (`[]` por defecto) y `body` como `""` por defecto.',
     'pt-BR':
-      'Implemente `SaltMixBuilder` com `liters(n)`, `salinity(ppt)` e `temperature(c)`, todos encadeáveis, e um `build()` que:\n- exige `liters` (se faltar, `Error("Specify the liters")`);\n- usa 35 ppt e 25 °C por padrão;\n- rejeita salinidades fora de 30–37 ppt com `RangeError("Salinity out of range")`;\n- devolve `{ liters, salinity, temperature, saltGrams }` com `saltGrams = Math.round(liters * salinity * 1.02)`.',
+      'Implemente `EmailBuilder` com `to(address)`, `cc(address)` (pode ser chamado várias vezes), `subject(text)` e `body(text)`, todos encadeáveis, e um `build()` que:\n- exige `to` (se faltar, `Error("Missing recipient")`);\n- exige um assunto de no máximo 120 caracteres (senão, `RangeError("Invalid subject")`);\n- devolve `{ to, cc, subject, body }` com `cc` como array (`[]` por padrão) e `body` como `""` por padrão.',
   },
-  starterCode: `function saltMix(liters, salinity, temperature) {
-  return { liters, salinity, temperature, saltGrams: liters * salinity };
+  starterCode: `function email(to, subject, body) {
+  return { to, subject, body };
 }
 `,
   tests: [
@@ -32,67 +32,75 @@ export const builder2: Challenge = {
         es: 'usa valores por defecto',
         'pt-BR': 'usa valores padrão',
       },
-      code: `expect(new SaltMixBuilder().liters(20).build()).toEqual({
-  liters: 20, salinity: 35, temperature: 25, saltGrams: 714,
+      code: `expect(new EmailBuilder().to('ana@example.com').subject('Welcome').build()).toEqual({
+  to: 'ana@example.com', cc: [], subject: 'Welcome', body: '',
 });`,
     },
     {
       name: {
-        en: 'allows configuring every parameter',
-        es: 'permite configurar cada parámetro',
-        'pt-BR': 'permite configurar cada parâmetro',
+        en: 'accepts several cc and a body',
+        es: 'acepta varios cc y un cuerpo',
+        'pt-BR': 'aceita vários cc e um corpo',
       },
-      code: `const mix = new SaltMixBuilder().liters(10).salinity(31).temperature(24).build();
-expect(mix).toEqual({ liters: 10, salinity: 31, temperature: 24, saltGrams: 316 });`,
-    },
-    {
-      name: { en: 'requires the liters', es: 'exige los litros', 'pt-BR': 'exige os litros' },
-      code: `expect(() => new SaltMixBuilder().salinity(35).build()).toThrow('Specify the liters');`,
+      code: `const mail = new EmailBuilder().to('ana@example.com').cc('ops@example.com').cc('billing@example.com').subject('Invoice').body('Attached').build();
+expect(mail.cc).toEqual(['ops@example.com', 'billing@example.com']);
+expect(mail.body).toBe('Attached');`,
     },
     {
       name: {
-        en: 'validates the salinity',
-        es: 'valida la salinidad',
-        'pt-BR': 'valida a salinidade',
+        en: 'requires a recipient',
+        es: 'exige un destinatario',
+        'pt-BR': 'exige um destinatário',
       },
-      code: `expect(() => new SaltMixBuilder().liters(5).salinity(40).build()).toThrow('Salinity out of range');`,
+      code: `expect(() => new EmailBuilder().subject('Hi').build()).toThrow('Missing recipient');`,
+    },
+    {
+      name: { en: 'validates the subject', es: 'valida el asunto', 'pt-BR': 'valida o assunto' },
+      code: `expect(() => new EmailBuilder().to('a@b.com').build()).toThrow('Invalid subject');
+expect(() => new EmailBuilder().to('a@b.com').subject('x'.repeat(121)).build()).toThrow('Invalid subject');`,
     },
   ],
   hints: {
     en: [
       'Store each value in a field and return `this`.',
-      'Validate everything together in `build()`.',
+      'Validate everything together in `build()` and copy the `cc` array.',
     ],
-    es: ['Guardá cada valor en un campo y devolvé `this`.', 'Validá todo junto en `build()`.'],
-    'pt-BR': ['Guarde cada valor em um campo e devolva `this`.', 'Valide tudo junto em `build()`.'],
+    es: [
+      'Guardá cada valor en un campo y devolvé `this`.',
+      'Validá todo junto en `build()` y copiá el array de `cc`.',
+    ],
+    'pt-BR': [
+      'Guarde cada valor em um campo e devolva `this`.',
+      'Valide tudo junto em `build()` e copie o array de `cc`.',
+    ],
   },
-  solution: `class SaltMixBuilder {
-  #liters = null;
-  #salinity = 35;
-  #temperature = 25;
+  solution: `class EmailBuilder {
+  #to = null;
+  #cc = [];
+  #subject = '';
+  #body = '';
 
-  liters(n) {
-    this.#liters = n;
+  to(address) {
+    this.#to = address;
     return this;
   }
-  salinity(ppt) {
-    this.#salinity = ppt;
+  cc(address) {
+    this.#cc.push(address);
     return this;
   }
-  temperature(c) {
-    this.#temperature = c;
+  subject(text) {
+    this.#subject = text;
+    return this;
+  }
+  body(text) {
+    this.#body = text;
     return this;
   }
 
   build() {
-    if (!this.#liters) throw new Error('Specify the liters');
-    if (this.#salinity < 30 || this.#salinity > 37) throw new RangeError('Salinity out of range');
-    return {
-      liters: this.#liters,
-      salinity: this.#salinity,
-      temperature: this.#temperature,
-      saltGrams: Math.round(this.#liters * this.#salinity * 1.02),
-    };
+    if (!this.#to) throw new Error('Missing recipient');
+    if (!this.#subject || this.#subject.length > 120) throw new RangeError('Invalid subject');
+    return { to: this.#to, cc: [...this.#cc], subject: this.#subject, body: this.#body };
   }
 }
 `,

@@ -59,18 +59,18 @@ export const plugin: Pattern = {
   },
   example: {
     title: {
-      en: 'Extensible controller',
-      es: 'Controlador extensible',
-      'pt-BR': 'Controlador extensível',
+      en: 'Extensible markdown renderer',
+      es: 'Renderizador de markdown extensible',
+      'pt-BR': 'Renderizador de markdown extensível',
     },
     scenario: {
-      en: 'The tank controller ships with the basics. The community publishes plugins: one logs pH readings, another dims the light following the lunar phase.',
-      es: 'El controlador del acuario trae lo básico. La comunidad publica plugins: uno registra lecturas de pH en un log, otro ajusta la luz según la fase lunar.',
+      en: 'The docs site ships a small markdown renderer. Teams add plugins: one turns ticket ids into links, another adds an "edited" note when a page is saved.',
+      es: 'El sitio de documentación trae un renderizador de markdown chico. Los equipos suman plugins: uno convierte ids de tickets en links, otro agrega una nota de "editado" al guardar.',
       'pt-BR':
-        'O controlador do aquário traz o básico. A comunidade publica plugins: um registra leituras de pH em um log, outro ajusta a luz conforme a fase da lua.',
+        'O site de documentação traz um renderizador de markdown pequeno. Os times adicionam plugins: um transforma ids de tickets em links, outro adiciona uma nota de "editado" ao salvar.',
     },
-    code: `function createReefCore() {
-  const hooks = { reading: [], hourTick: [] };
+    code: `function createRenderer() {
+  const hooks = { transform: [], beforeSave: [] };
   const api = {
     on(hook, handler) {
       hooks[hook].push(handler);
@@ -82,33 +82,32 @@ export const plugin: Pattern = {
       plugin.setup(api); // the plugin only sees the public API
       return this;
     },
-    emitReading(reading) {
-      hooks.reading.forEach((fn) => fn(reading));
+    render(markdown) {
+      return hooks.transform.reduce((text, fn) => fn(text), markdown);
     },
-    tick(hour) {
-      return hooks.hourTick.reduce((light, fn) => fn(hour, light), 100);
+    save(page) {
+      return hooks.beforeSave.reduce((p, fn) => fn(p), page);
     },
   };
 }
 
-const phLogger = {
-  name: 'ph-logger',
-  log: [],
+const ticketLinks = {
+  name: 'ticket-links',
   setup(api) {
-    api.on('reading', (r) => r.param === 'ph' && this.log.push(r.value));
+    api.on('transform', (text) => text.replace(/\\b(ENG-\\d+)\\b/g, '[$1](https://tracker.example.com/$1)'));
   },
 };
 
-const moonlight = {
-  name: 'moonlight',
+const editedNote = {
+  name: 'edited-note',
   setup(api) {
-    api.on('hourTick', (hour, light) => (hour >= 22 || hour < 6 ? 3 : light));
+    api.on('beforeSave', (page) => ({ ...page, footer: 'Edited by ' + page.author }));
   },
 };
 
-const core = createReefCore().use(phLogger).use(moonlight);
-core.emitReading({ param: 'ph', value: 8.1 });
-console.log(phLogger.log, core.tick(23), core.tick(12)); // [8.1] 3 100`,
+const renderer = createRenderer().use(ticketLinks).use(editedNote);
+console.log(renderer.render('Fixed in ENG-421'));
+console.log(renderer.save({ title: 'Deploy guide', author: 'ana' }));`,
   },
   related: ['middleware', 'observer', 'hexagonal'],
 };

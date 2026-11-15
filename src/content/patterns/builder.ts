@@ -58,45 +58,54 @@ export const builder: Pattern = {
       'Os query builders do Knex e do Drizzle, os schemas do Zod (z.string().min(3)), a API do supertest, URLSearchParams.',
   },
   example: {
-    title: { en: 'Dive plan', es: 'Plan de inmersión', 'pt-BR': 'Plano de mergulho' },
-    scenario: {
-      en: 'A dive plan needs a site and a maximum depth, and optionally gases and stops. If someone plans to go beyond 30 m on air, the plan must be rejected.',
-      es: 'Un plan de inmersión necesita sitio y profundidad máxima, y opcionalmente gases y paradas. Si se planea pasar de 30 m con aire, el plan debe rechazarse.',
-      'pt-BR':
-        'Um plano de mergulho precisa de local e profundidade máxima e, opcionalmente, gases e paradas. Se alguém planeja passar de 30 m com ar, o plano deve ser rejeitado.',
+    title: {
+      en: 'SQL query builder',
+      es: 'Builder de consultas SQL',
+      'pt-BR': 'Builder de consultas SQL',
     },
-    code: `class DivePlanBuilder {
-  #plan = { stops: [], gas: { o2: 21 } };
+    scenario: {
+      en: 'Report screens build queries with optional filters, sorting and limits. Concatenating strings by hand produced broken SQL and injection risks.',
+      es: 'Las pantallas de reportes arman consultas con filtros, orden y límites opcionales. Concatenar strings a mano generaba SQL roto y riesgos de inyección.',
+      'pt-BR':
+        'As telas de relatórios montam consultas com filtros, ordenação e limites opcionais. Concatenar strings à mão gerava SQL quebrado e riscos de injeção.',
+    },
+    code: `class QueryBuilder {
+  #table = null;
+  #columns = ['*'];
+  #where = [];
+  #params = [];
+  #limit = null;
 
-  site(name) {
-    this.#plan.site = name;
+  from(table) {
+    this.#table = table;
     return this;
   }
-  maxDepth(meters) {
-    this.#plan.maxDepth = meters;
+  select(...columns) {
+    this.#columns = columns;
     return this;
   }
-  nitrox(o2Percent) {
-    this.#plan.gas = { o2: o2Percent };
+  where(field, value) {
+    this.#where.push(field + ' = ?');
+    this.#params.push(value); // values never go into the SQL string
     return this;
   }
-  stop(depth, minutes) {
-    this.#plan.stops.push({ depth, minutes });
+  limit(n) {
+    this.#limit = n;
     return this;
   }
 
   build() {
-    const { site, maxDepth, gas, stops } = this.#plan;
-    if (!site || !maxDepth) throw new Error('Missing site or maximum depth');
-    const mod = Math.floor((1.4 / (gas.o2 / 100) - 1) * 10); // maximum operating depth
-    if (maxDepth > mod) throw new Error('The gas is not safe at ' + maxDepth + ' m (MOD ' + mod + ' m)');
-    if (maxDepth > 10 && !stops.some((s) => s.depth === 5)) stops.push({ depth: 5, minutes: 3 });
-    return Object.freeze({ site, maxDepth, gas, stops });
+    if (!this.#table) throw new Error('Missing table');
+    let sql = 'SELECT ' + this.#columns.join(', ') + ' FROM ' + this.#table;
+    if (this.#where.length) sql += ' WHERE ' + this.#where.join(' AND ');
+    if (this.#limit) sql += ' LIMIT ' + this.#limit;
+    return Object.freeze({ sql, params: [...this.#params] });
   }
 }
 
-const plan = new DivePlanBuilder().site('Hidden Reef').maxDepth(24).nitrox(32).build();
-console.log(plan.stops); // the 5 m safety stop was added`,
+const query = new QueryBuilder().from('orders').select('id', 'total').where('status', 'paid').limit(20).build();
+console.log(query.sql); // SELECT id, total FROM orders WHERE status = ? LIMIT 20
+console.log(query.params); // ['paid']`,
   },
   related: ['factory-method', 'abstract-factory', 'composite'],
 };

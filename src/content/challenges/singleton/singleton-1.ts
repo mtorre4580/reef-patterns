@@ -3,34 +3,38 @@ import type { Challenge } from '../../types';
 export const singleton1: Challenge = {
   id: 'singleton-1',
   patternId: 'singleton',
-  title: { en: 'A single controller', es: 'Un solo controlador', 'pt-BR': 'Um único controlador' },
+  title: {
+    en: 'A single API client',
+    es: 'Un único cliente de API',
+    'pt-BR': 'Um único cliente de API',
+  },
   difficulty: 'facil',
   story: {
-    en: 'The dashboard and the task scheduler each create their own tank controller. One turns off the skimmer and the other still sees it on.',
-    es: 'El dashboard y el programador de tareas crean cada uno su propio controlador del acuario. Uno apaga el skimmer y el otro sigue viéndolo encendido.',
+    en: 'The login page and the orders page each create their own API client. After logging in, the orders page keeps sending requests without the token.',
+    es: 'La página de login y la de órdenes crean cada una su propio cliente de API. Después de iniciar sesión, la página de órdenes sigue mandando requests sin el token.',
     'pt-BR':
-      'O dashboard e o agendador de tarefas criam cada um seu próprio controlador do aquário. Um desliga o skimmer e o outro continua vendo-o ligado.',
+      'A página de login e a de pedidos criam cada uma seu próprio cliente de API. Depois do login, a página de pedidos continua enviando requisições sem o token.',
   },
   instructions: {
-    en: 'Implement `getController()`, which always returns the same `ReefController` instance.\n- `setDevice(name, on)` stores the state of a device.\n- `isOn(name)` returns `true` or `false` (unknown devices are off).\n- The state must persist across calls to `getController()`.',
-    es: 'Implementá `getController()`, que siempre devuelve la misma instancia de `ReefController`.\n- `setDevice(name, on)` guarda el estado de un equipo.\n- `isOn(name)` devuelve `true` o `false` (los equipos desconocidos están apagados).\n- El estado tiene que persistir entre llamadas a `getController()`.',
+    en: 'Implement `getApiClient()`, which always returns the same `ApiClient` instance.\n- `setToken(token)` stores the auth token.\n- `headers()` returns `{ Authorization: "Bearer <token>" }`, or `{}` when there is no token.\n- The token must persist across calls to `getApiClient()`.',
+    es: 'Implementá `getApiClient()`, que siempre devuelve la misma instancia de `ApiClient`.\n- `setToken(token)` guarda el token de sesión.\n- `headers()` devuelve `{ Authorization: "Bearer <token>" }`, o `{}` si no hay token.\n- El token tiene que persistir entre llamadas a `getApiClient()`.',
     'pt-BR':
-      'Implemente `getController()`, que sempre devolve a mesma instância de `ReefController`.\n- `setDevice(name, on)` guarda o estado de um equipamento.\n- `isOn(name)` devolve `true` ou `false` (equipamentos desconhecidos estão desligados).\n- O estado precisa persistir entre chamadas a `getController()`.',
+      'Implemente `getApiClient()`, que sempre devolve a mesma instância de `ApiClient`.\n- `setToken(token)` guarda o token de sessão.\n- `headers()` devolve `{ Authorization: "Bearer <token>" }`, ou `{}` se não houver token.\n- O token precisa persistir entre chamadas a `getApiClient()`.',
   },
-  starterCode: `class ReefController {
-  devices = {};
+  starterCode: `class ApiClient {
+  token = null;
 
-  setDevice(name, on) {
-    this.devices[name] = on;
+  setToken(token) {
+    this.token = token;
   }
 
-  isOn(name) {
-    return this.devices[name] ?? false;
+  headers() {
+    return this.token ? { Authorization: 'Bearer ' + this.token } : {};
   }
 }
 
-function getController() {
-  return new ReefController();
+function getApiClient() {
+  return new ApiClient();
 }
 `,
   tests: [
@@ -40,58 +44,58 @@ function getController() {
         es: 'siempre devuelve la misma instancia',
         'pt-BR': 'sempre devolve a mesma instância',
       },
-      code: `expect(getController()).toBe(getController());`,
+      code: `expect(getApiClient()).toBe(getApiClient());`,
     },
     {
       name: {
-        en: 'state persists across calls',
-        es: 'el estado persiste entre llamadas',
-        'pt-BR': 'o estado persiste entre chamadas',
+        en: 'the token persists across calls',
+        es: 'el token persiste entre llamadas',
+        'pt-BR': 'o token persiste entre chamadas',
       },
-      code: `getController().setDevice('skimmer', true);
-expect(getController().isOn('skimmer')).toBe(true);
-getController().setDevice('skimmer', false);
-expect(getController().isOn('skimmer')).toBe(false);`,
+      code: `getApiClient().setToken('abc');
+expect(getApiClient().headers()).toEqual({ Authorization: 'Bearer abc' });
+getApiClient().setToken(null);`,
     },
     {
       name: {
-        en: 'an unknown device is off',
-        es: 'un equipo desconocido está apagado',
-        'pt-BR': 'um equipamento desconhecido está desligado',
+        en: 'without a token there are no auth headers',
+        es: 'sin token no hay headers de autenticación',
+        'pt-BR': 'sem token não há headers de autenticação',
       },
-      code: `expect(getController().isOn('chiller')).toBe(false);`,
+      code: `getApiClient().setToken(null);
+expect(getApiClient().headers()).toEqual({});`,
     },
   ],
   hints: {
     en: [
       'Keep the instance in a variable outside the function, initially `null`.',
-      'In `getController`, only create it if it does not exist yet: `instance ??= new ReefController()`.',
+      'In `getApiClient`, only create it if it does not exist yet: `instance ??= new ApiClient()`.',
     ],
     es: [
       'Guardá la instancia en una variable fuera de la función, inicialmente `null`.',
-      'En `getController`, creala solo si todavía no existe: `instance ??= new ReefController()`.',
+      'En `getApiClient`, creala solo si todavía no existe: `instance ??= new ApiClient()`.',
     ],
     'pt-BR': [
       'Guarde a instância em uma variável fora da função, inicialmente `null`.',
-      'Em `getController`, crie-a só se ainda não existir: `instance ??= new ReefController()`.',
+      'Em `getApiClient`, crie-a só se ainda não existir: `instance ??= new ApiClient()`.',
     ],
   },
-  solution: `class ReefController {
-  #devices = new Map();
+  solution: `class ApiClient {
+  #token = null;
 
-  setDevice(name, on) {
-    this.#devices.set(name, on);
+  setToken(token) {
+    this.#token = token;
   }
 
-  isOn(name) {
-    return this.#devices.get(name) ?? false;
+  headers() {
+    return this.#token ? { Authorization: 'Bearer ' + this.#token } : {};
   }
 }
 
 let instance = null;
 
-function getController() {
-  instance ??= new ReefController();
+function getApiClient() {
+  instance ??= new ApiClient();
   return instance;
 }
 `,

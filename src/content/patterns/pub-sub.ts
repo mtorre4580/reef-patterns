@@ -59,15 +59,15 @@ export const pubSub: Pattern = {
   },
   example: {
     title: {
-      en: 'Tank event bus',
-      es: 'Bus de eventos del acuario',
-      'pt-BR': 'Barramento de eventos do aquário',
+      en: 'Event bus between micro-frontends',
+      es: 'Bus de eventos entre micro-frontends',
+      'pt-BR': 'Barramento de eventos entre micro-frontends',
     },
     scenario: {
-      en: 'The tide simulator, the light controller and the feeder publish events. The app, the log and the flow pumps subscribe to the ones they care about.',
-      es: 'El simulador de mareas, el controlador de luz y el alimentador publican eventos. La app, el log y las bombas de flujo se suscriben a los que les importan.',
+      en: 'The header, the catalog and the cart are separate micro-frontends. They talk through an event bus by topic, without importing each other.',
+      es: 'El header, el catálogo y el carrito son micro-frontends separados. Se comunican con un bus de eventos por tópico, sin importarse entre sí.',
       'pt-BR':
-        'O simulador de marés, o controlador de luz e o alimentador publicam eventos. O app, o log e as bombas de fluxo assinam os que lhes interessam.',
+        'O header, o catálogo e o carrinho são micro-frontends separados. Eles conversam por um barramento de eventos por tópico, sem importar uns aos outros.',
     },
     code: `function createBus() {
   const topics = new Map();
@@ -86,16 +86,15 @@ export const pubSub: Pattern = {
 const bus = createBus();
 
 // Subscribers: they do not know who publishes
-bus.subscribe('tide:change', ({ level }) => console.log('Flow pumps at ' + level + '%'));
-bus.subscribe('light:sunrise', () => console.log('Log: sunrise on the reef'));
-const stopFeedPause = bus.subscribe('feed:start', () => console.log('Pause skimmer for 10 min'));
+bus.subscribe('cart:updated', ({ count }) => console.log('Header badge: ' + count));
+bus.subscribe('user:logged-in', ({ name }) => console.log('Header greets ' + name));
+const stopRecs = bus.subscribe('cart:updated', () => console.log('Refresh recommendations'));
 
 // Publishers: they do not know who listens
-bus.publish('light:sunrise');
-bus.publish('tide:change', { level: 70 });
-bus.publish('feed:start');
-stopFeedPause();
-bus.publish('feed:start'); // nobody listens`,
+bus.publish('user:logged-in', { name: 'Ana' });
+bus.publish('cart:updated', { count: 3 });
+stopRecs();
+bus.publish('cart:updated', { count: 4 }); // only the header reacts`,
   },
   related: ['observer', 'mediator', 'event-sourcing'],
 };

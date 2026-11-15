@@ -60,15 +60,15 @@ export const retry: Pattern = {
   },
   example: {
     title: {
-      en: 'Reading the controller over Wi-Fi',
-      es: 'Leer el controlador por Wi-Fi',
-      'pt-BR': 'Ler o controlador por Wi-Fi',
+      en: 'Retrying a flaky API',
+      es: 'Reintentar una API inestable',
+      'pt-BR': 'Repetir uma API instável',
     },
     scenario: {
-      en: 'The tank controller is far from the router and sometimes does not answer. The app retries up to four times with growing waits before showing an error.',
-      es: 'El controlador del acuario está lejos del router y a veces no responde. La app reintenta hasta cuatro veces con esperas crecientes antes de mostrar un error.',
+      en: 'A third-party API sometimes answers 503 under load. The app retries up to four times with growing waits before showing an error, but never retries a 400.',
+      es: 'Una API de terceros a veces responde 503 bajo carga. La app reintenta hasta cuatro veces con esperas crecientes antes de mostrar un error, pero nunca reintenta un 400.',
       'pt-BR':
-        'O controlador do aquário está longe do roteador e às vezes não responde. O app tenta de novo até quatro vezes com esperas crescentes antes de mostrar um erro.',
+        'Uma API de terceiros às vezes responde 503 sob carga. O app tenta de novo até quatro vezes com esperas crescentes antes de mostrar um erro, mas nunca repete um 400.',
     },
     code: `const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -87,17 +87,17 @@ async function retry(operation, { attempts = 4, baseMs = 100, isRetryable = () =
   throw lastError;
 }
 
-// Simulation: fails twice, then answers
+// Simulation: answers 503 twice, then succeeds
 let calls = 0;
-const readController = async () => {
+const getInvoices = async () => {
   calls++;
-  if (calls < 3) throw Object.assign(new Error('timeout'), { transient: true });
-  return { temp: 25.3, ph: 8.15 };
+  if (calls < 3) throw Object.assign(new Error('Service unavailable'), { status: 503 });
+  return [{ id: 'inv_1', total: 120 }];
 };
 
-retry(readController, { isRetryable: (e) => e.transient })
-  .then((data) => console.log('Reading after ' + calls + ' attempts', data))
-  .catch((e) => console.error('Offline:', e.message));`,
+retry(getInvoices, { isRetryable: (e) => e.status >= 500 })
+  .then((data) => console.log('Loaded after ' + calls + ' attempts', data))
+  .catch((e) => console.error('Giving up:', e.message));`,
   },
   related: ['circuit-breaker', 'bulkhead', 'proxy'],
 };

@@ -68,7 +68,7 @@ describe('pattern detail', () => {
   it('shows the example, related patterns and neighbors', async () => {
     const { user } = renderRoute('/patterns/observer');
     expect(screen.getByRole('heading', { name: /^Example:/ })).toBeInTheDocument();
-    expect(screen.getByText(/class TemperatureSensor/)).toBeInTheDocument();
+    expect(screen.getByText(/class CartStore/)).toBeInTheDocument();
     const related = screen.getByRole('heading', { name: 'Related' }).closest('section')!;
     await user.click(within(related).getByRole('link', { name: 'Pub/Sub' }));
     expect(await screen.findByRole('heading', { level: 1, name: 'Pub/Sub' })).toBeInTheDocument();
@@ -135,7 +135,7 @@ describe('language', () => {
     renderRoute('/patterns/strategy', 'es');
     expect(screen.getByText('Estrategia')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Cuándo usarlo' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /^Ejemplo: Dosificadora/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /^Ejemplo: Costo de envío/ })).toBeInTheDocument();
   });
 
   it('localizes category filters', () => {

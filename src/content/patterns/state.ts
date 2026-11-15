@@ -58,51 +58,52 @@ export const state: Pattern = {
       'XState e as máquinas de estados finitos, o estado de uma Promise (pending, fulfilled, rejected), os reducers com um campo status.',
   },
   example: {
-    title: { en: 'Dive computer', es: 'Computadora de buceo', 'pt-BR': 'Computador de mergulho' },
-    scenario: {
-      en: 'The computer goes through surface, descent, bottom, ascent and safety stop. You cannot surface without doing the stop.',
-      es: 'La computadora pasa por superficie, descenso, fondo, ascenso y parada de seguridad. No se puede salir a la superficie sin hacer la parada.',
-      'pt-BR':
-        'O computador passa por superfície, descida, fundo, subida e parada de segurança. Não é possível subir à superfície sem fazer a parada.',
+    title: {
+      en: 'Order lifecycle',
+      es: 'Ciclo de vida de una orden',
+      'pt-BR': 'Ciclo de vida de um pedido',
     },
-    code: `const states = {
-  surface: { descend: 'descending' },
-  descending: { level: 'bottom', ascend: 'ascending' },
-  bottom: { ascend: 'ascending' },
-  ascending: { reachStop: 'safetyStop' },
-  safetyStop: { complete: 'surface' },
+    scenario: {
+      en: 'An order goes from pending to paid, shipped and delivered. It can only be cancelled before shipping, and a bug once let unpaid orders ship.',
+      es: 'Una orden pasa de pendiente a pagada, enviada y entregada. Solo se puede cancelar antes del envío, y un bug dejó salir órdenes sin pagar.',
+      'pt-BR':
+        'Um pedido passa de pendente a pago, enviado e entregue. Só pode ser cancelado antes do envio, e um bug já deixou sair pedidos sem pagamento.',
+    },
+    code: `const transitions = {
+  pending: { pay: 'paid', cancel: 'cancelled' },
+  paid: { ship: 'shipped', cancel: 'cancelled' },
+  shipped: { deliver: 'delivered' },
+  delivered: {},
+  cancelled: {},
 };
 
-class DiveComputer {
-  phase = 'surface';
-  log = [];
+class Order {
+  status = 'pending';
+  history = [];
 
   #go(action) {
-    const next = states[this.phase][action];
-    if (!next) throw new Error('Cannot "' + action + '" from ' + this.phase);
-    this.log.push(this.phase + ' → ' + next);
-    this.phase = next;
+    const next = transitions[this.status][action];
+    if (!next) throw new Error('Cannot ' + action + ' from ' + this.status);
+    this.history.push(this.status + ' → ' + next);
+    this.status = next;
   }
 
-  descend() { this.#go('descend'); }
-  level() { this.#go('level'); }
-  ascend() { this.#go('ascend'); }
-  reachStop() { this.#go('reachStop'); }
-  complete() { this.#go('complete'); }
+  pay() { this.#go('pay'); }
+  ship() { this.#go('ship'); }
+  deliver() { this.#go('deliver'); }
+  cancel() { this.#go('cancel'); }
 }
 
-const computer = new DiveComputer();
-computer.descend();
-computer.level();
-computer.ascend();
+const order = new Order();
 try {
-  computer.complete(); // surfacing without a safety stop
+  order.ship(); // shipping an unpaid order
 } catch (error) {
-  console.warn(error.message);
+  console.warn(error.message); // Cannot ship from pending
 }
-computer.reachStop();
-computer.complete();
-console.log(computer.log);`,
+order.pay();
+order.ship();
+order.deliver();
+console.log(order.history);`,
   },
   related: ['strategy', 'memento', 'flux'],
 };

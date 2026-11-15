@@ -63,42 +63,43 @@ export const hexagonal: Pattern = {
   },
   example: {
     title: {
-      en: 'Use case: scheduling feeding',
-      es: 'Caso de uso: programar alimentación',
-      'pt-BR': 'Caso de uso: programar a alimentação',
+      en: 'Use case: registering a user',
+      es: 'Caso de uso: registrar un usuario',
+      'pt-BR': 'Caso de uso: cadastrar um usuário',
     },
     scenario: {
-      en: 'The core decides when to feed based on the lights. Everything external (the clock, the feeder, persistence) comes in through ports; tests plug in fake adapters.',
-      es: 'El núcleo decide cuándo alimentar según la luz. Lo externo (el reloj, el alimentador, la persistencia) entra por puertos; en tests se conectan adaptadores falsos.',
+      en: 'The core decides how a user registers: no duplicate emails and a welcome email. Everything external (database, mailer, clock) comes in through ports; tests plug in fake adapters.',
+      es: 'El núcleo decide cómo se registra un usuario: sin emails repetidos y con un email de bienvenida. Lo externo (base, mailer, reloj) entra por puertos; los tests conectan adaptadores falsos.',
       'pt-BR':
-        'O núcleo decide quando alimentar conforme a luz. O que é externo (o relógio, o alimentador, a persistência) entra por portas; nos testes conectam-se adaptadores falsos.',
+        'O núcleo decide como um usuário se cadastra: sem emails repetidos e com um email de boas-vindas. O que é externo (banco, mailer, relógio) entra por portas; os testes conectam adaptadores falsos.',
     },
     code: `// Core: imports nothing external, it only receives ports
-function createFeedingService({ clock, feeder, schedules }) {
-  return {
-    async tick() {
-      const hour = clock.now().getHours();
-      const plan = await schedules.forHour(hour);
-      if (!plan) return 'no feeding';
-      if (hour < 9 || hour > 20) return 'lights off: skipped';
-      await feeder.dispense(plan.grams);
-      return 'fed ' + plan.grams + ' g';
-    },
+function createRegisterUser({ users, mailer, clock }) {
+  return async ({ email, name }) => {
+    const normalized = email.trim().toLowerCase();
+    if (await users.findByEmail(normalized)) throw new Error('Email already registered');
+    const user = { email: normalized, name, createdAt: clock.now().toISOString() };
+    await users.save(user);
+    await mailer.send(normalized, 'Welcome, ' + name + '!');
+    return user;
   };
 }
 
-// Test adapters (in production: the RTC, the hardware and the database)
-const fixedClock = (h) => ({ now: () => new Date(2026, 0, 1, h) });
-const memorySchedules = { forHour: async (h) => ({ 10: { grams: 0.4 }, 18: { grams: 0.6 } })[h] };
-const fakeFeeder = { dispensed: [], async dispense(g) { this.dispensed.push(g); } };
+// Test adapters (in production: Postgres, an email provider and the system clock)
+const memoryUsers = {
+  rows: [],
+  async findByEmail(email) { return this.rows.find((u) => u.email === email) ?? null; },
+  async save(user) { this.rows.push(user); },
+};
+const fakeMailer = { sent: [], async send(to, subject) { this.sent.push(to + ': ' + subject); } };
+const fixedClock = { now: () => new Date('2026-03-01T10:00:00Z') };
 
-const service = createFeedingService({
-  clock: fixedClock(18),
-  feeder: fakeFeeder,
-  schedules: memorySchedules,
-});
+const registerUser = createRegisterUser({ users: memoryUsers, mailer: fakeMailer, clock: fixedClock });
 
-service.tick().then((result) => console.log(result, fakeFeeder.dispensed)); // fed 0.6 g`,
+registerUser({ email: ' Ana@Example.com ', name: 'Ana' })
+  .then((user) => console.log(user, fakeMailer.sent))
+  .then(() => registerUser({ email: 'ana@example.com', name: 'Ana again' }))
+  .catch((e) => console.log(e.message)); // Email already registered`,
   },
   related: ['adapter', 'dependency-injection', 'repository', 'plugin'],
 };

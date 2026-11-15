@@ -58,39 +58,40 @@ export const modulePattern: Pattern = {
       'Os ES modules (import/export), o padrão IIFE da era jQuery, os módulos do Node e os barrels index.ts.',
   },
   example: {
-    title: { en: 'Salinity module', es: 'Módulo de salinidad', 'pt-BR': 'Módulo de salinidade' },
+    title: { en: 'Analytics module', es: 'Módulo de analytics', 'pt-BR': 'Módulo de analytics' },
     scenario: {
-      en: 'The module keeps the latest refractometer readings and only exposes the average and an alert. Nobody can overwrite the history by mistake.',
-      es: 'El módulo guarda las últimas lecturas del refractómetro y expone solo el promedio y una alerta. Nadie puede pisar el historial por error.',
+      en: 'The analytics module queues events and sends them in batches. Other code can track events and flush, but nobody should be able to edit the queue by mistake.',
+      es: 'El módulo de analytics encola eventos y los manda en lotes. El resto del código puede registrar eventos y forzar el envío, pero nadie debería poder tocar la cola por error.',
       'pt-BR':
-        'O módulo guarda as últimas leituras do refratômetro e expõe só a média e um alerta. Ninguém consegue sobrescrever o histórico por engano.',
+        'O módulo de analytics enfileira eventos e os envia em lotes. O resto do código pode registrar eventos e forçar o envio, mas ninguém deveria conseguir mexer na fila por engano.',
     },
-    code: `const salinity = (() => {
+    code: `const analytics = (() => {
   // Private state: it only exists inside the closure
-  const readings = [];
-  const TARGET = 35; // ppt
+  const queue = [];
+  const BATCH_SIZE = 3;
+  let sent = 0;
 
-  function record(ppt) {
-    if (ppt < 25 || ppt > 45) throw new RangeError('Impossible reading: ' + ppt);
-    readings.push(ppt);
-    if (readings.length > 10) readings.shift();
+  function flush() {
+    if (queue.length === 0) return 0;
+    const batch = queue.splice(0, queue.length);
+    sent += batch.length; // in real life: navigator.sendBeacon('/collect', batch)
+    return batch.length;
   }
 
-  function average() {
-    return readings.reduce((a, b) => a + b, 0) / (readings.length || 1);
+  function track(name, props = {}) {
+    queue.push({ name, props, at: Date.now() });
+    if (queue.length >= BATCH_SIZE) flush();
   }
 
-  function isOff() {
-    return Math.abs(average() - TARGET) > 1;
-  }
-
-  return Object.freeze({ record, average, isOff });
+  return Object.freeze({ track, flush, stats: () => ({ queued: queue.length, sent }) });
 })();
 
-salinity.record(34.8);
-salinity.record(35.3);
-console.log(salinity.average(), salinity.isOff()); // 35.05 false
-console.log(salinity.readings); // undefined: the history is private`,
+analytics.track('page_view', { path: '/pricing' });
+analytics.track('click', { id: 'buy' });
+console.log(analytics.stats()); // { queued: 2, sent: 0 }
+analytics.track('signup');
+console.log(analytics.stats()); // { queued: 0, sent: 3 }
+console.log(analytics.queue); // undefined: the queue is private`,
   },
   related: ['singleton', 'facade', 'provider'],
 };

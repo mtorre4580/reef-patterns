@@ -63,45 +63,45 @@ export const compoundComponents: Pattern = {
   },
   example: {
     title: {
-      en: '<Tank> with light and pump',
-      es: '<Tank> con luz y bomba',
-      'pt-BR': '<Tank> com luz e bomba',
+      en: '<Tabs> with tabs and panels',
+      es: '<Tabs> con pestañas y paneles',
+      'pt-BR': '<Tabs> com abas e painéis',
     },
     scenario: {
-      en: 'A tank panel shows its light and its pump, but each user arranges them in the order they prefer. Every piece reads and changes the same tank state.',
-      es: 'El panel de un acuario muestra su luz y su bomba, pero cada usuario arma el orden que prefiere. Todas las piezas leen y cambian el mismo estado del tanque.',
+      en: 'The settings page uses tabs, and each team wants a different layout. All pieces share the active tab without passing props around.',
+      es: 'La página de configuración usa pestañas y cada equipo quiere un layout distinto. Todas las piezas comparten la pestaña activa sin pasar props.',
       'pt-BR':
-        'O painel de um aquário mostra sua luz e sua bomba, mas cada usuário monta a ordem que prefere. Todas as peças leem e mudam o mesmo estado do aquário.',
+        'A página de configurações usa abas e cada time quer um layout diferente. Todas as peças compartilham a aba ativa sem passar props.',
     },
     code: `import { createContext, createElement as h, useContext, useState } from 'react';
 
-const TankContext = createContext(null);
+const TabsContext = createContext(null);
 
-const useTank = () => {
-  const ctx = useContext(TankContext);
-  if (!ctx) throw new Error('Tank.* components must be used inside <Tank>');
+const useTabs = () => {
+  const ctx = useContext(TabsContext);
+  if (!ctx) throw new Error('Tabs.* components must be used inside <Tabs>');
   return ctx;
 };
 
-export const Tank = ({ name, children }) => {
-  const [state, setState] = useState({ light: false, pump: true });
-  const toggle = (device) => setState((s) => ({ ...s, [device]: !s[device] }));
-  return h(TankContext.Provider, { value: { state, toggle } },
-    h('section', { 'aria-label': name }, children),
-  );
+export const Tabs = ({ defaultValue, children }) => {
+  const [active, setActive] = useState(defaultValue);
+  return h(TabsContext.Provider, { value: { active, setActive } }, h('div', null, children));
 };
 
-Tank.Light = () => {
-  const { state, toggle } = useTank();
-  return h('button', { 'aria-pressed': state.light, onClick: () => toggle('light') }, 'Light');
+Tabs.Tab = ({ value, children }) => {
+  const { active, setActive } = useTabs();
+  return h('button', { role: 'tab', 'aria-selected': active === value, onClick: () => setActive(value) }, children);
 };
 
-Tank.Pump = () => {
-  const { state, toggle } = useTank();
-  return h('button', { 'aria-pressed': state.pump, onClick: () => toggle('pump') }, 'Pump');
+Tabs.Panel = ({ value, children }) => {
+  const { active } = useTabs();
+  return active === value ? h('div', { role: 'tabpanel' }, children) : null;
 };
 
-// <Tank name="Nano 60 L"><Tank.Pump /><Tank.Light /></Tank>`,
+// <Tabs defaultValue="profile">
+//   <Tabs.Tab value="profile">Profile</Tabs.Tab><Tabs.Tab value="billing">Billing</Tabs.Tab>
+//   <Tabs.Panel value="profile">…</Tabs.Panel><Tabs.Panel value="billing">…</Tabs.Panel>
+// </Tabs>`,
   },
   related: ['provider', 'composite', 'render-props'],
 };

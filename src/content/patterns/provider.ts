@@ -59,40 +59,43 @@ export const provider: Pattern = {
   },
   example: {
     title: {
-      en: 'ReefProvider with preferred units',
-      es: 'ReefProvider con unidades preferidas',
-      'pt-BR': 'ReefProvider com unidades preferidas',
+      en: 'AuthProvider with the current user',
+      es: 'AuthProvider con el usuario actual',
+      'pt-BR': 'AuthProvider com o usuário atual',
     },
     scenario: {
-      en: 'Some users measure in °C and ppt, others in °F and specific gravity. Every reading in the app is formatted to their preference without passing it through ten levels of props.',
-      es: 'Algunos usuarios miden en °C y ppt, otros en °F y gravedad específica. Cada lectura de la app se formatea según la preferencia, sin pasarla por diez niveles de props.',
+      en: 'The header, the settings page and dozens of buttons need the current user and a logout function. Passing them through ten levels of props was unmanageable.',
+      es: 'El header, la página de configuración y decenas de botones necesitan el usuario actual y una función de logout. Pasarlos por diez niveles de props era inmanejable.',
       'pt-BR':
-        'Alguns usuários medem em °C e ppt, outros em °F e densidade. Cada leitura do app é formatada conforme a preferência, sem passá-la por dez níveis de props.',
+        'O header, a página de configurações e dezenas de botões precisam do usuário atual e de uma função de logout. Passá-los por dez níveis de props era impossível de manter.',
     },
     code: `import { createContext, createElement as h, useContext, useMemo, useState } from 'react';
 
-const UnitsContext = createContext(null);
+const AuthContext = createContext(null);
 
-export const ReefProvider = ({ children, initial = { temp: 'C', salinity: 'ppt' } }) => {
-  const [units, setUnits] = useState(initial);
-  const value = useMemo(() => ({ units, setUnits }), [units]);
-  return h(UnitsContext.Provider, { value }, children);
+export const AuthProvider = ({ children, initialUser = null }) => {
+  const [user, setUser] = useState(initialUser);
+  const value = useMemo(
+    () => ({ user, login: setUser, logout: () => setUser(null) }),
+    [user],
+  );
+  return h(AuthContext.Provider, { value }, children);
 };
 
-export const useUnits = () => {
-  const ctx = useContext(UnitsContext);
-  if (!ctx) throw new Error('useUnits must be used inside <ReefProvider>');
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>');
   return ctx;
 };
 
-// A component deep in the tree formats readings without extra props
-export const TemperatureReading = ({ celsius }) => {
-  const { units } = useUnits();
-  const text = units.temp === 'F' ? (celsius * 9) / 5 + 32 + ' °F' : celsius + ' °C';
-  return h('span', null, text);
+// A component deep in the tree reads the user without extra props
+export const UserMenu = () => {
+  const { user, logout } = useAuth();
+  if (!user) return h('a', { href: '/login' }, 'Sign in');
+  return h('button', { onClick: logout }, 'Sign out ' + user.name);
 };
 
-// <ReefProvider initial={{ temp: 'F', salinity: 'sg' }}><Dashboard /></ReefProvider>`,
+// <AuthProvider initialUser={{ name: 'Ana' }}><App /></AuthProvider>`,
   },
   related: ['dependency-injection', 'custom-hooks', 'singleton', 'compound-components'],
 };

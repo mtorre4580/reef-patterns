@@ -59,49 +59,49 @@ export const middleware: Pattern = {
   },
   example: {
     title: {
-      en: 'Command pipeline to the controller',
-      es: 'Pipeline de comandos al controlador',
-      'pt-BR': 'Pipeline de comandos para o controlador',
+      en: 'API request pipeline',
+      es: 'Pipeline de requests de una API',
+      'pt-BR': 'Pipeline de requisições de uma API',
     },
     scenario: {
-      en: 'Every command reaching the tank controller is logged, validated and timed before touching the hardware.',
-      es: 'Cada comando que llega al controlador del acuario se registra, se valida y se cronometra antes de tocar el hardware.',
+      en: 'Every API request is logged, authenticated and rate limited before reaching the handler, in an order that can be changed without touching the handlers.',
+      es: 'Cada request de la API se registra, se autentica y se limita por tasa antes de llegar al handler, en un orden que se puede cambiar sin tocar los handlers.',
       'pt-BR':
-        'Cada comando que chega ao controlador do aquário é registrado, validado e cronometrado antes de tocar no hardware.',
+        'Cada requisição da API é registrada, autenticada e limitada por taxa antes de chegar ao handler, em uma ordem que pode mudar sem mexer nos handlers.',
     },
     code: `function compose(middlewares, handler) {
-  return (ctx) => {
+  return (req) => {
     const dispatch = (i) => {
       const fn = middlewares[i];
-      return fn ? fn(ctx, () => dispatch(i + 1)) : handler(ctx);
+      return fn ? fn(req, () => dispatch(i + 1)) : handler(req);
     };
     return dispatch(0);
   };
 }
 
-const logger = (ctx, next) => {
-  console.log('→', ctx.command);
-  const result = next();
-  console.log('←', ctx.command, result);
-  return result;
+const logger = (req, next) => {
+  console.log('→', req.method, req.path);
+  const res = next();
+  console.log('←', res.status, req.path);
+  return res;
 };
 
-const validate = (ctx, next) => {
-  if (ctx.command === 'dose' && ctx.ml > 30) return 'rejected: dose too high';
-  return next();
+const auth = (req, next) => (req.headers.authorization ? next() : { status: 401 });
+
+const hits = new Map();
+const rateLimit = (req, next) => {
+  const count = (hits.get(req.ip) ?? 0) + 1;
+  hits.set(req.ip, count);
+  return count > 2 ? { status: 429 } : next();
 };
 
-const timing = (ctx, next) => {
-  const start = Date.now();
-  const result = next();
-  ctx.ms = Date.now() - start;
-  return result;
-};
+const handle = compose([logger, auth, rateLimit], () => ({ status: 200, body: ['order 1'] }));
 
-const send = compose([logger, validate, timing], (ctx) => 'ok: ' + ctx.command);
-
-send({ command: 'dose', ml: 10 });
-send({ command: 'dose', ml: 80 }); // validate cuts the chain`,
+const req = { method: 'GET', path: '/orders', ip: '10.0.0.1', headers: { authorization: 'Bearer x' } };
+handle(req);
+handle({ ...req, headers: {} }); // auth cuts the chain: 401
+handle(req);
+handle(req); // third authenticated hit: 429`,
   },
   related: ['chain-of-responsibility', 'decorator', 'plugin'],
 };

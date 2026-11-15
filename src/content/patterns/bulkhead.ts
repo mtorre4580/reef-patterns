@@ -56,15 +56,15 @@ export const bulkhead: Pattern = {
   },
   example: {
     title: {
-      en: 'Alarms that never wait',
-      es: 'Alarmas que nunca esperan',
-      'pt-BR': 'Alarmes que nunca esperam',
+      en: 'Separate pools for uploads and payments',
+      es: 'Pools separados para subidas y pagos',
+      'pt-BR': 'Pools separados para uploads e pagamentos',
     },
     scenario: {
-      en: 'The app does many photo downloads and history reads. Critical alarms get their own compartment: even if photos saturate theirs, an alarm still goes out.',
-      es: 'La app hace muchas descargas de fotos y lecturas de historial. Las alarmas críticas tienen su propio compartimento: aunque las fotos saturen el suyo, una alarma sale igual.',
+      en: 'The app uploads many images and also processes payments. Payments get their own compartment: even if uploads saturate theirs, a payment request goes out right away.',
+      es: 'La app sube muchas imágenes y también procesa pagos. Los pagos tienen su propio compartimento: aunque las subidas saturen el suyo, un pago sale de inmediato.',
       'pt-BR':
-        'O app faz muitos downloads de fotos e leituras de histórico. Os alarmes críticos têm seu próprio compartimento: mesmo que as fotos saturem o delas, um alarme sai igual.',
+        'O app faz muitos uploads de imagens e também processa pagamentos. Os pagamentos têm seu próprio compartimento: mesmo que os uploads saturem o deles, um pagamento sai na hora.',
     },
     code: `function createBulkhead(maxConcurrent) {
   let active = 0;
@@ -95,15 +95,15 @@ export const bulkhead: Pattern = {
 }
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-const photos = createBulkhead(2); // compartment for heavy tasks
-const alarms = createBulkhead(1); // reserved compartment
+const uploads = createBulkhead(2); // compartment for heavy tasks
+const payments = createBulkhead(1); // reserved compartment
 
-for (let i = 0; i < 6; i++) photos.run(() => wait(500));
-console.log('Photos queued:', photos.pending); // 4
+for (let i = 0; i < 6; i++) uploads.run(() => wait(500));
+console.log('Uploads queued:', uploads.pending); // 4
 
-alarms
-  .run(async () => 'Alarm sent: low level in the sump')
-  .then(console.log); // goes out immediately, without waiting for the photos`,
+payments
+  .run(async () => 'Payment pay_123 authorized')
+  .then(console.log); // goes out immediately, without waiting for the uploads`,
   },
   related: ['circuit-breaker', 'retry', 'object-pool'],
 };

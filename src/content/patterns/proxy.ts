@@ -56,49 +56,49 @@ export const proxy: Pattern = {
   },
   example: {
     title: {
-      en: 'Caching an ICP analysis',
-      es: 'Caché de un análisis ICP',
-      'pt-BR': 'Cache de uma análise ICP',
+      en: 'Caching an expensive API call',
+      es: 'Cachear una llamada cara a la API',
+      'pt-BR': 'Cache de uma chamada cara à API',
     },
     scenario: {
-      en: 'An ICP water analysis takes days and costs money. If a sample already has a result, the app must return it without asking the lab again.',
-      es: 'Un análisis ICP del agua tarda días y cuesta dinero. Si ya hay un resultado de esa muestra, la app debe devolverlo sin pedirlo de nuevo al laboratorio.',
+      en: 'Exchange rates come from a paid API that charges per request. If a currency was already fetched, the app must reuse it instead of calling again.',
+      es: 'Las cotizaciones vienen de una API paga que cobra por request. Si una moneda ya se consultó, la app tiene que reutilizarla en vez de volver a llamar.',
       'pt-BR':
-        'Uma análise ICP da água demora dias e custa dinheiro. Se já existe um resultado daquela amostra, o app deve devolvê-lo sem pedir de novo ao laboratório.',
+        'As cotações vêm de uma API paga que cobra por requisição. Se uma moeda já foi consultada, o app precisa reutilizá-la em vez de chamar de novo.',
     },
-    code: `const lab = {
+    code: `const ratesApi = {
   calls: 0,
-  analyze(sampleId) {
+  getRate(currency) {
     this.calls++;
-    return { sampleId, magnesium: 1350, strontium: 8, copper: 0 };
+    return { currency, rate: currency === 'EUR' ? 0.92 : 1 };
   },
 };
 
-function createCachedLab(realLab) {
+function createCachedRates(api) {
   const cache = new Map();
   return {
-    analyze(sampleId) {
-      if (!cache.has(sampleId)) cache.set(sampleId, realLab.analyze(sampleId));
-      return cache.get(sampleId);
+    getRate(currency) {
+      if (!cache.has(currency)) cache.set(currency, api.getRate(currency));
+      return cache.get(currency);
     },
   };
 }
 
-const cachedLab = createCachedLab(lab);
-cachedLab.analyze('sample-0315');
-cachedLab.analyze('sample-0315');
-cachedLab.analyze('sample-0402');
-console.log(lab.calls); // 2: the second query came from the cache
+const rates = createCachedRates(ratesApi);
+rates.getRate('EUR');
+rates.getRate('EUR');
+rates.getRate('BRL');
+console.log(ratesApi.calls); // 2: the second EUR request came from the cache
 
-// Native Proxy variant: makes sure nobody writes an impossible pH
-const params = new Proxy({}, {
+// Native Proxy variant: validates form state before it is written
+const form = new Proxy({}, {
   set(target, key, value) {
-    if (key === 'ph' && (value < 0 || value > 14)) throw new RangeError('Invalid pH');
+    if (key === 'email' && !String(value).includes('@')) throw new TypeError('Invalid email');
     target[key] = value;
     return true;
   },
 });
-params.ph = 8.2;`,
+form.email = 'ana@example.com';`,
   },
   related: ['decorator', 'adapter', 'lazy-loading', 'flyweight'],
 };

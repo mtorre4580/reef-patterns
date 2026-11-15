@@ -4,62 +4,62 @@ export const command1: Challenge = {
   id: 'command-1',
   patternId: 'command',
   title: {
-    en: 'Doser with undo',
-    es: 'Dosificadora con deshacer',
-    'pt-BR': 'Dosadora com desfazer',
+    en: 'Text editor with undo',
+    es: 'Editor de texto con deshacer',
+    'pt-BR': 'Editor de texto com desfazer',
   },
   difficulty: 'media',
   story: {
-    en: 'When dosing by hand from the panel, a typo added 50 ml of alkalinity instead of 5. We want a dose history and the ability to undo the latest entries.',
-    es: 'Al dosificar a mano desde el panel, un error de tipeo metió 50 ml de alcalinidad en vez de 5. Queremos un historial de dosis y poder deshacer las últimas del registro.',
+    en: 'The notes app has no undo. Users lose text when they paste over a paragraph by mistake. Every edit should be undoable, and the history should be visible for debugging.',
+    es: 'La app de notas no tiene deshacer. Los usuarios pierden texto cuando pegan encima de un párrafo por error. Cada edición debería poder deshacerse, y el historial tendría que verse para depurar.',
     'pt-BR':
-      'Ao dosar manualmente pelo painel, um erro de digitação colocou 50 ml de alcalinidade em vez de 5. Queremos um histórico de doses e poder desfazer as últimas.',
+      'O app de notas não tem desfazer. Os usuários perdem texto quando colam por cima de um parágrafo por engano. Cada edição deveria poder ser desfeita, e o histórico deveria ser visível para depurar.',
   },
   instructions: {
-    en: 'Implement:\n- `DoseCommand(tank, element, ml)` with `execute()` (adds `ml` to `tank.dosed[element]`) and `undo()` (subtracts it).\n- `DoserConsole` with `run(command)` (executes and stores it), `undo()` (undoes the last one; with no history it does nothing) and `get history`, which returns `["<element> <ml> ml", …]`.',
-    es: 'Implementá:\n- `DoseCommand(tank, element, ml)` con `execute()` (suma `ml` a `tank.dosed[element]`) y `undo()` (lo resta).\n- `DoserConsole` con `run(command)` (ejecuta y guarda), `undo()` (deshace el último; sin historial no hace nada) y `get history`, que devuelve `["<element> <ml> ml", …]`.',
+    en: 'Implement:\n- `InsertCommand(doc, text)` with `execute()` (appends `text` to `doc.content`) and `undo()` (removes it).\n- `Editor` with `run(command)` (executes and stores it), `undo()` (undoes the last one; with no history it does nothing) and `get history`, which returns `["insert <text>", …]`.',
+    es: 'Implementá:\n- `InsertCommand(doc, text)` con `execute()` (agrega `text` al final de `doc.content`) y `undo()` (lo quita).\n- `Editor` con `run(command)` (ejecuta y guarda), `undo()` (deshace el último; sin historial no hace nada) y `get history`, que devuelve `["insert <text>", …]`.',
     'pt-BR':
-      'Implemente:\n- `DoseCommand(tank, element, ml)` com `execute()` (soma `ml` a `tank.dosed[element]`) e `undo()` (subtrai).\n- `DoserConsole` com `run(command)` (executa e guarda), `undo()` (desfaz o último; sem histórico não faz nada) e `get history`, que devolve `["<element> <ml> ml", …]`.',
+      'Implemente:\n- `InsertCommand(doc, text)` com `execute()` (adiciona `text` ao final de `doc.content`) e `undo()` (remove).\n- `Editor` com `run(command)` (executa e guarda), `undo()` (desfaz o último; sem histórico não faz nada) e `get history`, que devolve `["insert <text>", …]`.',
   },
-  starterCode: `class DoserConsole {
-  constructor(tank) {
-    this.tank = tank;
+  starterCode: `class Editor {
+  constructor(doc) {
+    this.doc = doc;
   }
 
-  dose(element, ml) {
-    this.tank.dosed[element] = (this.tank.dosed[element] ?? 0) + ml;
+  type(text) {
+    this.doc.content += text;
   }
 }
 `,
   tests: [
     {
       name: {
-        en: 'runs doses and records them',
-        es: 'ejecuta dosis y las registra',
-        'pt-BR': 'executa doses e as registra',
+        en: 'runs edits and records them',
+        es: 'ejecuta ediciones y las registra',
+        'pt-BR': 'executa edições e as registra',
       },
-      code: `const tank = { dosed: {} };
-const doser = new DoserConsole();
-doser.run(new DoseCommand(tank, 'alk', 5));
-doser.run(new DoseCommand(tank, 'calcium', 8));
-expect(tank.dosed).toEqual({ alk: 5, calcium: 8 });
-expect(doser.history).toEqual(['alk 5 ml', 'calcium 8 ml']);`,
+      code: `const doc = { content: '' };
+const editor = new Editor();
+editor.run(new InsertCommand(doc, 'Hello'));
+editor.run(new InsertCommand(doc, ' world'));
+expect(doc.content).toBe('Hello world');
+expect(editor.history).toEqual(['insert Hello', 'insert  world']);`,
     },
     {
       name: {
-        en: 'undoes two doses and leaves the right total',
-        es: 'deshace dos dosis y deja el total correcto',
-        'pt-BR': 'desfaz duas doses e deixa o total correto',
+        en: 'undoes two edits and leaves the right text',
+        es: 'deshace dos ediciones y deja el texto correcto',
+        'pt-BR': 'desfaz duas edições e deixa o texto correto',
       },
-      code: `const tank = { dosed: {} };
-const doser = new DoserConsole();
-doser.run(new DoseCommand(tank, 'alk', 5));
-doser.run(new DoseCommand(tank, 'alk', 50));
-doser.run(new DoseCommand(tank, 'calcium', 10));
-doser.undo();
-doser.undo();
-expect(tank.dosed).toEqual({ alk: 5, calcium: 0 });
-expect(doser.history).toEqual(['alk 5 ml']);`,
+      code: `const doc = { content: '' };
+const editor = new Editor();
+editor.run(new InsertCommand(doc, 'Ship it'));
+editor.run(new InsertCommand(doc, ' today'));
+editor.run(new InsertCommand(doc, '!!!'));
+editor.undo();
+editor.undo();
+expect(doc.content).toBe('Ship it');
+expect(editor.history).toEqual(['insert Ship it']);`,
     },
     {
       name: {
@@ -67,9 +67,9 @@ expect(doser.history).toEqual(['alk 5 ml']);`,
         es: 'deshacer sin historial no hace nada',
         'pt-BR': 'desfazer sem histórico não faz nada',
       },
-      code: `const doser = new DoserConsole();
-doser.undo();
-expect(doser.history).toEqual([]);`,
+      code: `const editor = new Editor();
+editor.undo();
+expect(editor.history).toEqual([]);`,
     },
     {
       name: {
@@ -79,9 +79,9 @@ expect(doser.history).toEqual([]);`,
       },
       code: `const execute = fn();
 const undo = fn();
-const doser = new DoserConsole();
-doser.run({ execute, undo, element: 'test', ml: 1 });
-doser.undo();
+const editor = new Editor();
+editor.run({ execute, undo, text: 'x' });
+editor.undo();
 expect(execute).toHaveBeenCalledTimes(1);
 expect(undo).toHaveBeenCalledTimes(1);`,
     },
@@ -89,44 +89,43 @@ expect(undo).toHaveBeenCalledTimes(1);`,
   checks: [
     {
       rule: 'requireMethod',
-      className: 'DoseCommand',
+      className: 'InsertCommand',
       method: 'undo',
       message: {
-        en: 'DoseCommand knows how to undo itself',
-        es: 'DoseCommand sabe deshacerse',
-        'pt-BR': 'DoseCommand sabe se desfazer',
+        en: 'InsertCommand knows how to undo itself',
+        es: 'InsertCommand sabe deshacerse',
+        'pt-BR': 'InsertCommand sabe se desfazer',
       },
     },
   ],
   hints: {
     en: [
-      'Each command stores everything it needs to run and revert: tank, element and ml.',
-      '`DoserConsole` just keeps a stack: `push` on run, `pop()?.undo()` on undo.',
+      'Each command stores everything it needs to run and revert: the document and the text.',
+      '`Editor` just keeps a stack: `push` on run, `pop()?.undo()` on undo.',
     ],
     es: [
-      'Cada comando guarda todo lo necesario para ejecutarse y revertirse: tanque, elemento y ml.',
-      '`DoserConsole` solo mantiene una pila: `push` al ejecutar, `pop()?.undo()` al deshacer.',
+      'Cada comando guarda todo lo necesario para ejecutarse y revertirse: el documento y el texto.',
+      '`Editor` solo mantiene una pila: `push` al ejecutar, `pop()?.undo()` al deshacer.',
     ],
     'pt-BR': [
-      'Cada comando guarda tudo o que precisa para executar e reverter: aquário, elemento e ml.',
-      '`DoserConsole` só mantém uma pilha: `push` ao executar, `pop()?.undo()` ao desfazer.',
+      'Cada comando guarda tudo o que precisa para executar e reverter: o documento e o texto.',
+      '`Editor` só mantém uma pilha: `push` ao executar, `pop()?.undo()` ao desfazer.',
     ],
   },
-  solution: `class DoseCommand {
-  constructor(tank, element, ml) {
-    this.tank = tank;
-    this.element = element;
-    this.ml = ml;
+  solution: `class InsertCommand {
+  constructor(doc, text) {
+    this.doc = doc;
+    this.text = text;
   }
   execute() {
-    this.tank.dosed[this.element] = (this.tank.dosed[this.element] ?? 0) + this.ml;
+    this.doc.content += this.text;
   }
   undo() {
-    this.tank.dosed[this.element] -= this.ml;
+    this.doc.content = this.doc.content.slice(0, -this.text.length);
   }
 }
 
-class DoserConsole {
+class Editor {
   #history = [];
 
   run(command) {
@@ -139,7 +138,7 @@ class DoserConsole {
   }
 
   get history() {
-    return this.#history.map((c) => c.element + ' ' + c.ml + ' ml');
+    return this.#history.map((c) => 'insert ' + c.text);
   }
 }
 `,

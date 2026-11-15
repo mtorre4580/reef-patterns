@@ -3,111 +3,115 @@ import type { Challenge } from '../../types';
 export const adapter1: Challenge = {
   id: 'adapter-1',
   patternId: 'adapter',
-  title: { en: 'Unify test kits', es: 'Unificar test kits', 'pt-BR': 'Unificar kits de teste' },
+  title: {
+    en: 'Unify payment providers',
+    es: 'Unificar proveedores de pago',
+    'pt-BR': 'Unificar provedores de pagamento',
+  },
   difficulty: 'facil',
   story: {
-    en: 'The Hanna colorimeter reports alkalinity in ppm of CaCO₃ and the Salifert kit in meq/L. The alkalinity history only understands dKH and blows up with any other shape.',
-    es: 'El colorímetro Hanna reporta alcalinidad en ppm de CaCO₃ y el kit Salifert en meq/L. El historial de alcalinidad solo entiende dKH y explota con cualquier otra forma.',
+    en: 'Stripe returns amounts in cents and PayPal as decimal strings with different field names. The payments report only understands one shape and blows up with any other.',
+    es: 'Stripe devuelve montos en centavos y PayPal como strings decimales con otros nombres de campo. El reporte de pagos solo entiende una forma y explota con cualquier otra.',
     'pt-BR':
-      'O colorímetro Hanna reporta alcalinidade em ppm de CaCO₃ e o kit Salifert em meq/L. O histórico de alcalinidade só entende dKH e quebra com qualquer outro formato.',
+      'O Stripe devolve valores em centavos e o PayPal como strings decimais com outros nomes de campo. O relatório de pagamentos só entende um formato e quebra com qualquer outro.',
   },
   instructions: {
-    en: 'Implement two adapters that return `{ dkh, takenAt }` (`takenAt` is a `Date`):\n- `fromHanna({ alk_ppm, ts })`: `dkh = +(alk_ppm / 17.86).toFixed(2)`.\n- `fromSalifert({ meq, date })`: `dkh = +(meq * 2.8).toFixed(2)`.\nDo not modify `AlkalinityLog`.',
-    es: 'Implementá dos adaptadores que devuelvan `{ dkh, takenAt }` (`takenAt` es un `Date`):\n- `fromHanna({ alk_ppm, ts })`: `dkh = +(alk_ppm / 17.86).toFixed(2)`.\n- `fromSalifert({ meq, date })`: `dkh = +(meq * 2.8).toFixed(2)`.\nNo modifiques `AlkalinityLog`.',
+    en: 'Implement two adapters that return `{ id, amountCents, paid }`:\n- `fromStripe({ id, amount, status })`: `amountCents = amount`, `paid = status === "succeeded"`.\n- `fromPaypal({ transaction_id, gross, state })`: `amountCents = Math.round(Number(gross) * 100)`, `paid = state === "COMPLETED"`.\nDo not modify `PaymentsReport`.',
+    es: 'Implementá dos adaptadores que devuelvan `{ id, amountCents, paid }`:\n- `fromStripe({ id, amount, status })`: `amountCents = amount`, `paid = status === "succeeded"`.\n- `fromPaypal({ transaction_id, gross, state })`: `amountCents = Math.round(Number(gross) * 100)`, `paid = state === "COMPLETED"`.\nNo modifiques `PaymentsReport`.',
     'pt-BR':
-      'Implemente dois adaptadores que devolvam `{ dkh, takenAt }` (`takenAt` é um `Date`):\n- `fromHanna({ alk_ppm, ts })`: `dkh = +(alk_ppm / 17.86).toFixed(2)`.\n- `fromSalifert({ meq, date })`: `dkh = +(meq * 2.8).toFixed(2)`.\nNão modifique `AlkalinityLog`.',
+      'Implemente dois adaptadores que devolvam `{ id, amountCents, paid }`:\n- `fromStripe({ id, amount, status })`: `amountCents = amount`, `paid = status === "succeeded"`.\n- `fromPaypal({ transaction_id, gross, state })`: `amountCents = Math.round(Number(gross) * 100)`, `paid = state === "COMPLETED"`.\nNão modifique `PaymentsReport`.',
   },
   starterCode: `// Do not modify this class
-class AlkalinityLog {
-  #entries = [];
-  add(reading) {
-    if (typeof reading.dkh !== 'number' || !(reading.takenAt instanceof Date)) {
-      throw new TypeError('Invalid reading');
+class PaymentsReport {
+  #payments = [];
+  add(payment) {
+    if (typeof payment.amountCents !== 'number' || typeof payment.paid !== 'boolean') {
+      throw new TypeError('Invalid payment');
     }
-    this.#entries.push(reading);
+    this.#payments.push(payment);
   }
-  average() {
-    const total = this.#entries.reduce((sum, e) => sum + e.dkh, 0);
-    return +(total / this.#entries.length).toFixed(2);
+  totalPaidCents() {
+    return this.#payments.filter((p) => p.paid).reduce((sum, p) => sum + p.amountCents, 0);
   }
 }
 
-function fromHanna(reading) {
-  return reading;
+function fromStripe(charge) {
+  return charge;
 }
 
-function fromSalifert(reading) {
-  return reading;
+function fromPaypal(capture) {
+  return capture;
 }
 `,
   tests: [
     {
       name: {
-        en: 'adapts a Hanna reading',
-        es: 'adapta una lectura de Hanna',
-        'pt-BR': 'adapta uma leitura do Hanna',
+        en: 'adapts a Stripe charge',
+        es: 'adapta un cobro de Stripe',
+        'pt-BR': 'adapta uma cobrança do Stripe',
       },
-      code: `const r = fromHanna({ alk_ppm: 143, ts: '2026-03-01T09:00:00Z' });
-expect(r.dkh).toBe(8.01);
-expect(r.takenAt.toISOString()).toBe('2026-03-01T09:00:00.000Z');`,
+      code: `expect(fromStripe({ id: 'ch_1', amount: 2599, status: 'succeeded' })).toEqual({ id: 'ch_1', amountCents: 2599, paid: true });`,
     },
     {
       name: {
-        en: 'adapts a Salifert reading',
-        es: 'adapta una lectura de Salifert',
-        'pt-BR': 'adapta uma leitura do Salifert',
+        en: 'adapts a PayPal capture',
+        es: 'adapta una captura de PayPal',
+        'pt-BR': 'adapta uma captura do PayPal',
       },
-      code: `const r = fromSalifert({ meq: 3, date: '2026-03-02' });
-expect(r.dkh).toBe(8.4);
-expect(r.takenAt instanceof Date).toBe(true);`,
+      code: `expect(fromPaypal({ transaction_id: 'PP-9', gross: '12.50', state: 'COMPLETED' })).toEqual({ id: 'PP-9', amountCents: 1250, paid: true });
+expect(fromPaypal({ transaction_id: 'PP-10', gross: '3.00', state: 'PENDING' }).paid).toBe(false);`,
     },
     {
       name: {
-        en: 'the history accepts both sources',
-        es: 'el historial acepta ambas fuentes',
-        'pt-BR': 'o histórico aceita as duas fontes',
+        en: 'the report accepts both providers',
+        es: 'el reporte acepta ambos proveedores',
+        'pt-BR': 'o relatório aceita os dois provedores',
       },
-      code: `const log = new AlkalinityLog();
-log.add(fromHanna({ alk_ppm: 143, ts: '2026-03-01' }));
-log.add(fromSalifert({ meq: 3, date: '2026-03-02' }));
-expect(log.average()).toBe(8.21);`,
+      code: `const report = new PaymentsReport();
+report.add(fromStripe({ id: 'ch_1', amount: 2599, status: 'succeeded' }));
+report.add(fromPaypal({ transaction_id: 'PP-9', gross: '12.50', state: 'COMPLETED' }));
+report.add(fromStripe({ id: 'ch_2', amount: 999, status: 'failed' }));
+expect(report.totalPaidCents()).toBe(3849);`,
     },
   ],
   hints: {
     en: [
-      'Each adapter is a function that translates a device shape into the one your app uses.',
-      '`new Date(reading.ts)` turns the text into a date.',
+      'Each adapter is a function that translates a provider shape into the one your app uses.',
+      '`Math.round(Number("12.50") * 100)` turns the decimal string into cents without floating-point surprises.',
     ],
     es: [
-      'Cada adaptador es una función que traduce la forma de un dispositivo a la de tu app.',
-      '`new Date(reading.ts)` convierte el texto en fecha.',
+      'Cada adaptador es una función que traduce la forma de un proveedor a la de tu app.',
+      '`Math.round(Number("12.50") * 100)` convierte el string decimal en centavos sin sorpresas de punto flotante.',
     ],
     'pt-BR': [
-      'Cada adaptador é uma função que traduz o formato de um dispositivo para o do seu app.',
-      '`new Date(reading.ts)` converte o texto em data.',
+      'Cada adaptador é uma função que traduz o formato de um provedor para o do seu app.',
+      '`Math.round(Number("12.50") * 100)` converte a string decimal em centavos sem surpresas de ponto flutuante.',
     ],
   },
   solution: `// Do not modify this class
-class AlkalinityLog {
-  #entries = [];
-  add(reading) {
-    if (typeof reading.dkh !== 'number' || !(reading.takenAt instanceof Date)) {
-      throw new TypeError('Invalid reading');
+class PaymentsReport {
+  #payments = [];
+  add(payment) {
+    if (typeof payment.amountCents !== 'number' || typeof payment.paid !== 'boolean') {
+      throw new TypeError('Invalid payment');
     }
-    this.#entries.push(reading);
+    this.#payments.push(payment);
   }
-  average() {
-    const total = this.#entries.reduce((sum, e) => sum + e.dkh, 0);
-    return +(total / this.#entries.length).toFixed(2);
+  totalPaidCents() {
+    return this.#payments.filter((p) => p.paid).reduce((sum, p) => sum + p.amountCents, 0);
   }
 }
 
-function fromHanna({ alk_ppm, ts }) {
-  return { dkh: +(alk_ppm / 17.86).toFixed(2), takenAt: new Date(ts) };
+function fromStripe({ id, amount, status }) {
+  return { id, amountCents: amount, paid: status === 'succeeded' };
 }
 
-function fromSalifert({ meq, date }) {
-  return { dkh: +(meq * 2.8).toFixed(2), takenAt: new Date(date) };
+function fromPaypal({ transaction_id, gross, state }) {
+  return {
+    id: transaction_id,
+    amountCents: Math.round(Number(gross) * 100),
+    paid: state === 'COMPLETED',
+  };
 }
 `,
 };

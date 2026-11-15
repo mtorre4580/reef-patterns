@@ -56,35 +56,37 @@ export const renderProps: Pattern = {
   },
   example: {
     title: {
-      en: 'Units with a render prop',
-      es: 'Unidades con render prop',
-      'pt-BR': 'Unidades com render prop',
+      en: 'Data fetching with a render prop',
+      es: 'Datos con render prop',
+      'pt-BR': 'Dados com render prop',
     },
     scenario: {
-      en: 'The same logic as withUnits, but the consumer decides the markup: one widget uses it in a heading, another in a tooltip.',
-      es: 'La misma lógica de withUnits, pero el consumidor decide el marcado: un widget la usa en un título, otro en un tooltip.',
+      en: 'The same fetching logic feeds a table on one page and a small card on another. The consumer decides the markup; the component only provides the state.',
+      es: 'La misma lógica de fetch alimenta una tabla en una página y una tarjeta chica en otra. El consumidor decide el marcado; el componente solo aporta el estado.',
       'pt-BR':
-        'A mesma lógica do withUnits, mas o consumidor decide a marcação: um widget a usa em um título, outro em um tooltip.',
+        'A mesma lógica de busca alimenta uma tabela em uma página e um card pequeno em outra. O consumidor decide a marcação; o componente só fornece o estado.',
     },
-    code: `import { createElement as h, useState } from 'react';
+    code: `import { createElement as h, useEffect, useState } from 'react';
 
-export const Units = ({ children }) => {
-  const [unit, setUnit] = useState('C');
-  const format = (c) => (unit === 'F' ? ((c * 9) / 5 + 32).toFixed(1) + ' °F' : c + ' °C');
-  const toggle = () => setUnit((u) => (u === 'C' ? 'F' : 'C'));
+export const Fetch = ({ load, children }) => {
+  const [state, setState] = useState({ data: null, error: null, loading: true });
+  useEffect(() => {
+    load()
+      .then((data) => setState({ data, error: null, loading: false }))
+      .catch((error) => setState({ data: null, error, loading: false }));
+  }, [load]);
   // The component draws nothing of its own: it delegates to the children function
-  return children({ unit, format, toggle });
+  return children(state);
 };
 
-export const SumpCard = ({ celsius }) =>
-  h(Units, null, ({ format, toggle, unit }) =>
-    h('div', null,
-      h('h3', null, 'Sump ' + format(celsius)),
-      h('button', { onClick: toggle }, 'Show in °' + (unit === 'C' ? 'F' : 'C')),
-    ),
-  );
+export const RevenueCard = ({ loadRevenue }) =>
+  h(Fetch, { load: loadRevenue }, ({ data, loading, error }) => {
+    if (loading) return h('p', null, 'Loading…');
+    if (error) return h('p', { role: 'alert' }, 'Could not load revenue');
+    return h('p', null, 'Revenue this month: $' + data.total);
+  });
 
-// Compared with the HOC: the logic is the same, but here the consumer
+// Compared with a HOC: the logic is the same, but here the consumer
 // chooses what to render and there are no injected props to collide.`,
   },
   related: ['hoc', 'custom-hooks', 'compound-components', 'strategy'],

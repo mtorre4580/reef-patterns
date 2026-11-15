@@ -59,67 +59,54 @@ export const templateMethod: Pattern = {
   },
   example: {
     title: {
-      en: 'Water change routine',
-      es: 'Rutina de cambio de agua',
-      'pt-BR': 'Rotina de troca de água',
+      en: 'Report exporters',
+      es: 'Exportadores de reportes',
+      'pt-BR': 'Exportadores de relatórios',
     },
     scenario: {
-      en: 'Every water change follows the same sequence: turn off equipment, drain water, prepare new water, refill and turn on. A nano tank and a sump tank differ in some steps.',
-      es: 'Todo cambio de agua sigue la misma secuencia: apagar equipos, sacar agua, preparar agua nueva, reponer y encender. Un nano y un acuario con sump difieren en algunos pasos.',
+      en: 'Every export follows the same steps: load rows, filter them, format them and add a header. CSV and JSON exports only differ in formatting.',
+      es: 'Toda exportación sigue los mismos pasos: cargar filas, filtrarlas, formatearlas y agregar un encabezado. CSV y JSON solo cambian en el formato.',
       'pt-BR':
-        'Toda troca de água segue a mesma sequência: desligar equipamentos, tirar água, preparar água nova, repor e ligar. Um nano e um aquário com sump diferem em alguns passos.',
+        'Toda exportação segue os mesmos passos: carregar linhas, filtrá-las, formatá-las e adicionar um cabeçalho. CSV e JSON só mudam na formatação.',
     },
-    code: `class WaterChange {
+    code: `class ReportExporter {
   // Template method: the sequence never changes
-  run() {
-    const log = [];
-    log.push('Turn off return pump and ATO');
-    log.push('Drain ' + this.volume() + ' L');
-    log.push(this.prepareWater());
-    if (this.needsSiphon()) log.push('Siphon the sand');
-    log.push('Refill water at ' + this.temperature() + ' °C');
-    log.push('Turn equipment back on');
-    return log;
+  export(rows) {
+    const visible = rows.filter((row) => this.include(row));
+    const body = this.format(visible);
+    return this.header(visible.length) + body;
   }
 
   // Step with a default value (hook)
-  needsSiphon() {
-    return false;
+  include(row) {
+    return !row.deleted;
   }
-  temperature() {
-    return 25.5;
+  header(count) {
+    return '';
   }
-  volume() {
-    throw new Error('Each tank defines its volume');
-  }
-  prepareWater() {
-    throw new Error('Each tank defines how it prepares the water');
+  format() {
+    throw new Error('Each exporter defines its format');
   }
 }
 
-class NanoTank extends WaterChange {
-  volume() {
-    return 6;
+class CsvExporter extends ReportExporter {
+  header() {
+    return 'id,total\\n';
   }
-  prepareWater() {
-    return 'Use premixed water';
-  }
-}
-
-class SumpTank extends WaterChange {
-  volume() {
-    return 40;
-  }
-  prepareWater() {
-    return 'Mix salt in the 60 L bucket for 24 h';
-  }
-  needsSiphon() {
-    return true;
+  format(rows) {
+    return rows.map((r) => r.id + ',' + r.total).join('\\n');
   }
 }
 
-console.log(new NanoTank().run());
-console.log(new SumpTank().run());`,
+class JsonExporter extends ReportExporter {
+  format(rows) {
+    return JSON.stringify({ count: rows.length, rows });
+  }
+}
+
+const rows = [{ id: 1, total: 30 }, { id: 2, total: 12, deleted: true }, { id: 3, total: 8 }];
+console.log(new CsvExporter().export(rows));
+console.log(new JsonExporter().export(rows));`,
   },
   related: ['strategy', 'hoc'],
 };

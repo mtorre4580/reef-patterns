@@ -62,45 +62,45 @@ export const observer: Pattern = {
   },
   example: {
     title: {
-      en: 'Temperature sensor with subscribers',
-      es: 'Sensor de temperatura con suscriptores',
-      'pt-BR': 'Sensor de temperatura com inscritos',
+      en: 'Cart that notifies the UI',
+      es: 'Carrito que avisa a la UI',
+      'pt-BR': 'Carrinho que avisa a UI',
     },
     scenario: {
-      en: 'The sump sensor reads the temperature every minute. The heater, the alarm and the phone app need to know, but the sensor should not know any of them.',
-      es: 'El sensor del sump lee la temperatura cada minuto. El calentador, la alarma y la app del celular necesitan enterarse, pero el sensor no debería conocer a ninguno.',
+      en: 'When an item is added to the cart, the header badge, the analytics tracker and the local storage sync all need to know, but the cart should not know any of them.',
+      es: 'Cuando se agrega un producto al carrito, el contador del header, el tracking de analytics y el guardado en localStorage tienen que enterarse, pero el carrito no debería conocer a ninguno.',
       'pt-BR':
-        'O sensor do sump lê a temperatura a cada minuto. O aquecedor, o alarme e o app do celular precisam saber, mas o sensor não deveria conhecer nenhum deles.',
+        'Quando um produto é adicionado ao carrinho, o contador do header, o tracking de analytics e o salvamento local precisam saber, mas o carrinho não deveria conhecer nenhum deles.',
     },
-    code: `class TemperatureSensor {
+    code: `class CartStore {
   #listeners = new Set();
-  #celsius = null;
+  #items = [];
 
   subscribe(listener) {
     this.#listeners.add(listener);
-    // Return the unsubscribe function: avoids leaks
+    // Return the unsubscribe function: avoids leaks when a component unmounts
     return () => this.#listeners.delete(listener);
   }
 
-  read(celsius) {
-    this.#celsius = celsius;
-    for (const listener of this.#listeners) listener(celsius);
+  add(product) {
+    this.#items = [...this.#items, product];
+    for (const listener of this.#listeners) listener(this.#items);
   }
 }
 
-const sensor = new TemperatureSensor();
+const cart = new CartStore();
 
-const heater = (c) => console.log(c < 25 ? 'Heater: on' : 'Heater: off');
-const alarm = (c) => c > 28 && console.warn('Alarm! High temperature: ' + c + ' °C');
-const phone = (c) => console.log('App: ' + c + ' °C');
+const headerBadge = (items) => console.log('Badge: ' + items.length);
+const analytics = (items) => console.log('track add_to_cart', items.at(-1).sku);
+const persist = (items) => console.log('saved ' + items.length + ' items');
 
-sensor.subscribe(heater);
-sensor.subscribe(alarm);
-const stopPhone = sensor.subscribe(phone);
+cart.subscribe(headerBadge);
+cart.subscribe(analytics);
+const stopPersisting = cart.subscribe(persist);
 
-sensor.read(24.6); // all three react
-stopPhone(); // the user muted the app
-sensor.read(28.4); // only heater and alarm`,
+cart.add({ sku: 'TSHIRT-M', price: 20 }); // all three react
+stopPersisting(); // the user disabled "remember my cart"
+cart.add({ sku: 'MUG', price: 12 }); // only badge and analytics`,
   },
   related: ['pub-sub', 'mediator', 'flux'],
 };

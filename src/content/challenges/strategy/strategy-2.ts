@@ -4,78 +4,74 @@ export const strategy2: Challenge = {
   id: 'strategy-2',
   patternId: 'strategy',
   title: {
-    en: "The dive computer's algorithm",
-    es: 'Algoritmo de la computadora de buceo',
-    'pt-BR': 'Algoritmo do computador de mergulho',
+    en: 'Discount strategies at checkout',
+    es: 'Estrategias de descuento en el checkout',
+    'pt-BR': 'Estratégias de desconto no checkout',
   },
   difficulty: 'facil',
   story: {
-    en: 'Dive computers compute no-decompression time with different algorithms. Beginners prefer a conservative one; instructors, the standard one. The computer should not know which one it uses.',
-    es: 'Las computadoras de buceo calculan el tiempo sin descompresión con distintos algoritmos. Los buzos principiantes prefieren uno conservador; los instructores, el estándar. La computadora no debería saber cuál usa.',
+    en: 'The checkout applies discounts with a chain of ifs over the coupon type. Marketing invents a new kind of discount every month, and the total once went negative.',
+    es: 'El checkout aplica descuentos con una cadena de if según el tipo de cupón. Marketing inventa un descuento nuevo cada mes, y una vez el total quedó negativo.',
     'pt-BR':
-      'Os computadores de mergulho calculam o tempo sem descompressão com algoritmos diferentes. Os iniciantes preferem um conservador; os instrutores, o padrão. O computador não deveria saber qual usa.',
+      'O checkout aplica descontos com uma cadeia de if conforme o tipo de cupom. O marketing inventa um desconto novo todo mês, e uma vez o total ficou negativo.',
   },
   instructions: {
-    en: 'Implement:\n- `standard`: `{ name: "Standard", noDecoLimit(depth) }`, which returns `Math.round(1000 / depth)` minutes.\n- `conservative`: like the standard one but at 80 %: `Math.round(standard.noDecoLimit(depth) * 0.8)`.\n- `DiveComputer` with `constructor(algorithm)`, `setAlgorithm(algorithm)` and `remaining(depth, elapsedMinutes)`, which never returns negatives.\nNo `if` and no `switch`: picking the algorithm means picking the strategy.',
-    es: 'Implementá:\n- `standard`: `{ name: "Standard", noDecoLimit(depth) }` que devuelve `Math.round(1000 / depth)` minutos.\n- `conservative`: igual que el estándar pero al 80 %: `Math.round(standard.noDecoLimit(depth) * 0.8)`.\n- `DiveComputer` con `constructor(algorithm)`, `setAlgorithm(algorithm)` y `remaining(depth, elapsedMinutes)`, que nunca devuelve negativos.\nSin `if` ni `switch`: elegir el algoritmo es elegir la estrategia.',
+    en: 'Implement:\n- `percentOff(pct)`: returns a discount `{ name, apply(subtotal) }` that takes `pct` % off.\n- `fixedOff(amount)`: takes a fixed `amount` off.\n- `Cart` with `constructor(discount)`, `setDiscount(discount)` and `total(subtotal)`, which never returns a negative number.\nNo `if` and no `switch`: picking the discount means picking the strategy.',
+    es: 'Implementá:\n- `percentOff(pct)`: devuelve un descuento `{ name, apply(subtotal) }` que resta el `pct` %.\n- `fixedOff(amount)`: resta un monto fijo `amount`.\n- `Cart` con `constructor(discount)`, `setDiscount(discount)` y `total(subtotal)`, que nunca devuelve negativos.\nSin `if` ni `switch`: elegir el descuento es elegir la estrategia.',
     'pt-BR':
-      'Implemente:\n- `standard`: `{ name: "Standard", noDecoLimit(depth) }`, que devolve `Math.round(1000 / depth)` minutos.\n- `conservative`: igual ao padrão, mas a 80 %: `Math.round(standard.noDecoLimit(depth) * 0.8)`.\n- `DiveComputer` com `constructor(algorithm)`, `setAlgorithm(algorithm)` e `remaining(depth, elapsedMinutes)`, que nunca devolve negativos.\nSem `if` nem `switch`: escolher o algoritmo é escolher a estratégia.',
+      'Implemente:\n- `percentOff(pct)`: devolve um desconto `{ name, apply(subtotal) }` que tira `pct` %.\n- `fixedOff(amount)`: tira um valor fixo `amount`.\n- `Cart` com `constructor(discount)`, `setDiscount(discount)` e `total(subtotal)`, que nunca devolve negativos.\nSem `if` nem `switch`: escolher o desconto é escolher a estratégia.',
   },
-  starterCode: `class DiveComputer {
-  constructor(mode) {
-    this.mode = mode;
+  starterCode: `class Cart {
+  constructor(coupon) {
+    this.coupon = coupon;
   }
 
-  remaining(depth, elapsedMinutes) {
-    let limit = Math.round(1000 / depth);
-    if (this.mode === 'conservative') limit = Math.round(limit * 0.8);
-    return limit - elapsedMinutes;
+  total(subtotal) {
+    if (this.coupon.type === 'percent') return subtotal - (subtotal * this.coupon.value) / 100;
+    if (this.coupon.type === 'fixed') return subtotal - this.coupon.value;
+    return subtotal;
   }
 }
 `,
   tests: [
     {
       name: {
-        en: 'the standard algorithm at 20 m',
-        es: 'el algoritmo estándar a 20 m',
-        'pt-BR': 'o algoritmo padrão a 20 m',
+        en: 'percentage discount',
+        es: 'descuento porcentual',
+        'pt-BR': 'desconto percentual',
       },
-      code: `expect(new DiveComputer(standard).remaining(20, 10)).toBe(40);`,
+      code: `expect(new Cart(percentOff(10)).total(200)).toBe(180);`,
+    },
+    {
+      name: { en: 'fixed discount', es: 'descuento fijo', 'pt-BR': 'desconto fixo' },
+      code: `expect(new Cart(fixedOff(15)).total(100)).toBe(85);`,
     },
     {
       name: {
-        en: 'the conservative algorithm at 20 m',
-        es: 'el algoritmo conservador a 20 m',
-        'pt-BR': 'o algoritmo conservador a 20 m',
+        en: 'never returns a negative total',
+        es: 'nunca devuelve un total negativo',
+        'pt-BR': 'nunca devolve um total negativo',
       },
-      code: `expect(new DiveComputer(conservative).remaining(20, 10)).toBe(30);`,
+      code: `expect(new Cart(fixedOff(50)).total(30)).toBe(0);`,
     },
     {
       name: {
-        en: 'never returns negative time',
-        es: 'nunca devuelve tiempo negativo',
-        'pt-BR': 'nunca devolve tempo negativo',
+        en: 'accepts a new discount',
+        es: 'acepta un descuento nuevo',
+        'pt-BR': 'aceita um desconto novo',
       },
-      code: `expect(new DiveComputer(standard).remaining(30, 60)).toBe(0);`,
+      code: `const buyOver100 = { name: 'Over 100', apply: (s) => s - 25 };
+expect(new Cart(buyOver100).total(120)).toBe(95);`,
     },
     {
       name: {
-        en: 'accepts a new algorithm',
-        es: 'acepta un algoritmo nuevo',
-        'pt-BR': 'aceita um algoritmo novo',
+        en: 'setDiscount changes the calculation',
+        es: 'setDiscount cambia el cálculo',
+        'pt-BR': 'setDiscount muda o cálculo',
       },
-      code: `const tables = { name: 'Tables', noDecoLimit: () => 25 };
-expect(new DiveComputer(tables).remaining(18, 5)).toBe(20);`,
-    },
-    {
-      name: {
-        en: 'setAlgorithm changes the calculation',
-        es: 'setAlgorithm cambia el cálculo',
-        'pt-BR': 'setAlgorithm muda o cálculo',
-      },
-      code: `const computer = new DiveComputer(standard);
-computer.setAlgorithm(conservative);
-expect(computer.remaining(25, 0)).toBe(32);`,
+      code: `const cart = new Cart(percentOff(10));
+cart.setDiscount(fixedOff(5));
+expect(cart.total(50)).toBe(45);`,
     },
   ],
   checks: [
@@ -83,9 +79,9 @@ expect(computer.remaining(25, 0)).toBe(32);`,
       rule: 'maxIfStatements',
       max: 0,
       message: {
-        en: 'No if: the algorithm decides, not the computer',
-        es: 'Sin if: el algoritmo decide, no la computadora',
-        'pt-BR': 'Sem if: quem decide é o algoritmo, não o computador',
+        en: 'No if: the discount decides, not the cart',
+        es: 'Sin if: decide el descuento, no el carrito',
+        'pt-BR': 'Sem if: quem decide é o desconto, não o carrinho',
       },
     },
     {
@@ -96,42 +92,42 @@ expect(computer.remaining(25, 0)).toBe(32);`,
   ],
   hints: {
     en: [
-      'Each algorithm is an object with `noDecoLimit(depth)`.',
-      '`conservative` can reuse `standard` inside its function.',
-      'To avoid negatives, use `Math.max(0, limit - elapsed)`.',
+      'Each discount is an object with `apply(subtotal)`; the factories just build it.',
+      '`percentOff(10)` can return `{ name: "10% off", apply: (s) => s - (s * 10) / 100 }`.',
+      'To avoid negatives, use `Math.max(0, …)` in `total`.',
     ],
     es: [
-      'Cada algoritmo es un objeto con `noDecoLimit(depth)`.',
-      '`conservative` puede reutilizar a `standard` dentro de su función.',
-      'Para no devolver negativos, usá `Math.max(0, limite - transcurrido)`.',
+      'Cada descuento es un objeto con `apply(subtotal)`; las fábricas solo lo arman.',
+      '`percentOff(10)` puede devolver `{ name: "10% off", apply: (s) => s - (s * 10) / 100 }`.',
+      'Para no devolver negativos, usá `Math.max(0, …)` en `total`.',
     ],
     'pt-BR': [
-      'Cada algoritmo é um objeto com `noDecoLimit(depth)`.',
-      '`conservative` pode reutilizar `standard` dentro da sua função.',
-      'Para não devolver negativos, use `Math.max(0, limite - decorrido)`.',
+      'Cada desconto é um objeto com `apply(subtotal)`; as fábricas só o montam.',
+      '`percentOff(10)` pode devolver `{ name: "10% off", apply: (s) => s - (s * 10) / 100 }`.',
+      'Para não devolver negativos, use `Math.max(0, …)` em `total`.',
     ],
   },
-  solution: `const standard = {
-  name: 'Standard',
-  noDecoLimit: (depth) => Math.round(1000 / depth),
-};
+  solution: `const percentOff = (pct) => ({
+  name: pct + '% off',
+  apply: (subtotal) => subtotal - (subtotal * pct) / 100,
+});
 
-const conservative = {
-  name: 'Conservative',
-  noDecoLimit: (depth) => Math.round(standard.noDecoLimit(depth) * 0.8),
-};
+const fixedOff = (amount) => ({
+  name: amount + ' off',
+  apply: (subtotal) => subtotal - amount,
+});
 
-class DiveComputer {
-  constructor(algorithm) {
-    this.algorithm = algorithm;
+class Cart {
+  constructor(discount) {
+    this.discount = discount;
   }
 
-  setAlgorithm(algorithm) {
-    this.algorithm = algorithm;
+  setDiscount(discount) {
+    this.discount = discount;
   }
 
-  remaining(depth, elapsedMinutes) {
-    return Math.max(0, this.algorithm.noDecoLimit(depth) - elapsedMinutes);
+  total(subtotal) {
+    return Math.max(0, this.discount.apply(subtotal));
   }
 }
 `,

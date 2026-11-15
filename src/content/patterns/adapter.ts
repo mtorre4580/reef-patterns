@@ -59,39 +59,42 @@ export const adapter: Pattern = {
   },
   example: {
     title: {
-      en: 'Unifying test kit readings',
-      es: 'Unificar lecturas de test kits',
-      'pt-BR': 'Unificar leituras de kits de teste',
+      en: 'Unifying payment providers',
+      es: 'Unificar proveedores de pago',
+      'pt-BR': 'Unificar provedores de pagamento',
     },
     scenario: {
-      en: 'One test kit reports alkalinity in dKH and another in ppm of CaCO₃, with different field names. The parameter history should only see dKH.',
-      es: 'Un test kit reporta alcalinidad en dKH y otro, en ppm de CaCO₃, con nombres de campo distintos. El historial de parámetros solo debería ver dKH.',
+      en: 'One payment provider returns amounts in cents and another as decimal strings with different field names. The orders screen should only see one shape.',
+      es: 'Un proveedor de pagos devuelve montos en centavos y otro como strings decimales con otros nombres de campo. La pantalla de órdenes solo debería ver una forma.',
       'pt-BR':
-        'Um kit de teste reporta alcalinidade em dKH e outro em ppm de CaCO₃, com nomes de campo diferentes. O histórico de parâmetros só deveria ver dKH.',
+        'Um provedor de pagamento devolve valores em centavos e outro como strings decimais com outros nomes de campo. A tela de pedidos só deveria ver um formato.',
     },
-    code: `// Readings exactly as the devices return them
-const hannaReading = { alk_ppm: 143, ts: '2026-03-01T09:00:00Z' };
-const kitReading = { result: 8.1, unit: 'dKH', date: '2026-03-02' };
+    code: `// Responses exactly as each provider returns them
+const stripeCharge = { id: 'ch_1', amount: 2599, currency: 'usd', status: 'succeeded' };
+const paypalCapture = { transaction_id: 'PP-9', gross: '12.50', state: 'COMPLETED' };
 
-// The interface our app expects: { dkh, takenAt }
-const fromHanna = (r) => ({ dkh: +(r.alk_ppm / 17.86).toFixed(2), takenAt: new Date(r.ts) });
-const fromKit = (r) => ({ dkh: r.result, takenAt: new Date(r.date) });
+// The shape our app expects: { id, amountCents, paid }
+const fromStripe = (c) => ({ id: c.id, amountCents: c.amount, paid: c.status === 'succeeded' });
+const fromPaypal = (p) => ({
+  id: p.transaction_id,
+  amountCents: Math.round(Number(p.gross) * 100),
+  paid: p.state === 'COMPLETED',
+});
 
-class AlkalinityLog {
-  #entries = [];
-  add(reading) {
-    this.#entries.push(reading);
+class PaymentsReport {
+  #payments = [];
+  add(payment) {
+    this.#payments.push(payment);
   }
-  average() {
-    const total = this.#entries.reduce((sum, e) => sum + e.dkh, 0);
-    return +(total / this.#entries.length).toFixed(2);
+  totalPaidCents() {
+    return this.#payments.filter((p) => p.paid).reduce((sum, p) => sum + p.amountCents, 0);
   }
 }
 
-const log = new AlkalinityLog();
-log.add(fromHanna(hannaReading));
-log.add(fromKit(kitReading));
-console.log(log.average()); // ~8.05 dKH`,
+const report = new PaymentsReport();
+report.add(fromStripe(stripeCharge));
+report.add(fromPaypal(paypalCapture));
+console.log(report.totalPaidCents()); // 3849`,
   },
   related: ['facade', 'decorator', 'hexagonal', 'bridge'],
 };

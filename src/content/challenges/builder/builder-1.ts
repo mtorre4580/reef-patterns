@@ -3,134 +3,125 @@ import type { Challenge } from '../../types';
 export const builder1: Challenge = {
   id: 'builder-1',
   patternId: 'builder',
-  title: { en: 'Dive plan', es: 'Plan de inmersión', 'pt-BR': 'Plano de mergulho' },
+  title: {
+    en: 'SQL query builder',
+    es: 'Builder de consultas SQL',
+    'pt-BR': 'Builder de consultas SQL',
+  },
   difficulty: 'media',
   story: {
-    en: 'Dive plans used to be built with a ten-field object literal and something was always missing. A plan using air at 40 m was even printed without a warning.',
-    es: 'Los planes de inmersión se armaban con un objeto literal de diez campos y siempre faltaba algo. Un plan con aire a 40 m llegó a imprimirse sin advertencia.',
+    en: 'Report screens build SQL by concatenating strings. Last week a filter value with a quote broke a query, and nobody remembers which limit is allowed.',
+    es: 'Las pantallas de reportes arman SQL concatenando strings. La semana pasada un valor de filtro con comillas rompió una consulta, y nadie recuerda qué límite está permitido.',
     'pt-BR':
-      'Os planos de mergulho eram montados com um objeto literal de dez campos e sempre faltava algo. Um plano com ar a 40 m chegou a ser impresso sem aviso.',
+      'As telas de relatórios montam SQL concatenando strings. Semana passada um valor de filtro com aspas quebrou uma consulta, e ninguém lembra qual limite é permitido.',
   },
   instructions: {
-    en: 'Implement `DivePlanBuilder` with chainable methods `site(name)`, `maxDepth(m)`, `nitrox(o2Percent)` (21 by default) and `stop(depth, minutes)`, and a `build()` that:\n- throws `Error("Missing site or depth")` if either is missing;\n- throws `Error("Unsafe gas at <m> m")` if `maxDepth` exceeds the MOD: `Math.floor((1.4 / (o2 / 100) - 1) * 10)`;\n- adds a `{ depth: 5, minutes: 3 }` stop if `maxDepth > 10` and there is no other stop at 5 m;\n- returns `{ site, maxDepth, o2, stops }` frozen with `Object.freeze`.',
-    es: 'Implementá `DivePlanBuilder` con métodos encadenables `site(name)`, `maxDepth(m)`, `nitrox(o2Percent)` (por defecto 21) y `stop(depth, minutes)`, y `build()` que:\n- lanza `Error("Missing site or depth")` si falta alguno;\n- lanza `Error("Unsafe gas at <m> m")` si `maxDepth` supera la MOD: `Math.floor((1.4 / (o2 / 100) - 1) * 10)`;\n- agrega una parada `{ depth: 5, minutes: 3 }` si `maxDepth > 10` y no hay otra a 5 m;\n- devuelve `{ site, maxDepth, o2, stops }` congelado con `Object.freeze`.',
+    en: 'Implement `QueryBuilder` with chainable `from(table)`, `select(...columns)` (`*` by default), `where(field, value)` and `limit(n)`, and a `build()` that:\n- throws `Error("Missing table")` if `from` was not called;\n- throws `RangeError("Invalid limit")` if the limit is not between 1 and 1000;\n- joins `where` clauses with `AND` as `field = ?` and puts values in `params`;\n- returns `{ sql, params }` frozen with `Object.freeze`, e.g. `SELECT id, name FROM users WHERE status = ? LIMIT 10`.',
+    es: 'Implementá `QueryBuilder` con `from(table)`, `select(...columns)` (`*` por defecto), `where(field, value)` y `limit(n)` encadenables, y un `build()` que:\n- lanza `Error("Missing table")` si no se llamó a `from`;\n- lanza `RangeError("Invalid limit")` si el límite no está entre 1 y 1000;\n- une los `where` con `AND` como `field = ?` y pone los valores en `params`;\n- devuelve `{ sql, params }` congelado con `Object.freeze`, por ejemplo `SELECT id, name FROM users WHERE status = ? LIMIT 10`.',
     'pt-BR':
-      'Implemente `DivePlanBuilder` com métodos encadeáveis `site(name)`, `maxDepth(m)`, `nitrox(o2Percent)` (21 por padrão) e `stop(depth, minutes)`, e um `build()` que:\n- lança `Error("Missing site or depth")` se faltar algum;\n- lança `Error("Unsafe gas at <m> m")` se `maxDepth` passar da MOD: `Math.floor((1.4 / (o2 / 100) - 1) * 10)`;\n- adiciona uma parada `{ depth: 5, minutes: 3 }` se `maxDepth > 10` e não houver outra a 5 m;\n- devolve `{ site, maxDepth, o2, stops }` congelado com `Object.freeze`.',
+      'Implemente `QueryBuilder` com `from(table)`, `select(...columns)` (`*` por padrão), `where(field, value)` e `limit(n)` encadeáveis, e um `build()` que:\n- lança `Error("Missing table")` se `from` não foi chamado;\n- lança `RangeError("Invalid limit")` se o limite não estiver entre 1 e 1000;\n- junta os `where` com `AND` como `field = ?` e coloca os valores em `params`;\n- devolve `{ sql, params }` congelado com `Object.freeze`, por exemplo `SELECT id, name FROM users WHERE status = ? LIMIT 10`.',
   },
-  starterCode: `class DivePlanBuilder {
-  site(name) {
-    this.siteName = name;
+  starterCode: `class QueryBuilder {
+  from(table) {
+    this.table = table;
   }
 
   build() {
-    return { site: this.siteName };
+    return { sql: 'SELECT * FROM ' + this.table, params: [] };
   }
 }
 `,
   tests: [
     {
       name: {
-        en: 'methods chain',
-        es: 'los métodos se encadenan',
-        'pt-BR': 'os métodos se encadeiam',
+        en: 'builds a simple query',
+        es: 'arma una consulta simple',
+        'pt-BR': 'monta uma consulta simples',
       },
-      code: `const plan = new DivePlanBuilder().site('Hidden Reef').maxDepth(18).build();
-expect(plan.site).toBe('Hidden Reef');
-expect(plan.o2).toBe(21);`,
+      code: `const q = new QueryBuilder().from('users').build();
+expect(q.sql).toBe('SELECT * FROM users');
+expect(q.params).toEqual([]);`,
     },
     {
       name: {
-        en: 'adds the safety stop',
-        es: 'agrega la parada de seguridad',
-        'pt-BR': 'adiciona a parada de segurança',
+        en: 'methods chain and values go into params',
+        es: 'los métodos se encadenan y los valores van a params',
+        'pt-BR': 'os métodos se encadeiam e os valores vão para params',
       },
-      code: `const plan = new DivePlanBuilder().site('The Wall').maxDepth(24).nitrox(32).build();
-expect(plan.stops).toEqual([{ depth: 5, minutes: 3 }]);`,
+      code: `const q = new QueryBuilder().from('users').select('id', 'name').where('status', 'active').where('country', "O'Higgins").limit(10).build();
+expect(q.sql).toBe('SELECT id, name FROM users WHERE status = ? AND country = ? LIMIT 10');
+expect(q.params).toEqual(['active', "O'Higgins"]);`,
+    },
+    {
+      name: { en: 'requires a table', es: 'exige una tabla', 'pt-BR': 'exige uma tabela' },
+      code: `expect(() => new QueryBuilder().select('id').build()).toThrow('Missing table');`,
+    },
+    {
+      name: { en: 'validates the limit', es: 'valida el límite', 'pt-BR': 'valida o limite' },
+      code: `expect(() => new QueryBuilder().from('orders').limit(5000).build()).toThrow('Invalid limit');
+expect(() => new QueryBuilder().from('orders').limit(0).build()).toThrow('Invalid limit');`,
     },
     {
       name: {
-        en: 'does not duplicate a 5 m stop',
-        es: 'no duplica una parada a 5 m',
-        'pt-BR': 'não duplica uma parada a 5 m',
+        en: 'the result is frozen',
+        es: 'el resultado queda congelado',
+        'pt-BR': 'o resultado fica congelado',
       },
-      code: `const plan = new DivePlanBuilder().site('Cave').maxDepth(20).stop(5, 5).build();
-expect(plan.stops).toEqual([{ depth: 5, minutes: 5 }]);`,
-    },
-    {
-      name: {
-        en: 'rejects unsafe gas',
-        es: 'rechaza gas inseguro',
-        'pt-BR': 'rejeita gás inseguro',
-      },
-      code: `const builder = new DivePlanBuilder().site('Abyss').maxDepth(40).nitrox(32);
-expect(() => builder.build()).toThrow('Unsafe gas at 40 m');`,
-    },
-    {
-      name: {
-        en: 'requires site and depth',
-        es: 'exige sitio y profundidad',
-        'pt-BR': 'exige local e profundidade',
-      },
-      code: `expect(() => new DivePlanBuilder().site('Only a site').build()).toThrow('Missing site or depth');`,
-    },
-    {
-      name: {
-        en: 'the plan is frozen',
-        es: 'el plan queda congelado',
-        'pt-BR': 'o plano fica congelado',
-      },
-      code: `const plan = new DivePlanBuilder().site('Shoal').maxDepth(8).build();
-expect(Object.isFrozen(plan)).toBe(true);
-expect(plan.stops).toEqual([]);`,
+      code: `const q = new QueryBuilder().from('orders').build();
+expect(Object.isFrozen(q)).toBe(true);`,
     },
   ],
   hints: {
     en: [
       'Each method stores its value and does `return this` so calls can chain.',
-      'All validation goes into `build()`, once.',
-      "Copy the stops array before adding the safety stop so you don't modify the builder's state.",
+      'Keep `where` as two arrays: the `field = ?` fragments and the values.',
+      'All validation goes into `build()`; use `limit !== null` to know whether it was set.',
     ],
     es: [
       'Cada método guarda su dato y hace `return this` para poder encadenar.',
-      'Toda la validación va en `build()`, una sola vez.',
-      'Copiá el array de paradas antes de agregar la de seguridad para no modificar el estado del builder.',
+      'Guardá los `where` como dos arrays: los fragmentos `field = ?` y los valores.',
+      'Toda la validación va en `build()`; usá `limit !== null` para saber si se definió.',
     ],
     'pt-BR': [
       'Cada método guarda seu dado e faz `return this` para poder encadear.',
-      'Toda a validação vai em `build()`, uma única vez.',
-      'Copie o array de paradas antes de adicionar a de segurança para não modificar o estado do builder.',
+      'Guarde os `where` como dois arrays: os fragmentos `field = ?` e os valores.',
+      'Toda a validação vai em `build()`; use `limit !== null` para saber se foi definido.',
     ],
   },
-  solution: `class DivePlanBuilder {
-  #site = null;
-  #maxDepth = null;
-  #o2 = 21;
-  #stops = [];
+  solution: `class QueryBuilder {
+  #table = null;
+  #columns = ['*'];
+  #clauses = [];
+  #params = [];
+  #limit = null;
 
-  site(name) {
-    this.#site = name;
+  from(table) {
+    this.#table = table;
     return this;
   }
-  maxDepth(meters) {
-    this.#maxDepth = meters;
+  select(...columns) {
+    this.#columns = columns;
     return this;
   }
-  nitrox(o2Percent) {
-    this.#o2 = o2Percent;
+  where(field, value) {
+    this.#clauses.push(field + ' = ?');
+    this.#params.push(value);
     return this;
   }
-  stop(depth, minutes) {
-    this.#stops.push({ depth, minutes });
+  limit(n) {
+    this.#limit = n;
     return this;
   }
 
   build() {
-    if (!this.#site || !this.#maxDepth) throw new Error('Missing site or depth');
-    const mod = Math.floor((1.4 / (this.#o2 / 100) - 1) * 10);
-    if (this.#maxDepth > mod) throw new Error('Unsafe gas at ' + this.#maxDepth + ' m');
-    const stops = [...this.#stops];
-    if (this.#maxDepth > 10 && !stops.some((s) => s.depth === 5)) stops.push({ depth: 5, minutes: 3 });
-    return Object.freeze({ site: this.#site, maxDepth: this.#maxDepth, o2: this.#o2, stops });
+    if (!this.#table) throw new Error('Missing table');
+    if (this.#limit !== null && (this.#limit < 1 || this.#limit > 1000)) {
+      throw new RangeError('Invalid limit');
+    }
+    let sql = 'SELECT ' + this.#columns.join(', ') + ' FROM ' + this.#table;
+    if (this.#clauses.length) sql += ' WHERE ' + this.#clauses.join(' AND ');
+    if (this.#limit !== null) sql += ' LIMIT ' + this.#limit;
+    return Object.freeze({ sql, params: [...this.#params] });
   }
 }
 `,

@@ -4,24 +4,24 @@ export const observer2: Challenge = {
   id: 'observer-2',
   patternId: 'observer',
   title: {
-    en: 'Feeder with one-time notifications',
-    es: 'Alimentador con avisos de un solo uso',
-    'pt-BR': 'Alimentador com avisos de uso único',
+    en: 'Session events with one-time listeners',
+    es: 'Eventos de sesión con listeners de un solo uso',
+    'pt-BR': 'Eventos de sessão com listeners de uso único',
   },
   difficulty: 'media',
   story: {
-    en: 'The automatic feeder announces every time it drops food. The skimmer always wants to know (to pause itself), but the camera only wants the next feeding to take a photo.',
-    es: 'El alimentador automático avisa cada vez que larga comida. El skimmer quiere enterarse siempre (para pausarse), pero la cámara solo quiere la próxima alimentación para sacar una foto.',
+    en: 'The auth module announces every token refresh. The API client always wants to know (to update its header), but the onboarding tour only wants the next one to start after login.',
+    es: 'El módulo de autenticación avisa cada vez que se renueva el token. El cliente de API quiere enterarse siempre (para actualizar su header), pero el tour de bienvenida solo quiere el próximo para arrancar después del login.',
     'pt-BR':
-      'O alimentador automático avisa cada vez que solta comida. O skimmer quer saber sempre (para pausar), mas a câmera só quer a próxima alimentação para tirar uma foto.',
+      'O módulo de autenticação avisa toda vez que o token é renovado. O cliente de API quer saber sempre (para atualizar o header), mas o tour de boas-vindas só quer o próximo para começar depois do login.',
   },
   instructions: {
-    en: 'Implement `FeedingTimer` with:\n- `subscribe(listener)`, which returns a function to unsubscribe.\n- `once(listener)`: the listener gets only the next notification and unsubscribes itself. It also returns a function to cancel it earlier.\n- `feed(grams)`: notifies the subscribers with the grams.\n- `get listenerCount`: the number of active subscribers.',
-    es: 'Implementá `FeedingTimer` con:\n- `subscribe(listener)` que devuelve una función para desuscribirse.\n- `once(listener)`: el listener recibe solo la próxima notificación y se desuscribe solo. También devuelve una función para cancelarlo antes.\n- `feed(grams)`: notifica a los suscriptores con los gramos.\n- `get listenerCount`: cantidad de suscriptores activos.',
+    en: 'Implement `TokenEvents` with:\n- `subscribe(listener)`, which returns a function to unsubscribe.\n- `once(listener)`: the listener gets only the next notification and unsubscribes itself. It also returns a function to cancel it earlier.\n- `refresh(token)`: notifies the subscribers with the token.\n- `get listenerCount`: the number of active subscribers.',
+    es: 'Implementá `TokenEvents` con:\n- `subscribe(listener)`, que devuelve una función para desuscribirse.\n- `once(listener)`: el listener recibe solo la próxima notificación y se desuscribe solo. También devuelve una función para cancelarlo antes.\n- `refresh(token)`: notifica a los suscriptores con el token.\n- `get listenerCount`: cantidad de suscriptores activos.',
     'pt-BR':
-      'Implemente `FeedingTimer` com:\n- `subscribe(listener)`, que devolve uma função para cancelar a inscrição.\n- `once(listener)`: o listener recebe só a próxima notificação e se desinscreve sozinho. Também devolve uma função para cancelá-lo antes.\n- `feed(grams)`: notifica os inscritos com os gramas.\n- `get listenerCount`: quantidade de inscritos ativos.',
+      'Implemente `TokenEvents` com:\n- `subscribe(listener)`, que devolve uma função para cancelar a inscrição.\n- `once(listener)`: o listener recebe só a próxima notificação e se desinscreve sozinho. Também devolve uma função para cancelá-lo antes.\n- `refresh(token)`: notifica os inscritos com o token.\n- `get listenerCount`: quantidade de inscritos ativos.',
   },
-  starterCode: `class FeedingTimer {
+  starterCode: `class TokenEvents {
   listeners = [];
 
   subscribe(listener) {
@@ -32,8 +32,8 @@ export const observer2: Challenge = {
     this.listeners.push(listener);
   }
 
-  feed(grams) {
-    this.listeners.forEach((listener) => listener(grams));
+  refresh(token) {
+    this.listeners.forEach((listener) => listener(token));
   }
 
   get listenerCount() {
@@ -44,16 +44,16 @@ export const observer2: Challenge = {
   tests: [
     {
       name: {
-        en: 'subscribe gets every feeding',
-        es: 'subscribe recibe cada alimentación',
-        'pt-BR': 'subscribe recebe cada alimentação',
+        en: 'subscribe gets every refresh',
+        es: 'subscribe recibe cada renovación',
+        'pt-BR': 'subscribe recebe cada renovação',
       },
-      code: `const timer = new FeedingTimer();
-const skimmer = fn();
-timer.subscribe(skimmer);
-timer.feed(0.4);
-timer.feed(0.6);
-expect(skimmer.calls).toEqual([[0.4], [0.6]]);`,
+      code: `const events = new TokenEvents();
+const apiClient = fn();
+events.subscribe(apiClient);
+events.refresh('t1');
+events.refresh('t2');
+expect(apiClient.calls).toEqual([['t1'], ['t2']]);`,
     },
     {
       name: {
@@ -61,13 +61,13 @@ expect(skimmer.calls).toEqual([[0.4], [0.6]]);`,
         es: 'once recibe solo la próxima',
         'pt-BR': 'once recebe só a próxima',
       },
-      code: `const timer = new FeedingTimer();
-const camera = fn();
-timer.once(camera);
-timer.feed(0.4);
-timer.feed(0.6);
-expect(camera.calls).toEqual([[0.4]]);
-expect(timer.listenerCount).toBe(0);`,
+      code: `const events = new TokenEvents();
+const tour = fn();
+events.once(tour);
+events.refresh('t1');
+events.refresh('t2');
+expect(tour.calls).toEqual([['t1']]);
+expect(events.listenerCount).toBe(0);`,
     },
     {
       name: {
@@ -75,12 +75,12 @@ expect(timer.listenerCount).toBe(0);`,
         es: 'once se puede cancelar antes',
         'pt-BR': 'once pode ser cancelado antes',
       },
-      code: `const timer = new FeedingTimer();
-const camera = fn();
-const cancel = timer.once(camera);
+      code: `const events = new TokenEvents();
+const tour = fn();
+const cancel = events.once(tour);
 cancel();
-timer.feed(1);
-expect(camera).toHaveBeenCalledTimes(0);`,
+events.refresh('t1');
+expect(tour).toHaveBeenCalledTimes(0);`,
     },
     {
       name: {
@@ -88,16 +88,16 @@ expect(camera).toHaveBeenCalledTimes(0);`,
         es: 'la función de desuscripción quita solo a ese listener',
         'pt-BR': 'a função de cancelamento remove só esse listener',
       },
-      code: `const timer = new FeedingTimer();
+      code: `const events = new TokenEvents();
 const a = fn();
 const b = fn();
-const offA = timer.subscribe(a);
-timer.subscribe(b);
+const offA = events.subscribe(a);
+events.subscribe(b);
 offA();
-timer.feed(1);
+events.refresh('t1');
 expect(a).toHaveBeenCalledTimes(0);
 expect(b).toHaveBeenCalledTimes(1);
-expect(timer.listenerCount).toBe(1);`,
+expect(events.listenerCount).toBe(1);`,
     },
     {
       name: {
@@ -105,12 +105,12 @@ expect(timer.listenerCount).toBe(1);`,
         es: 'desuscribirse durante una notificación no saltea a otros',
         'pt-BR': 'cancelar durante uma notificação não pula os outros',
       },
-      code: `const timer = new FeedingTimer();
+      code: `const events = new TokenEvents();
 const order = [];
-timer.once(() => order.push('camera'));
-timer.subscribe(() => order.push('skimmer'));
-timer.feed(1);
-expect(order).toEqual(['camera', 'skimmer']);`,
+events.once(() => order.push('tour'));
+events.subscribe(() => order.push('api'));
+events.refresh('t1');
+expect(order).toEqual(['tour', 'api']);`,
     },
   ],
   hints: {
@@ -130,7 +130,7 @@ expect(order).toEqual(['camera', 'skimmer']);`,
       'Para notificar com segurança, percorra uma cópia: `for (const l of [...this.#listeners])`.',
     ],
   },
-  solution: `class FeedingTimer {
+  solution: `class TokenEvents {
   #listeners = new Set();
 
   subscribe(listener) {
@@ -139,15 +139,15 @@ expect(order).toEqual(['camera', 'skimmer']);`,
   }
 
   once(listener) {
-    const off = this.subscribe((grams) => {
+    const off = this.subscribe((token) => {
       off();
-      listener(grams);
+      listener(token);
     });
     return off;
   }
 
-  feed(grams) {
-    for (const listener of [...this.#listeners]) listener(grams);
+  refresh(token) {
+    for (const listener of [...this.#listeners]) listener(token);
   }
 
   get listenerCount() {

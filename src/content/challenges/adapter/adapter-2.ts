@@ -3,154 +3,162 @@ import type { Challenge } from '../../types';
 export const adapter2: Challenge = {
   id: 'adapter-2',
   patternId: 'adapter',
-  title: { en: 'Fahrenheit probe', es: 'Sonda en Fahrenheit', 'pt-BR': 'Sonda em Fahrenheit' },
+  title: {
+    en: 'Wrapping a legacy analytics SDK',
+    es: 'Envolver un SDK de analytics viejo',
+    'pt-BR': 'Envolver um SDK de analytics antigo',
+  },
   difficulty: 'media',
   story: {
-    en: "We bought an imported probe that only speaks °F and has its own API. The app's monitor expects a sensor with `read()` in °C and `subscribe()`. We can change neither the probe nor the monitor.",
-    es: 'Compramos una sonda importada que solo habla en °F y con su propia API. El monitor de la app espera un sensor con `read()` en °C y `subscribe()`. No podemos cambiar ni la sonda ni el monitor.',
+    en: 'The app tracks events with `track(name, props)` and `identify(userId)`. Marketing signed with a vendor whose old SDK only has `logEvent({ name, data })` and `setUser({ id })`. We cannot change the SDK or the 200 calls in the app.',
+    es: 'La app registra eventos con `track(name, props)` e `identify(userId)`. Marketing firmó con un proveedor cuyo SDK viejo solo tiene `logEvent({ name, data })` y `setUser({ id })`. No podemos cambiar el SDK ni las 200 llamadas de la app.',
     'pt-BR':
-      'Compramos uma sonda importada que só fala em °F e tem sua própria API. O monitor do app espera um sensor com `read()` em °C e `subscribe()`. Não podemos mudar nem a sonda nem o monitor.',
+      'O app registra eventos com `track(name, props)` e `identify(userId)`. O marketing fechou com um fornecedor cujo SDK antigo só tem `logEvent({ name, data })` e `setUser({ id })`. Não podemos mudar o SDK nem as 200 chamadas do app.',
   },
   instructions: {
-    en: 'Implement the `CelsiusAdapter` class that wraps an `ImperialProbe`:\n- `read()` returns the current temperature in °C, rounded to 1 decimal: `+((f - 32) * 5 / 9).toFixed(1)`.\n- `subscribe(listener)` calls the listener with every reading in °C and returns the function that unsubscribes from the probe.',
-    es: 'Implementá la clase `CelsiusAdapter` que envuelve una `ImperialProbe`:\n- `read()` devuelve la temperatura actual en °C, redondeada a 1 decimal: `+((f - 32) * 5 / 9).toFixed(1)`.\n- `subscribe(listener)` llama al listener con cada lectura en °C y devuelve la función para desuscribirse de la sonda.',
+    en: 'Implement the `AnalyticsAdapter` class that wraps a `LegacySdk`:\n- `track(name, props = {})` calls `sdk.logEvent({ name, data: props })` and returns what it returns.\n- `identify(userId)` calls `sdk.setUser({ id: String(userId) })`.\n- `flush()` calls `sdk.sendNow()` and returns how many events were sent.',
+    es: 'Implementá la clase `AnalyticsAdapter` que envuelve un `LegacySdk`:\n- `track(name, props = {})` llama a `sdk.logEvent({ name, data: props })` y devuelve lo que devuelva.\n- `identify(userId)` llama a `sdk.setUser({ id: String(userId) })`.\n- `flush()` llama a `sdk.sendNow()` y devuelve cuántos eventos se mandaron.',
     'pt-BR':
-      'Implemente a classe `CelsiusAdapter` que envolve uma `ImperialProbe`:\n- `read()` devolve a temperatura atual em °C, arredondada a 1 decimal: `+((f - 32) * 5 / 9).toFixed(1)`.\n- `subscribe(listener)` chama o listener com cada leitura em °C e devolve a função para cancelar a inscrição na sonda.',
+      'Implemente a classe `AnalyticsAdapter` que envolve um `LegacySdk`:\n- `track(name, props = {})` chama `sdk.logEvent({ name, data: props })` e devolve o que ela devolver.\n- `identify(userId)` chama `sdk.setUser({ id: String(userId) })`.\n- `flush()` chama `sdk.sendNow()` e devolve quantos eventos foram enviados.',
   },
-  starterCode: `// Probe API: do not modify it
-class ImperialProbe {
-  #fahrenheit = 77;
-  #callbacks = new Set();
-  getFahrenheit() {
-    return this.#fahrenheit;
+  starterCode: `// Vendor SDK: do not modify it
+class LegacySdk {
+  queue = [];
+  user = null;
+  logEvent(event) {
+    this.queue.push(event);
+    return this.queue.length;
   }
-  onReading(callback) {
-    this.#callbacks.add(callback);
-    return () => this.#callbacks.delete(callback);
+  setUser(user) {
+    this.user = user;
   }
-  emit(fahrenheit) {
-    this.#fahrenheit = fahrenheit;
-    this.#callbacks.forEach((cb) => cb(fahrenheit));
+  sendNow() {
+    const sent = this.queue.length;
+    this.queue = [];
+    return sent;
   }
 }
 
-class CelsiusAdapter {
-  constructor(probe) {
-    this.probe = probe;
+class AnalyticsAdapter {
+  constructor(sdk) {
+    this.sdk = sdk;
   }
 
-  read() {
-    return this.probe.getFahrenheit();
+  track(name, props) {
+    return this.sdk.logEvent(name, props);
   }
 
-  subscribe(listener) {
-    return this.probe.onReading(listener);
+  identify(userId) {
+    this.sdk.setUser(userId);
   }
 }
 `,
   tests: [
     {
       name: {
-        en: 'read converts to °C',
-        es: 'read convierte a °C',
-        'pt-BR': 'read converte para °C',
+        en: 'track translates to logEvent',
+        es: 'track se traduce a logEvent',
+        'pt-BR': 'track é traduzido para logEvent',
       },
-      code: `const probe = new ImperialProbe();
-expect(new CelsiusAdapter(probe).read()).toBe(25);
-probe.emit(79.7);
-expect(new CelsiusAdapter(probe).read()).toBe(26.5);`,
+      code: `const sdk = new LegacySdk();
+const analytics = new AnalyticsAdapter(sdk);
+analytics.track('checkout_started', { total: 59 });
+analytics.track('page_view');
+expect(sdk.queue).toEqual([{ name: 'checkout_started', data: { total: 59 } }, { name: 'page_view', data: {} }]);`,
     },
     {
       name: {
-        en: 'subscribe delivers readings in °C',
-        es: 'subscribe entrega lecturas en °C',
-        'pt-BR': 'subscribe entrega leituras em °C',
+        en: 'identify translates to setUser with a string id',
+        es: 'identify se traduce a setUser con un id string',
+        'pt-BR': 'identify é traduzido para setUser com um id string',
       },
-      code: `const probe = new ImperialProbe();
-const listener = fn();
-new CelsiusAdapter(probe).subscribe(listener);
-probe.emit(82.4);
-expect(listener.calls).toEqual([[28]]);`,
+      code: `const sdk = new LegacySdk();
+new AnalyticsAdapter(sdk).identify(42);
+expect(sdk.user).toEqual({ id: '42' });`,
     },
     {
       name: {
-        en: 'unsubscribing reaches the probe',
-        es: 'la desuscripción llega a la sonda',
-        'pt-BR': 'o cancelamento chega à sonda',
+        en: 'flush sends the queue',
+        es: 'flush manda la cola',
+        'pt-BR': 'flush envia a fila',
       },
-      code: `const probe = new ImperialProbe();
-const listener = fn();
-const off = new CelsiusAdapter(probe).subscribe(listener);
-off();
-probe.emit(90);
-expect(listener).toHaveBeenCalledTimes(0);`,
+      code: `const sdk = new LegacySdk();
+const analytics = new AnalyticsAdapter(sdk);
+analytics.track('a');
+analytics.track('b');
+expect(analytics.flush()).toBe(2);
+expect(sdk.queue).toEqual([]);`,
     },
     {
       name: {
-        en: 'the probe still speaks °F',
-        es: 'la sonda sigue hablando en °F',
-        'pt-BR': 'a sonda continua falando em °F',
+        en: 'works with any object that has the SDK shape',
+        es: 'funciona con cualquier objeto con la forma del SDK',
+        'pt-BR': 'funciona com qualquer objeto com o formato do SDK',
       },
-      code: `const probe = new ImperialProbe();
-new CelsiusAdapter(probe).read();
-expect(probe.getFahrenheit()).toBe(77);`,
+      code: `const logEvent = fn(() => 1);
+const adapter = new AnalyticsAdapter({ logEvent, setUser: fn(), sendNow: fn(() => 0) });
+adapter.track('signup', { plan: 'pro' });
+expect(logEvent.calls).toEqual([[{ name: 'signup', data: { plan: 'pro' } }]]);`,
     },
   ],
   checks: [
     {
       rule: 'requireClass',
-      name: 'CelsiusAdapter',
+      name: 'AnalyticsAdapter',
       message: {
-        en: 'Defines the CelsiusAdapter class',
-        es: 'Define la clase CelsiusAdapter',
-        'pt-BR': 'Define a classe CelsiusAdapter',
+        en: 'Defines the AnalyticsAdapter class',
+        es: 'Define la clase AnalyticsAdapter',
+        'pt-BR': 'Define a classe AnalyticsAdapter',
       },
     },
   ],
   hints: {
     en: [
-      'Write a `toCelsius(f)` function and use it in both methods.',
-      'In `subscribe`, give the probe your own callback that converts and calls the listener.',
+      'The adapter keeps the app API and only translates each call into the SDK shape.',
+      'Use a default parameter so `track("page_view")` sends `data: {}`.',
     ],
     es: [
-      'Escribí una función `toCelsius(f)` y usala en los dos métodos.',
-      'En `subscribe`, pasale a la sonda un callback propio que convierta y llame al listener.',
+      'El adaptador mantiene la API de la app y solo traduce cada llamada a la forma del SDK.',
+      'Usá un parámetro por defecto para que `track("page_view")` mande `data: {}`.',
     ],
     'pt-BR': [
-      'Escreva uma função `toCelsius(f)` e use-a nos dois métodos.',
-      'Em `subscribe`, passe para a sonda um callback próprio que converta e chame o listener.',
+      'O adaptador mantém a API do app e só traduz cada chamada para o formato do SDK.',
+      'Use um parâmetro padrão para que `track("page_view")` envie `data: {}`.',
     ],
   },
-  solution: `// Probe API: do not modify it
-class ImperialProbe {
-  #fahrenheit = 77;
-  #callbacks = new Set();
-  getFahrenheit() {
-    return this.#fahrenheit;
+  solution: `// Vendor SDK: do not modify it
+class LegacySdk {
+  queue = [];
+  user = null;
+  logEvent(event) {
+    this.queue.push(event);
+    return this.queue.length;
   }
-  onReading(callback) {
-    this.#callbacks.add(callback);
-    return () => this.#callbacks.delete(callback);
+  setUser(user) {
+    this.user = user;
   }
-  emit(fahrenheit) {
-    this.#fahrenheit = fahrenheit;
-    this.#callbacks.forEach((cb) => cb(fahrenheit));
+  sendNow() {
+    const sent = this.queue.length;
+    this.queue = [];
+    return sent;
   }
 }
 
-const toCelsius = (f) => +(((f - 32) * 5) / 9).toFixed(1);
-
-class CelsiusAdapter {
-  constructor(probe) {
-    this.probe = probe;
+class AnalyticsAdapter {
+  constructor(sdk) {
+    this.sdk = sdk;
   }
 
-  read() {
-    return toCelsius(this.probe.getFahrenheit());
+  track(name, props = {}) {
+    return this.sdk.logEvent({ name, data: props });
   }
 
-  subscribe(listener) {
-    return this.probe.onReading((f) => listener(toCelsius(f)));
+  identify(userId) {
+    this.sdk.setUser({ id: String(userId) });
+  }
+
+  flush() {
+    return this.sdk.sendNow();
   }
 }
 `,

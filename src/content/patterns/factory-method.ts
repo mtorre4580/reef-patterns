@@ -15,10 +15,10 @@ export const factoryMethod: Pattern = {
       'Centraliza a criação de objetos em uma função ou método que decide qual classe concreta instanciar.',
   },
   when: {
-    en: 'When client code knows what it needs ("an SPS coral") but should not know how it is built or which concrete class represents it.',
-    es: 'Cuando el código cliente sabe qué necesita (“un coral SPS”) pero no debería saber cómo se construye ni qué clase concreta lo representa.',
+    en: 'When client code knows what it needs ("an email notifier") but should not know how it is built or which concrete class represents it.',
+    es: 'Cuando el código cliente sabe qué necesita (“un notificador por email”) pero no debería saber cómo se construye ni qué clase concreta lo representa.',
     'pt-BR':
-      'Quando o código cliente sabe do que precisa ("um coral SPS"), mas não deveria saber como ele é construído nem qual classe concreta o representa.',
+      'Quando o código cliente sabe do que precisa ("um notificador por email"), mas não deveria saber como ele é construído nem qual classe concreta o representa.',
   },
   pros: {
     en: [
@@ -58,46 +58,49 @@ export const factoryMethod: Pattern = {
       'React.createElement, document.createElement, axios.create, as factories do Vue (createApp) e do Pinia (defineStore).',
   },
   example: {
-    title: { en: 'Coral factory', es: 'Fábrica de corales', 'pt-BR': 'Fábrica de corais' },
-    scenario: {
-      en: 'When a new frag is added to the inventory, the app creates the coral with its light (PAR) and flow requirements based on its type, without the upload screen knowing each class.',
-      es: 'Al cargar un frag nuevo en el inventario, la app crea el coral con sus requisitos de luz (PAR) y flujo según el tipo, sin que la pantalla de carga conozca cada clase.',
-      'pt-BR':
-        'Ao cadastrar um frag novo no inventário, o app cria o coral com seus requisitos de luz (PAR) e fluxo conforme o tipo, sem que a tela de cadastro conheça cada classe.',
+    title: {
+      en: 'Notification channel factory',
+      es: 'Fábrica de canales de notificación',
+      'pt-BR': 'Fábrica de canais de notificação',
     },
-    code: `class Coral {
-  constructor(name) {
-    this.name = name;
+    scenario: {
+      en: 'Users choose how to be notified: email, SMS or push. The rest of the app asks for "a notifier for this user" and should not care which class it gets.',
+      es: 'Los usuarios eligen cómo recibir avisos: email, SMS o push. El resto de la app pide "un notificador para este usuario" y no debería importarle qué clase recibe.',
+      'pt-BR':
+        'Os usuários escolhem como receber avisos: email, SMS ou push. O resto do app pede "um notificador para este usuário" e não deveria se importar com a classe que recebe.',
+    },
+    code: `class Notifier {
+  send(to, message) {
+    return '[' + this.channel + '] ' + to + ': ' + message;
   }
-  describe() {
-    return this.name + ': PAR ' + this.par + ', flow ' + this.flow;
+}
+
+class EmailNotifier extends Notifier {
+  channel = 'email';
+}
+class SmsNotifier extends Notifier {
+  channel = 'sms';
+  send(to, message) {
+    // SMS has a hard length limit
+    return super.send(to, message.slice(0, 160));
   }
 }
-
-class SpsCoral extends Coral {
-  par = '250-400';
-  flow = 'high';
-}
-class LpsCoral extends Coral {
-  par = '100-200';
-  flow = 'medium';
-}
-class SoftCoral extends Coral {
-  par = '50-150';
-  flow = 'low to medium';
+class PushNotifier extends Notifier {
+  channel = 'push';
 }
 
-// A registry instead of a switch: adding a type is one more line
-const coralTypes = { sps: SpsCoral, lps: LpsCoral, soft: SoftCoral };
+// A registry instead of a switch: adding a channel is one more line
+const channels = { email: EmailNotifier, sms: SmsNotifier, push: PushNotifier };
 
-function createCoral(type, name) {
-  const CoralClass = coralTypes[type];
-  if (!CoralClass) throw new Error('Unknown coral type: ' + type);
-  return new CoralClass(name);
+function createNotifier(type) {
+  const NotifierClass = channels[type];
+  if (!NotifierClass) throw new Error('Unknown channel: ' + type);
+  return new NotifierClass();
 }
 
-console.log(createCoral('sps', 'Acropora millepora').describe());
-console.log(createCoral('soft', 'Zoanthus').describe());`,
+const user = { email: 'ana@example.com', prefers: 'email' };
+console.log(createNotifier(user.prefers).send(user.email, 'Your order shipped'));
+console.log(createNotifier('sms').send('+5491100000000', 'Your code is 4821'));`,
   },
   related: ['abstract-factory', 'builder', 'prototype'],
 };

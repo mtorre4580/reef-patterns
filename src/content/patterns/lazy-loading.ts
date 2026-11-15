@@ -50,15 +50,15 @@ export const lazyLoading: Pattern = {
   },
   example: {
     title: {
-      en: 'Chemistry simulator loaded on demand',
-      es: 'Simulador de química cargado a demanda',
-      'pt-BR': 'Simulador de química carregado sob demanda',
+      en: 'PDF export loaded on demand',
+      es: 'Exportar a PDF cargado a demanda',
+      'pt-BR': 'Exportar para PDF carregado sob demanda',
     },
     scenario: {
-      en: 'The water chemistry simulator is heavy and only used by whoever opens the advanced calculator. It is loaded the first time and reused afterwards.',
-      es: 'El simulador de química del agua pesa mucho y solo lo usa quien abre la calculadora avanzada. Se carga la primera vez y se reutiliza después.',
+      en: 'The PDF library is heavy and only used by people who click "Export". It is loaded the first time and reused afterwards.',
+      es: 'La librería de PDF es pesada y solo la usa quien hace clic en "Exportar". Se carga la primera vez y se reutiliza después.',
       'pt-BR':
-        'O simulador de química da água é pesado e só é usado por quem abre a calculadora avançada. Ele é carregado na primeira vez e reutilizado depois.',
+        'A biblioteca de PDF é pesada e só é usada por quem clica em "Exportar". Ela é carregada na primeira vez e reutilizada depois.',
     },
     code: `function lazy(loader) {
   let promise = null;
@@ -67,23 +67,21 @@ export const lazyLoading: Pattern = {
 }
 
 let loads = 0;
-const loadChemistry = lazy(async () => {
+const loadPdfKit = lazy(async () => {
   loads++;
-  // In the real app: return import('./chemistry-simulator.js');
-  return {
-    saturationIndex: (ca, alk, ph) => +(ph - (9.3 + Math.log10(1 / (ca * alk)))).toFixed(2),
-  };
+  // In the real app: return import('./pdf-export.js');
+  return { render: (invoice) => '%PDF-1.7 invoice ' + invoice.id + ' total ' + invoice.total };
 });
 
-async function openAdvancedCalculator() {
-  const chemistry = await loadChemistry();
-  return chemistry.saturationIndex(420, 2.9, 8.2);
+async function exportInvoice(invoice) {
+  const pdf = await loadPdfKit();
+  return pdf.render(invoice);
 }
 
-console.log('App ready without the simulator. Loads:', loads); // 0
-openAdvancedCalculator()
-  .then(() => openAdvancedCalculator())
-  .then((index) => console.log('Index:', index, 'Loads:', loads)); // 1`,
+console.log('App ready without the PDF library. Loads:', loads); // 0
+exportInvoice({ id: 'inv_1', total: 120 })
+  .then(() => exportInvoice({ id: 'inv_2', total: 80 }))
+  .then((file) => console.log(file, '· loads:', loads)); // 1`,
   },
   related: ['proxy', 'singleton', 'flyweight'],
 };

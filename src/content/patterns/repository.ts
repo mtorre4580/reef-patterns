@@ -58,54 +58,56 @@ export const repository: Pattern = {
       'Os repositórios do TypeORM e do MikroORM, as camadas de dados de apps com TanStack Query, os serviços do Angular que envolvem o HttpClient.',
   },
   example: {
-    title: { en: 'Coral inventory', es: 'Inventario de corales', 'pt-BR': 'Inventário de corais' },
-    scenario: {
-      en: 'The app keeps the inventory in memory during tests and in a key-value store in production. The frag screen always uses the same API.',
-      es: 'La app guarda el inventario en memoria durante los tests y en un almacenamiento clave-valor en producción. La pantalla de frags usa siempre la misma API.',
-      'pt-BR':
-        'O app guarda o inventário em memória durante os testes e em um armazenamento chave-valor em produção. A tela de frags usa sempre a mesma API.',
+    title: {
+      en: 'Todo repository',
+      es: 'Repositorio de tareas',
+      'pt-BR': 'Repositório de tarefas',
     },
-    code: `class InMemoryCoralRepository {
+    scenario: {
+      en: 'The todo app keeps tasks in memory during tests and in localStorage in the browser. The screens always use the same API.',
+      es: 'La app de tareas guarda todo en memoria durante los tests y en localStorage en el navegador. Las pantallas usan siempre la misma API.',
+      'pt-BR':
+        'O app de tarefas guarda tudo em memória durante os testes e no localStorage no navegador. As telas usam sempre a mesma API.',
+    },
+    code: `class InMemoryTodoRepository {
   #items = new Map();
-  save(coral) {
-    this.#items.set(coral.id, { ...coral });
+  save(todo) {
+    this.#items.set(todo.id, { ...todo });
   }
   findById(id) {
     return this.#items.get(id) ?? null;
   }
-  findByType(type) {
-    return [...this.#items.values()].filter((c) => c.type === type);
+  findPending() {
+    return [...this.#items.values()].filter((t) => !t.done);
   }
 }
 
 // Same interface, different storage (storage: any getItem/setItem object)
-class KeyValueCoralRepository {
+class StorageTodoRepository {
   constructor(storage) {
     this.storage = storage;
   }
   #all() {
-    return JSON.parse(this.storage.getItem('corals') ?? '[]');
+    return JSON.parse(this.storage.getItem('todos') ?? '[]');
   }
-  save(coral) {
-    const others = this.#all().filter((c) => c.id !== coral.id);
-    this.storage.setItem('corals', JSON.stringify([...others, coral]));
+  save(todo) {
+    const others = this.#all().filter((t) => t.id !== todo.id);
+    this.storage.setItem('todos', JSON.stringify([...others, todo]));
   }
   findById(id) {
-    return this.#all().find((c) => c.id === id) ?? null;
+    return this.#all().find((t) => t.id === id) ?? null;
   }
-  findByType(type) {
-    return this.#all().filter((c) => c.type === type);
+  findPending() {
+    return this.#all().filter((t) => !t.done);
   }
 }
 
-function listSps(repo) {
-  return repo.findByType('sps').map((c) => c.name);
-}
+const pendingTitles = (repo) => repo.findPending().map((t) => t.title);
 
-const repo = new InMemoryCoralRepository();
-repo.save({ id: 1, name: 'Montipora digitata', type: 'sps' });
-repo.save({ id: 2, name: 'Hammer', type: 'lps' });
-console.log(listSps(repo)); // ['Montipora digitata']`,
+const repo = new InMemoryTodoRepository();
+repo.save({ id: 1, title: 'Write release notes', done: false });
+repo.save({ id: 2, title: 'Fix login bug', done: true });
+console.log(pendingTitles(repo)); // ['Write release notes']`,
   },
   related: ['unit-of-work', 'hexagonal', 'dependency-injection', 'specification'],
 };

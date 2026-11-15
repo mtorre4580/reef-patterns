@@ -3,96 +3,88 @@ import type { Challenge } from '../../types';
 export const factoryMethod2: Challenge = {
   id: 'factory-method-2',
   patternId: 'factory-method',
-  title: { en: 'Gas mixes', es: 'Mezclas de gas', 'pt-BR': 'Misturas de gás' },
+  title: {
+    en: 'Card brands from the card number',
+    es: 'Marca de tarjeta a partir del número',
+    'pt-BR': 'Bandeira do cartão a partir do número',
+  },
   difficulty: 'media',
   story: {
-    en: 'The planner receives the gas as text: "air", "nitrox32", "trimix-18-45". Every screen parsed the name its own way and one of them computed the maximum operating depth (MOD) wrong.',
-    es: 'El planificador recibe el gas como texto: "air", "nitrox32", "trimix-18-45". Cada pantalla parseaba el nombre a su manera y una calculaba mal la profundidad máxima operativa (MOD).',
+    en: 'The payment form receives a card number and must show the brand logo and a masked number. Each screen guessed the brand its own way and one showed Amex cards as Visa.',
+    es: 'El formulario de pago recibe un número de tarjeta y tiene que mostrar el logo de la marca y el número enmascarado. Cada pantalla adivinaba la marca a su manera y una mostraba las Amex como Visa.',
     'pt-BR':
-      'O planejador recebe o gás como texto: "air", "nitrox32", "trimix-18-45". Cada tela interpretava o nome do seu jeito e uma calculava errado a profundidade máxima operacional (MOD).',
+      'O formulário de pagamento recebe um número de cartão e precisa mostrar o logo da bandeira e o número mascarado. Cada tela adivinhava a bandeira do seu jeito e uma mostrava cartões Amex como Visa.',
   },
   instructions: {
-    en: 'Implement `createGasMix(name)`, which returns `{ name, o2, he, n2, mod() }` (fractions between 0 and 1):\n- `"air"`: 21 % O₂.\n- `"nitroxNN"`: NN % O₂ (for example `"nitrox32"`).\n- `"trimix-OO-HH"`: OO % O₂ and HH % helium.\n- `n2` is `+(1 - o2 - he).toFixed(2)` and `mod()` is `Math.floor((1.4 / o2 - 1) * 10)` meters.\n- Any other name throws `Error("Unknown gas: <name>")`.',
-    es: 'Implementá `createGasMix(name)`, que devuelve `{ name, o2, he, n2, mod() }` (fracciones entre 0 y 1):\n- `"air"`: 21 % de O₂.\n- `"nitroxNN"`: NN % de O₂ (por ejemplo `"nitrox32"`).\n- `"trimix-OO-HH"`: OO % de O₂ y HH % de helio.\n- `n2` es `+(1 - o2 - he).toFixed(2)` y `mod()` es `Math.floor((1.4 / o2 - 1) * 10)` metros.\n- Cualquier otro nombre lanza `Error("Unknown gas: <name>")`.',
+    en: 'Implement `createCard(number)`, which ignores spaces and returns `{ brand, last4, mask() }`:\n- Starts with `4`: brand `"visa"`.\n- Starts with `51`–`55`: brand `"mastercard"`.\n- Starts with `34` or `37`: brand `"amex"`.\n- `last4` holds the last 4 digits and `mask()` returns `"•••• <last4>"`.\n- Anything else throws `Error("Unknown card brand")`.',
+    es: 'Implementá `createCard(number)`, que ignora espacios y devuelve `{ brand, last4, mask() }`:\n- Empieza con `4`: marca `"visa"`.\n- Empieza con `51`–`55`: marca `"mastercard"`.\n- Empieza con `34` o `37`: marca `"amex"`.\n- `last4` tiene los últimos 4 dígitos y `mask()` devuelve `"•••• <last4>"`.\n- Cualquier otra cosa lanza `Error("Unknown card brand")`.',
     'pt-BR':
-      'Implemente `createGasMix(name)`, que devolve `{ name, o2, he, n2, mod() }` (frações entre 0 e 1):\n- `"air"`: 21 % de O₂.\n- `"nitroxNN"`: NN % de O₂ (por exemplo `"nitrox32"`).\n- `"trimix-OO-HH"`: OO % de O₂ e HH % de hélio.\n- `n2` é `+(1 - o2 - he).toFixed(2)` e `mod()` é `Math.floor((1.4 / o2 - 1) * 10)` metros.\n- Qualquer outro nome lança `Error("Unknown gas: <name>")`.',
+      'Implemente `createCard(number)`, que ignora espaços e devolve `{ brand, last4, mask() }`:\n- Começa com `4`: bandeira `"visa"`.\n- Começa com `51`–`55`: bandeira `"mastercard"`.\n- Começa com `34` ou `37`: bandeira `"amex"`.\n- `last4` tem os últimos 4 dígitos e `mask()` devolve `"•••• <last4>"`.\n- Qualquer outra coisa lança `Error("Unknown card brand")`.',
   },
-  starterCode: `function createGasMix(name) {
-  return { name, o2: 0.21, he: 0, n2: 0.79, mod: () => 56 };
+  starterCode: `function createCard(number) {
+  return { brand: 'visa', last4: number.slice(-4), mask: () => '•••• ' + number.slice(-4) };
 }
 `,
   tests: [
     {
-      name: { en: 'air', es: 'aire', 'pt-BR': 'ar' },
-      code: `const air = createGasMix('air');
-expect([air.o2, air.he, air.n2]).toEqual([0.21, 0, 0.79]);
-expect(air.mod()).toBe(56);`,
+      name: {
+        en: 'detects Visa and ignores spaces',
+        es: 'detecta Visa e ignora espacios',
+        'pt-BR': 'detecta Visa e ignora espaços',
+      },
+      code: `const card = createCard('4111 1111 1111 1234');
+expect(card.brand).toBe('visa');
+expect(card.last4).toBe('1234');
+expect(card.mask()).toBe('•••• 1234');`,
+    },
+    {
+      name: { en: 'detects Mastercard', es: 'detecta Mastercard', 'pt-BR': 'detecta Mastercard' },
+      code: `expect(createCard('5500000000000004').brand).toBe('mastercard');
+expect(createCard('5105105105105100').brand).toBe('mastercard');`,
+    },
+    {
+      name: { en: 'detects Amex', es: 'detecta Amex', 'pt-BR': 'detecta Amex' },
+      code: `expect(createCard('3782 822463 10005').brand).toBe('amex');
+expect(createCard('341111111111111').mask()).toBe('•••• 1111');`,
     },
     {
       name: {
-        en: 'nitrox with any percentage',
-        es: 'nitrox con cualquier porcentaje',
-        'pt-BR': 'nitrox com qualquer porcentagem',
+        en: 'an unknown number throws an error',
+        es: 'un número desconocido lanza un error',
+        'pt-BR': 'um número desconhecido lança um erro',
       },
-      code: `expect(createGasMix('nitrox32').mod()).toBe(33);
-expect(createGasMix('nitrox36').o2).toBe(0.36);
-expect(createGasMix('nitrox36').mod()).toBe(28);`,
-    },
-    {
-      name: { en: 'trimix with helium', es: 'trimix con helio', 'pt-BR': 'trimix com hélio' },
-      code: `const mix = createGasMix('trimix-18-45');
-expect(mix.he).toBe(0.45);
-expect(mix.n2).toBe(0.37);
-expect(mix.mod()).toBe(67);`,
-    },
-    {
-      name: {
-        en: 'an invalid name throws an error',
-        es: 'un nombre inválido lanza un error',
-        'pt-BR': 'um nome inválido lança um erro',
-      },
-      code: `expect(() => createGasMix('heliox')).toThrow('Unknown gas: heliox');`,
+      code: `expect(() => createCard('6011000990139424')).toThrow('Unknown card brand');`,
     },
   ],
   hints: {
     en: [
-      'Move building the final object into a `mix(name, o2, he)` function that computes `n2` and `mod`.',
-      'A list of "recognizers" `{ match: /regex/, create: (m) => … }` avoids one if per format.',
-      'For `nitrox32`, `/^nitrox(\\d{2})$/` captures the percentage; divide it by 100.',
+      'Normalize first: `number.replace(/\\s+/g, "")`.',
+      'A list of "recognizers" `{ brand, match: /^4/ }` avoids one if per brand.',
+      'Mastercard is `/^5[1-5]/` and Amex is `/^3[47]/`.',
     ],
     es: [
-      'Separá la creación del objeto final en una función `mix(name, o2, he)` que calcule `n2` y `mod`.',
-      'Una lista de “reconocedores” `{ match: /regex/, create: (m) => … }` evita un if por formato.',
-      'Para `nitrox32`, `/^nitrox(\\d{2})$/` captura el porcentaje; dividilo por 100.',
+      'Normalizá primero: `number.replace(/\\s+/g, "")`.',
+      'Una lista de "reconocedores" `{ brand, match: /^4/ }` evita un if por marca.',
+      'Mastercard es `/^5[1-5]/` y Amex es `/^3[47]/`.',
     ],
     'pt-BR': [
-      'Separe a criação do objeto final em uma função `mix(name, o2, he)` que calcule `n2` e `mod`.',
-      'Uma lista de "reconhecedores" `{ match: /regex/, create: (m) => … }` evita um if por formato.',
-      'Para `nitrox32`, `/^nitrox(\\d{2})$/` captura a porcentagem; divida por 100.',
+      'Normalize primeiro: `number.replace(/\\s+/g, "")`.',
+      'Uma lista de "reconhecedores" `{ brand, match: /^4/ }` evita um if por bandeira.',
+      'Mastercard é `/^5[1-5]/` e Amex é `/^3[47]/`.',
     ],
   },
-  solution: `function mix(name, o2, he = 0) {
-  return {
-    name,
-    o2,
-    he,
-    n2: +(1 - o2 - he).toFixed(2),
-    mod: () => Math.floor((1.4 / o2 - 1) * 10),
-  };
-}
-
-const recognizers = [
-  { match: /^air$/, create: (m) => mix(m[0], 0.21) },
-  { match: /^nitrox(\\d{2})$/, create: (m) => mix(m[0], Number(m[1]) / 100) },
-  { match: /^trimix-(\\d{2})-(\\d{2})$/, create: (m) => mix(m[0], Number(m[1]) / 100, Number(m[2]) / 100) },
+  solution: `const brands = [
+  { brand: 'visa', match: /^4/ },
+  { brand: 'mastercard', match: /^5[1-5]/ },
+  { brand: 'amex', match: /^3[47]/ },
 ];
 
-function createGasMix(name) {
-  for (const { match, create } of recognizers) {
-    const m = name.match(match);
-    if (m) return create(m);
-  }
-  throw new Error('Unknown gas: ' + name);
+function createCard(number) {
+  const digits = number.replace(/\\s+/g, '');
+  const found = brands.find(({ match }) => match.test(digits));
+  if (!found) throw new Error('Unknown card brand');
+  const last4 = digits.slice(-4);
+  return { brand: found.brand, last4, mask: () => '•••• ' + last4 };
 }
 `,
 };

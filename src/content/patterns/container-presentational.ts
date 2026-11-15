@@ -59,39 +59,39 @@ export const containerPresentational: Pattern = {
       'Popularizado por Dan Abramov na era do Redux (connect); hoje aparece como server components que obtêm dados e client components que os mostram.',
   },
   example: {
-    title: { en: 'Coral list', es: 'Lista de corales', 'pt-BR': 'Lista de corais' },
+    title: { en: 'User list', es: 'Lista de usuarios', 'pt-BR': 'Lista de usuários' },
     scenario: {
-      en: 'CoralListContainer fetches the inventory and handles loading; CoralList only receives an array and draws it, and is reused on the frag sales screen.',
-      es: 'CoralListContainer obtiene el inventario y maneja la carga; CoralList solo recibe un array y lo dibuja, y se reutiliza en la pantalla de venta de frags.',
+      en: 'UserListContainer fetches users and handles loading; UserList only receives an array and draws it, and is reused in the admin panel and in Storybook.',
+      es: 'UserListContainer trae los usuarios y maneja la carga; UserList solo recibe un array y lo dibuja, y se reutiliza en el panel de admin y en Storybook.',
       'pt-BR':
-        'CoralListContainer obtém o inventário e cuida do carregamento; CoralList só recebe um array e o desenha, e é reutilizado na tela de venda de frags.',
+        'UserListContainer busca os usuários e cuida do carregamento; UserList só recebe um array e o desenha, e é reutilizado no painel de admin e no Storybook.',
     },
     code: `import { createElement as h, useEffect, useState } from 'react';
 
 // Presentational: no state, no fetching, only props
-export const CoralList = ({ corals, onSelect }) => {
-  if (corals.length === 0) return h('p', null, 'No corals yet.');
+export const UserList = ({ users, onSelect }) => {
+  if (users.length === 0) return h('p', null, 'No users yet.');
   return h(
     'ul',
     null,
-    corals.map((coral) =>
-      h('li', { key: coral.id },
-        h('button', { onClick: () => onSelect(coral) }, coral.name + ' · ' + coral.type),
+    users.map((user) =>
+      h('li', { key: user.id },
+        h('button', { onClick: () => onSelect(user) }, user.name + ' · ' + user.role),
       ),
     ),
   );
 };
 
 // Container: data and effects, no markup of its own
-export const CoralListContainer = ({ repository, onSelect }) => {
-  const [corals, setCorals] = useState(null);
+export const UserListContainer = ({ api, onSelect }) => {
+  const [users, setUsers] = useState(null);
 
   useEffect(() => {
-    repository.findAll().then(setCorals);
-  }, [repository]);
+    api.listUsers().then(setUsers);
+  }, [api]);
 
-  if (corals === null) return h('p', { role: 'status' }, 'Loading inventory…');
-  return h(CoralList, { corals, onSelect });
+  if (users === null) return h('p', { role: 'status' }, 'Loading users…');
+  return h(UserList, { users, onSelect });
 };`,
   },
   related: ['mvc', 'custom-hooks', 'hoc'],

@@ -4,39 +4,39 @@ export const decorator2: Challenge = {
   id: 'decorator-2',
   patternId: 'decorator',
   title: {
-    en: 'Pump with logging and a flow cap',
-    es: 'Bomba con registro y límite de caudal',
-    'pt-BR': 'Bomba com registro e limite de vazão',
+    en: 'Image resizer with logging and a width cap',
+    es: 'Redimensionador con logging y ancho máximo',
+    'pt-BR': 'Redimensionador com logging e largura máxima',
   },
   difficulty: 'media',
   story: {
-    en: "The wave pump accepts any flow. We want to log every change for debugging and, on the nano, cap the maximum flow so the sand doesn't fly. We can't touch the `Pump` class.",
-    es: 'La bomba de olas acepta cualquier caudal. Queremos registrar cada cambio para depurar y, en el nano, limitar el caudal máximo para no volar la arena. No podemos tocar la clase `Pump`.',
+    en: 'The image service resizes uploads to any width. We want to log every change for debugging and, for avatars, cap the width at 512 px. We cannot touch the `Resizer` class, which comes from another team.',
+    es: 'El servicio de imágenes redimensiona las subidas a cualquier ancho. Queremos registrar cada cambio para depurar y, para avatares, limitar el ancho a 512 px. No podemos tocar la clase `Resizer`, que es de otro equipo.',
     'pt-BR':
-      'A bomba de ondas aceita qualquer vazão. Queremos registrar cada mudança para depurar e, no nano, limitar a vazão máxima para não levantar a areia. Não podemos mexer na classe `Pump`.',
+      'O serviço de imagens redimensiona os uploads para qualquer largura. Queremos registrar cada mudança para depurar e, para avatares, limitar a largura a 512 px. Não podemos mexer na classe `Resizer`, que é de outro time.',
   },
   instructions: {
-    en: 'Without modifying `Pump`, implement two decorators that return objects with `setFlow(lph)` and `getFlow()`:\n- `withLogging(pump, log)`: before delegating, pushes `"setFlow <lph>"` into the `log` array.\n- `withMaxFlow(pump, max)`: delegates with `Math.min(lph, max)`.\nThey must nest: `withLogging(withMaxFlow(pump, 2000), log)`.',
-    es: 'Sin modificar `Pump`, implementá dos decoradores que devuelvan objetos con `setFlow(lph)` y `getFlow()`:\n- `withLogging(pump, log)`: antes de delegar, agrega `"setFlow <lph>"` al array `log`.\n- `withMaxFlow(pump, max)`: delega con `Math.min(lph, max)`.\nSe tienen que poder anidar: `withLogging(withMaxFlow(pump, 2000), log)`.',
+    en: 'Without modifying `Resizer`, implement two decorators that return objects with `setWidth(px)` and `getWidth()`:\n- `withLogging(resizer, log)`: before delegating, pushes `"setWidth <px>"` into the `log` array.\n- `withMaxWidth(resizer, max)`: delegates with `Math.min(px, max)`.\nThey must nest: `withLogging(withMaxWidth(resizer, 512), log)`.',
+    es: 'Sin modificar `Resizer`, implementá dos decoradores que devuelvan objetos con `setWidth(px)` y `getWidth()`:\n- `withLogging(resizer, log)`: antes de delegar, agrega `"setWidth <px>"` al array `log`.\n- `withMaxWidth(resizer, max)`: delega con `Math.min(px, max)`.\nSe tienen que poder anidar: `withLogging(withMaxWidth(resizer, 512), log)`.',
     'pt-BR':
-      'Sem modificar `Pump`, implemente dois decoradores que devolvam objetos com `setFlow(lph)` e `getFlow()`:\n- `withLogging(pump, log)`: antes de delegar, adiciona `"setFlow <lph>"` ao array `log`.\n- `withMaxFlow(pump, max)`: delega com `Math.min(lph, max)`.\nPrecisam poder ser aninhados: `withLogging(withMaxFlow(pump, 2000), log)`.',
+      'Sem modificar `Resizer`, implemente dois decoradores que devolvam objetos com `setWidth(px)` e `getWidth()`:\n- `withLogging(resizer, log)`: antes de delegar, adiciona `"setWidth <px>"` ao array `log`.\n- `withMaxWidth(resizer, max)`: delega com `Math.min(px, max)`.\nPrecisam poder ser aninhados: `withLogging(withMaxWidth(resizer, 512), log)`.',
   },
-  starterCode: `class Pump {
-  #flow = 0;
-  setFlow(lph) {
-    this.#flow = lph;
+  starterCode: `class Resizer {
+  #width = 0;
+  setWidth(px) {
+    this.#width = px;
   }
-  getFlow() {
-    return this.#flow;
+  getWidth() {
+    return this.#width;
   }
 }
 
-function withLogging(pump, log) {
-  return pump;
+function withLogging(resizer, log) {
+  return resizer;
 }
 
-function withMaxFlow(pump, max) {
-  return pump;
+function withMaxWidth(resizer, max) {
+  return resizer;
 }
 `,
   tests: [
@@ -47,23 +47,23 @@ function withMaxFlow(pump, max) {
         'pt-BR': 'withLogging registra cada mudança',
       },
       code: `const log = [];
-const pump = withLogging(new Pump(), log);
-pump.setFlow(3000);
-pump.setFlow(1200);
-expect(log).toEqual(['setFlow 3000', 'setFlow 1200']);
-expect(pump.getFlow()).toBe(1200);`,
+const resizer = withLogging(new Resizer(), log);
+resizer.setWidth(1200);
+resizer.setWidth(800);
+expect(log).toEqual(['setWidth 1200', 'setWidth 800']);
+expect(resizer.getWidth()).toBe(800);`,
     },
     {
       name: {
-        en: 'withMaxFlow caps the flow',
-        es: 'withMaxFlow limita el caudal',
-        'pt-BR': 'withMaxFlow limita a vazão',
+        en: 'withMaxWidth caps the width',
+        es: 'withMaxWidth limita el ancho',
+        'pt-BR': 'withMaxWidth limita a largura',
       },
-      code: `const pump = withMaxFlow(new Pump(), 2000);
-pump.setFlow(3500);
-expect(pump.getFlow()).toBe(2000);
-pump.setFlow(800);
-expect(pump.getFlow()).toBe(800);`,
+      code: `const resizer = withMaxWidth(new Resizer(), 512);
+resizer.setWidth(2000);
+expect(resizer.getWidth()).toBe(512);
+resizer.setWidth(300);
+expect(resizer.getWidth()).toBe(300);`,
     },
     {
       name: {
@@ -72,62 +72,62 @@ expect(pump.getFlow()).toBe(800);`,
         'pt-BR': 'aninham-se: registra-se o pedido e aplica-se o limite',
       },
       code: `const log = [];
-const real = new Pump();
-const pump = withLogging(withMaxFlow(real, 2000), log);
-pump.setFlow(3500);
-expect(log).toEqual(['setFlow 3500']);
-expect(real.getFlow()).toBe(2000);`,
+const real = new Resizer();
+const resizer = withLogging(withMaxWidth(real, 512), log);
+resizer.setWidth(2000);
+expect(log).toEqual(['setWidth 2000']);
+expect(real.getWidth()).toBe(512);`,
     },
     {
       name: {
-        en: 'does not modify the original pump',
-        es: 'no modifica la bomba original',
-        'pt-BR': 'não modifica a bomba original',
+        en: 'does not modify the original resizer',
+        es: 'no modifica el redimensionador original',
+        'pt-BR': 'não modifica o redimensionador original',
       },
-      code: `const real = new Pump();
-withMaxFlow(real, 100);
-real.setFlow(5000);
-expect(real.getFlow()).toBe(5000);`,
+      code: `const real = new Resizer();
+withMaxWidth(real, 100);
+real.setWidth(5000);
+expect(real.getWidth()).toBe(5000);`,
     },
   ],
   hints: {
     en: [
       'Each decorator returns a new object with both methods.',
-      "The decorator's `getFlow` just delegates: `() => pump.getFlow()`.",
+      "The decorator's `getWidth` just delegates: `() => resizer.getWidth()`.",
     ],
     es: [
       'Cada decorador devuelve un objeto nuevo con los dos métodos.',
-      '`getFlow` del decorador solo delega: `() => pump.getFlow()`.',
+      'El `getWidth` del decorador solo delega: `() => resizer.getWidth()`.',
     ],
     'pt-BR': [
       'Cada decorador devolve um objeto novo com os dois métodos.',
-      'O `getFlow` do decorador só delega: `() => pump.getFlow()`.',
+      'O `getWidth` do decorador só delega: `() => resizer.getWidth()`.',
     ],
   },
-  solution: `class Pump {
-  #flow = 0;
-  setFlow(lph) {
-    this.#flow = lph;
+  solution: `class Resizer {
+  #width = 0;
+  setWidth(px) {
+    this.#width = px;
   }
-  getFlow() {
-    return this.#flow;
+  getWidth() {
+    return this.#width;
   }
 }
 
-function withLogging(pump, log) {
+function withLogging(resizer, log) {
   return {
-    setFlow(lph) {
-      log.push('setFlow ' + lph);
-      pump.setFlow(lph);
+    setWidth(px) {
+      log.push('setWidth ' + px);
+      resizer.setWidth(px);
     },
-    getFlow: () => pump.getFlow(),
+    getWidth: () => resizer.getWidth(),
   };
 }
 
-function withMaxFlow(pump, max) {
+function withMaxWidth(resizer, max) {
   return {
-    setFlow: (lph) => pump.setFlow(Math.min(lph, max)),
-    getFlow: () => pump.getFlow(),
+    setWidth: (px) => resizer.setWidth(Math.min(px, max)),
+    getWidth: () => resizer.getWidth(),
   };
 }
 `,

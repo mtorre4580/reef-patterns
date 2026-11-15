@@ -59,27 +59,27 @@ export const composite: Pattern = {
   },
   example: {
     title: {
-      en: 'Counting polyps on a reef',
-      es: 'Contar pólipos en un arrecife',
-      'pt-BR': 'Contar pólipos em um recife',
+      en: 'Folder sizes in a file browser',
+      es: 'Tamaño de carpetas en un explorador de archivos',
+      'pt-BR': 'Tamanho de pastas em um explorador de arquivos',
     },
     scenario: {
-      en: 'A reef has sections, sections have colonies and colonies have frags. The report needs the total number of polyps at any level.',
-      es: 'Un arrecife tiene secciones, las secciones tienen colonias y las colonias tienen frags. El reporte necesita el total de pólipos de cualquier nivel.',
+      en: 'The storage page shows the size of any folder, and folders can contain files or other folders. The total must be computed the same way at any level.',
+      es: 'La página de almacenamiento muestra el tamaño de cualquier carpeta, y las carpetas pueden tener archivos u otras carpetas. El total se calcula igual en cualquier nivel.',
       'pt-BR':
-        'Um recife tem seções, as seções têm colônias e as colônias têm frags. O relatório precisa do total de pólipos de qualquer nível.',
+        'A página de armazenamento mostra o tamanho de qualquer pasta, e as pastas podem ter arquivos ou outras pastas. O total é calculado do mesmo jeito em qualquer nível.',
     },
-    code: `class Frag {
-  constructor(name, polyps) {
+    code: `class File {
+  constructor(name, bytes) {
     this.name = name;
-    this.polyps = polyps;
+    this.bytes = bytes;
   }
-  countPolyps() {
-    return this.polyps;
+  size() {
+    return this.bytes;
   }
 }
 
-class Group {
+class Folder {
   #children = [];
   constructor(name) {
     this.name = name;
@@ -88,18 +88,18 @@ class Group {
     this.#children.push(...children);
     return this;
   }
-  countPolyps() {
-    // A group adds up its children, whether frags or other groups
-    return this.#children.reduce((total, child) => total + child.countPolyps(), 0);
+  size() {
+    // A folder adds up its children, whether files or other folders
+    return this.#children.reduce((total, child) => total + child.size(), 0);
   }
 }
 
-const zoaColony = new Group('Zoa colony').add(new Frag('Rasta', 40), new Frag('Utter Chaos', 25));
-const leftRock = new Group('Left rock').add(zoaColony, new Frag('Acropora', 300));
-const reef = new Group('Reef').add(leftRock, new Frag('Euphyllia', 6));
+const invoices = new Folder('invoices').add(new File('jan.pdf', 120_000), new File('feb.pdf', 98_000));
+const docs = new Folder('docs').add(invoices, new File('contract.pdf', 450_000));
+const root = new Folder('/').add(docs, new File('avatar.png', 32_000));
 
-console.log(zoaColony.countPolyps()); // 65
-console.log(reef.countPolyps()); // 371`,
+console.log(invoices.size()); // 218000
+console.log(root.size()); // 700000`,
   },
   related: ['iterator', 'visitor', 'decorator', 'compound-components'],
 };

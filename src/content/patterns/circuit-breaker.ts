@@ -59,15 +59,15 @@ export const circuitBreaker: Pattern = {
   },
   example: {
     title: {
-      en: 'Tide forecast service',
-      es: 'Servicio de pronóstico de mareas',
-      'pt-BR': 'Serviço de previsão de marés',
+      en: 'Recommendations service with a breaker',
+      es: 'Servicio de recomendaciones con breaker',
+      'pt-BR': 'Serviço de recomendações com breaker',
     },
     scenario: {
-      en: 'The tide simulator queries an external service. If it fails three times in a row, the last known table is used for 30 seconds before trying again.',
-      es: 'El simulador de mareas consulta un servicio externo. Si falla tres veces seguidas, se usa la última tabla conocida durante 30 segundos antes de volver a intentar.',
+      en: 'The product page calls a recommendations service. If it fails three times in a row, the page shows best sellers for 30 seconds instead of waiting for timeouts.',
+      es: 'La página de producto llama a un servicio de recomendaciones. Si falla tres veces seguidas, la página muestra los más vendidos durante 30 segundos en vez de esperar timeouts.',
       'pt-BR':
-        'O simulador de marés consulta um serviço externo. Se ele falha três vezes seguidas, usa-se a última tabela conhecida durante 30 segundos antes de tentar de novo.',
+        'A página de produto chama um serviço de recomendações. Se falhar três vezes seguidas, a página mostra os mais vendidos por 30 segundos em vez de esperar timeouts.',
     },
     code: `class CircuitBreaker {
   state = 'closed'; // closed → open → half-open
@@ -99,20 +99,20 @@ export const circuitBreaker: Pattern = {
   }
 }
 
-const lastKnownTides = [{ hour: 6, level: 'high' }];
-const tideService = new CircuitBreaker(async () => {
-  throw new Error('503');
+const bestSellers = ['SKU-1', 'SKU-7', 'SKU-9'];
+const recommendations = new CircuitBreaker(async () => {
+  throw new Error('504 Gateway Timeout');
 });
 
-async function getTides() {
+async function productSidebar() {
   try {
-    return await tideService.call();
+    return await recommendations.call();
   } catch {
-    return lastKnownTides; // fallback response
+    return bestSellers; // fallback response
   }
 }
 
-getTides().then(() => getTides()).then(() => getTides()).then(() => console.log(tideService.state)); // open`,
+productSidebar().then(productSidebar).then(productSidebar).then(() => console.log(recommendations.state)); // open`,
   },
   related: ['retry', 'bulkhead', 'state'],
 };

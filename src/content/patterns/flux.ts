@@ -58,23 +58,27 @@ export const flux: Pattern = {
       'Redux e Redux Toolkit, useReducer do React, Zustand, NgRx, Vuex/Pinia com suas ações.',
   },
   example: {
-    title: { en: 'Tank store', es: 'Store del acuario', 'pt-BR': 'Store do aquário' },
-    scenario: {
-      en: 'The dashboard, the scheduler and the manual console change the same state: doses, readings and pumps. Everything goes through actions so it can be audited.',
-      es: 'El dashboard, el planificador y la consola manual cambian el mismo estado: dosis, lecturas y bombas. Todo pasa por acciones para poder auditarlo.',
-      'pt-BR':
-        'O dashboard, o agendador e o console manual mudam o mesmo estado: doses, leituras e bombas. Tudo passa por ações para poder ser auditado.',
+    title: {
+      en: 'Cart store with actions',
+      es: 'Store del carrito con acciones',
+      'pt-BR': 'Store do carrinho com ações',
     },
-    code: `const initialState = { dosedMl: 0, readings: [], pumps: { return: true, wave: true } };
+    scenario: {
+      en: 'The product page, the mini cart and the checkout change the same cart. Everything goes through actions so bugs can be traced and replayed.',
+      es: 'La página de producto, el mini carrito y el checkout cambian el mismo carrito. Todo pasa por acciones para poder rastrear y reproducir bugs.',
+      'pt-BR':
+        'A página de produto, o mini carrinho e o checkout mudam o mesmo carrinho. Tudo passa por ações para poder rastrear e reproduzir bugs.',
+    },
+    code: `const initialState = { items: [], coupon: null };
 
-function reefReducer(state, action) {
+function cartReducer(state, action) {
   switch (action.type) {
-    case 'DOSE':
-      return { ...state, dosedMl: state.dosedMl + action.ml };
-    case 'READ_PARAM':
-      return { ...state, readings: [...state.readings, action.reading] };
-    case 'TOGGLE_PUMP':
-      return { ...state, pumps: { ...state.pumps, [action.pump]: !state.pumps[action.pump] } };
+    case 'ADD_ITEM':
+      return { ...state, items: [...state.items, action.item] };
+    case 'REMOVE_ITEM':
+      return { ...state, items: state.items.filter((i) => i.sku !== action.sku) };
+    case 'APPLY_COUPON':
+      return { ...state, coupon: action.code };
     default:
       return state;
   }
@@ -95,10 +99,10 @@ function createStore(reducer, state) {
   };
 }
 
-const store = createStore(reefReducer, initialState);
-store.subscribe((s) => console.log('Render:', s.dosedMl, s.pumps));
-store.dispatch({ type: 'DOSE', ml: 12 });
-store.dispatch({ type: 'TOGGLE_PUMP', pump: 'wave' });`,
+const store = createStore(cartReducer, initialState);
+store.subscribe((s) => console.log('Render:', s.items.length, 'items', s.coupon ?? ''));
+store.dispatch({ type: 'ADD_ITEM', item: { sku: 'TSHIRT-M', price: 20 } });
+store.dispatch({ type: 'APPLY_COUPON', code: 'WELCOME10' });`,
   },
   related: ['observer', 'command', 'cqrs', 'state'],
 };

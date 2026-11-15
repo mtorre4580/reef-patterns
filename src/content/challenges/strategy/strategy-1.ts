@@ -4,34 +4,34 @@ export const strategy1: Challenge = {
   id: 'strategy-1',
   patternId: 'strategy',
   title: {
-    en: 'Doser with interchangeable methods',
-    es: 'Dosificadora con métodos intercambiables',
-    'pt-BR': 'Dosadora com métodos intercambiáveis',
+    en: 'Shipping cost calculator',
+    es: 'Calculadora de costo de envío',
+    'pt-BR': 'Calculadora de frete',
   },
   difficulty: 'media',
   story: {
-    en: 'The doser computes how much to add per day depending on the method: kalkwasser or Balling. The current code uses a switch and every new method means touching the class. Today someone wants to try a Triton-style method.',
-    es: 'La dosificadora calcula cuánto agregar por día según el método: kalkwasser o Balling. El código actual usa un switch y cada método nuevo obliga a tocar la clase. Hoy alguien quiere probar un método tipo Triton.',
+    en: 'The checkout computes shipping with a switch over the method name. Every new option (express, pickup, free over a threshold) means editing the class, and last time someone broke standard shipping.',
+    es: 'El checkout calcula el envío con un switch sobre el nombre del método. Cada opción nueva (express, retiro, gratis desde un monto) obliga a editar la clase, y la última vez alguien rompió el envío estándar.',
     'pt-BR':
-      'A dosadora calcula quanto adicionar por dia conforme o método: kalkwasser ou Balling. O código atual usa um switch e cada método novo obriga a mexer na classe. Hoje alguém quer testar um método tipo Triton.',
+      'O checkout calcula o frete com um switch sobre o nome do método. Cada opção nova (expresso, retirada, grátis acima de um valor) obriga a editar a classe, e da última vez alguém quebrou o frete padrão.',
   },
   instructions: {
-    en: 'Rewrite `Doser` so it receives a strategy:\n- Define `kalkwasser` and `balling` as `{ name, dose(ppm, liters) }` objects. Kalkwasser: `Math.round(ppm * liters * 0.54)` ml; Balling: `Math.round(ppm * liters * 0.012)` ml.\n- `new Doser(strategy)`, `setStrategy(strategy)` and `dailyDose(ppm, liters)`, which returns `{ method, ml }`.\n- It must work with any new strategy without modifying `Doser`. No `switch` and at most one `if`.',
-    es: 'Reescribí `Doser` para que reciba una estrategia:\n- Definí `kalkwasser` y `balling` como objetos `{ name, dose(ppm, liters) }`. Kalkwasser: `Math.round(ppm * liters * 0.54)` ml; Balling: `Math.round(ppm * liters * 0.012)` ml.\n- `new Doser(strategy)`, `setStrategy(strategy)` y `dailyDose(ppm, liters)` que devuelve `{ method, ml }`.\n- Tiene que funcionar con cualquier estrategia nueva sin modificar `Doser`. Sin `switch` y como mucho un `if`.',
+    en: 'Rewrite `ShippingCalculator` so it receives a strategy:\n- Define `standard` and `express` as `{ name, cost(order) }` objects. Standard: `5 + order.weightKg * 1`; Express: `12 + order.weightKg * 2`.\n- `new ShippingCalculator(strategy)`, `setStrategy(strategy)` and `quote(order)`, which returns `{ method, cost }`.\n- It must work with any new strategy without modifying `ShippingCalculator`. No `switch` and at most one `if`.',
+    es: 'Reescribí `ShippingCalculator` para que reciba una estrategia:\n- Definí `standard` y `express` como objetos `{ name, cost(order) }`. Standard: `5 + order.weightKg * 1`; Express: `12 + order.weightKg * 2`.\n- `new ShippingCalculator(strategy)`, `setStrategy(strategy)` y `quote(order)`, que devuelve `{ method, cost }`.\n- Tiene que funcionar con cualquier estrategia nueva sin modificar `ShippingCalculator`. Sin `switch` y como mucho un `if`.',
     'pt-BR':
-      'Reescreva `Doser` para que receba uma estratégia:\n- Defina `kalkwasser` e `balling` como objetos `{ name, dose(ppm, liters) }`. Kalkwasser: `Math.round(ppm * liters * 0.54)` ml; Balling: `Math.round(ppm * liters * 0.012)` ml.\n- `new Doser(strategy)`, `setStrategy(strategy)` e `dailyDose(ppm, liters)`, que devolve `{ method, ml }`.\n- Precisa funcionar com qualquer estratégia nova sem modificar `Doser`. Sem `switch` e no máximo um `if`.',
+      'Reescreva `ShippingCalculator` para receber uma estratégia:\n- Defina `standard` e `express` como objetos `{ name, cost(order) }`. Standard: `5 + order.weightKg * 1`; Express: `12 + order.weightKg * 2`.\n- `new ShippingCalculator(strategy)`, `setStrategy(strategy)` e `quote(order)`, que devolve `{ method, cost }`.\n- Precisa funcionar com qualquer estratégia nova sem modificar `ShippingCalculator`. Sem `switch` e no máximo um `if`.',
   },
-  starterCode: `class Doser {
+  starterCode: `class ShippingCalculator {
   constructor(method) {
     this.method = method;
   }
 
-  dailyDose(ppm, liters) {
+  quote(order) {
     switch (this.method) {
-      case 'kalkwasser':
-        return { method: 'Kalkwasser', ml: Math.round(ppm * liters * 0.54) };
-      case 'balling':
-        return { method: 'Balling', ml: Math.round(ppm * liters * 0.012) };
+      case 'standard':
+        return { method: 'Standard', cost: 5 + order.weightKg * 1 };
+      case 'express':
+        return { method: 'Express', cost: 12 + order.weightKg * 2 };
     }
   }
 }
@@ -39,28 +39,28 @@ export const strategy1: Challenge = {
   tests: [
     {
       name: {
-        en: 'kalkwasser computes the daily dose',
-        es: 'kalkwasser calcula la dosis diaria',
-        'pt-BR': 'kalkwasser calcula a dose diária',
+        en: 'standard computes the cost',
+        es: 'standard calcula el costo',
+        'pt-BR': 'standard calcula o custo',
       },
-      code: `expect(new Doser(kalkwasser).dailyDose(10, 300)).toEqual({ method: 'Kalkwasser', ml: 1620 });`,
+      code: `expect(new ShippingCalculator(standard).quote({ weightKg: 3 })).toEqual({ method: 'Standard', cost: 8 });`,
     },
     {
       name: {
-        en: 'balling computes the daily dose',
-        es: 'balling calcula la dosis diaria',
-        'pt-BR': 'balling calcula a dose diária',
+        en: 'express computes the cost',
+        es: 'express calcula el costo',
+        'pt-BR': 'express calcula o custo',
       },
-      code: `expect(new Doser(balling).dailyDose(10, 300)).toEqual({ method: 'Balling', ml: 36 });`,
+      code: `expect(new ShippingCalculator(express).quote({ weightKg: 3 })).toEqual({ method: 'Express', cost: 18 });`,
     },
     {
       name: {
-        en: 'accepts a new strategy without modifying Doser',
-        es: 'acepta una estrategia nueva sin modificar Doser',
-        'pt-BR': 'aceita uma estratégia nova sem modificar Doser',
+        en: 'accepts a new strategy without modifying the calculator',
+        es: 'acepta una estrategia nueva sin modificar la calculadora',
+        'pt-BR': 'aceita uma estratégia nova sem modificar a calculadora',
       },
-      code: `const triton = { name: 'Triton-style', dose: (ppm, liters) => ppm * liters };
-expect(new Doser(triton).dailyDose(2, 3)).toEqual({ method: 'Triton-style', ml: 6 });`,
+      code: `const pickup = { name: 'Store pickup', cost: () => 0 };
+expect(new ShippingCalculator(pickup).quote({ weightKg: 10 })).toEqual({ method: 'Store pickup', cost: 0 });`,
     },
     {
       name: {
@@ -68,9 +68,9 @@ expect(new Doser(triton).dailyDose(2, 3)).toEqual({ method: 'Triton-style', ml: 
         es: 'setStrategy cambia el método en caliente',
         'pt-BR': 'setStrategy troca o método na hora',
       },
-      code: `const doser = new Doser(kalkwasser);
-doser.setStrategy(balling);
-expect(doser.dailyDose(5, 100).method).toBe('Balling');`,
+      code: `const calculator = new ShippingCalculator(standard);
+calculator.setStrategy(express);
+expect(calculator.quote({ weightKg: 1 }).method).toBe('Express');`,
     },
     {
       name: {
@@ -78,10 +78,11 @@ expect(doser.dailyDose(5, 100).method).toBe('Balling');`,
         es: 'delega el cálculo en la estrategia',
         'pt-BR': 'delega o cálculo à estratégia',
       },
-      code: `const dose = fn(() => 7);
-const result = new Doser({ name: 'Spy', dose }).dailyDose(4, 50);
-expect(dose.calls).toEqual([[4, 50]]);
-expect(result.ml).toBe(7);`,
+      code: `const cost = fn(() => 7);
+const order = { weightKg: 2, subtotal: 40 };
+const result = new ShippingCalculator({ name: 'Spy', cost }).quote(order);
+expect(cost.calls).toEqual([[order]]);
+expect(result.cost).toBe(7);`,
     },
   ],
   checks: [
@@ -102,32 +103,32 @@ expect(result.ml).toBe(7);`,
   ],
   hints: {
     en: [
-      'A strategy is just an object with the same shape: `name` and `dose(ppm, liters)`.',
-      'Store the strategy in the constructor and delegate in `dailyDose`: `this.strategy.dose(ppm, liters)`.',
-      '`dailyDose` can return `{ method: this.strategy.name, ml: this.strategy.dose(ppm, liters) }`.',
+      'A strategy is just an object with the same shape: `name` and `cost(order)`.',
+      'Store the strategy in the constructor and delegate in `quote`: `this.strategy.cost(order)`.',
+      '`quote` can return `{ method: this.strategy.name, cost: this.strategy.cost(order) }`.',
     ],
     es: [
-      'Una estrategia es solo un objeto con la misma forma: `name` y `dose(ppm, liters)`.',
-      'Guardá la estrategia en el constructor y en `dailyDose` delegá: `this.strategy.dose(ppm, liters)`.',
-      '`dailyDose` puede devolver `{ method: this.strategy.name, ml: this.strategy.dose(ppm, liters) }`.',
+      'Una estrategia es solo un objeto con la misma forma: `name` y `cost(order)`.',
+      'Guardá la estrategia en el constructor y delegá en `quote`: `this.strategy.cost(order)`.',
+      '`quote` puede devolver `{ method: this.strategy.name, cost: this.strategy.cost(order) }`.',
     ],
     'pt-BR': [
-      'Uma estratégia é só um objeto com o mesmo formato: `name` e `dose(ppm, liters)`.',
-      'Guarde a estratégia no construtor e delegue em `dailyDose`: `this.strategy.dose(ppm, liters)`.',
-      '`dailyDose` pode devolver `{ method: this.strategy.name, ml: this.strategy.dose(ppm, liters) }`.',
+      'Uma estratégia é só um objeto com o mesmo formato: `name` e `cost(order)`.',
+      'Guarde a estratégia no construtor e delegue em `quote`: `this.strategy.cost(order)`.',
+      '`quote` pode devolver `{ method: this.strategy.name, cost: this.strategy.cost(order) }`.',
     ],
   },
-  solution: `const kalkwasser = {
-  name: 'Kalkwasser',
-  dose: (ppm, liters) => Math.round(ppm * liters * 0.54),
+  solution: `const standard = {
+  name: 'Standard',
+  cost: (order) => 5 + order.weightKg * 1,
 };
 
-const balling = {
-  name: 'Balling',
-  dose: (ppm, liters) => Math.round(ppm * liters * 0.012),
+const express = {
+  name: 'Express',
+  cost: (order) => 12 + order.weightKg * 2,
 };
 
-class Doser {
+class ShippingCalculator {
   constructor(strategy) {
     this.strategy = strategy;
   }
@@ -136,8 +137,8 @@ class Doser {
     this.strategy = strategy;
   }
 
-  dailyDose(ppm, liters) {
-    return { method: this.strategy.name, ml: this.strategy.dose(ppm, liters) };
+  quote(order) {
+    return { method: this.strategy.name, cost: this.strategy.cost(order) };
   }
 }
 `,

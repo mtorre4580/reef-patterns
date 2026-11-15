@@ -56,57 +56,55 @@ export const mvc: Pattern = {
   },
   example: {
     title: {
-      en: 'Water parameter panel',
-      es: 'Panel de parámetros del agua',
-      'pt-BR': 'Painel de parâmetros da água',
+      en: 'Todo list with MVC',
+      es: 'Lista de tareas con MVC',
+      'pt-BR': 'Lista de tarefas com MVC',
     },
     scenario: {
-      en: 'The model stores readings and knows when a value is out of range; the view only builds text; the controller receives the reading the user enters.',
-      es: 'El modelo guarda lecturas y sabe cuándo un valor está fuera de rango; la vista solo arma texto; el controlador recibe la lectura que carga el usuario.',
+      en: 'The model stores tasks and knows which ones are overdue; the view only builds text; the controller receives what the user types.',
+      es: 'El modelo guarda tareas y sabe cuáles están vencidas; la vista solo arma texto; el controlador recibe lo que escribe el usuario.',
       'pt-BR':
-        'O modelo guarda leituras e sabe quando um valor está fora da faixa; a visão só monta texto; o controlador recebe a leitura que o usuário digita.',
+        'O modelo guarda tarefas e sabe quais estão atrasadas; a visão só monta texto; o controlador recebe o que o usuário digita.',
     },
-    code: `class ParamsModel {
+    code: `class TodoModel {
   #listeners = [];
-  readings = {};
-  ranges = { kh: [7, 9], ca: [400, 450], mg: [1250, 1400] };
+  todos = [];
 
-  set(param, value) {
-    this.readings[param] = value;
+  add(title, due) {
+    this.todos.push({ title, due });
     this.#listeners.forEach((fn) => fn());
   }
-  isOk(param) {
-    const [min, max] = this.ranges[param];
-    return this.readings[param] >= min && this.readings[param] <= max;
+  isOverdue(todo, today) {
+    return todo.due < today;
   }
   onChange(fn) {
     this.#listeners.push(fn);
   }
 }
 
-const ParamsView = {
-  render(model) {
-    return Object.keys(model.readings)
-      .map((p) => (model.isOk(p) ? '✓ ' : '✗ ') + p.toUpperCase() + ' ' + model.readings[p])
+const TodoView = {
+  render(model, today) {
+    return model.todos
+      .map((t) => (model.isOverdue(t, today) ? '! ' : '- ') + t.title + ' (' + t.due + ')')
       .join('\\n');
   },
 };
 
-class ParamsController {
-  constructor(model, view, output) {
+class TodoController {
+  constructor(model, view, output, today) {
     this.model = model;
-    model.onChange(() => output(view.render(model)));
+    model.onChange(() => output(view.render(model, today)));
   }
-  submitReading(param, raw) {
-    const value = Number(raw);
-    if (Number.isNaN(value)) throw new Error('Enter a number');
-    this.model.set(param, value);
+  submit(rawTitle, due) {
+    const title = rawTitle.trim();
+    if (!title) throw new Error('The title is required');
+    this.model.add(title, due);
   }
 }
 
-const controller = new ParamsController(new ParamsModel(), ParamsView, console.log);
-controller.submitReading('kh', '8.3');
-controller.submitReading('ca', '380');`,
+const controller = new TodoController(new TodoModel(), TodoView, console.log, '2026-03-10');
+controller.submit('Renew SSL certificate', '2026-03-01');
+controller.submit('  Ship v2.4  ', '2026-03-20');`,
   },
   related: ['mvvm', 'container-presentational', 'observer'],
 };
