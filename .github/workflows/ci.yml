@@ -42,6 +42,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # Types are already checked in the `check` job: skip the tsc step of `pnpm build`
       - run: pnpm exec vite build
+      - run: pnpm exec tsx scripts/prerender.ts
       - run: pnpm check:bundle
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

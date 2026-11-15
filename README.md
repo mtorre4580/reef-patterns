@@ -33,8 +33,10 @@ pnpm dev
 ## Deploy
 
 GitHub Pages: the `.github/workflows/deploy.yml` workflow builds and publishes on every push to
-`main` (it can also be run manually). The app uses `HashRouter` because Pages has no SPA
-fallback, and Vite builds with `base: '/reef-patterns/'`.
+`main` (it can also be run manually). The app uses real URLs (`createBrowserRouter`); since Pages
+has no SPA fallback, `scripts/prerender.ts` writes one static HTML file per route (with its own
+title, description and JSON-LD), a `404.html` fallback and `sitemap.xml`. Vite builds with
+`base: '/reef-patterns/'`.
 
 ## Contributing
 

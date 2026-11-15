@@ -1,6 +1,6 @@
 /**
- * Scrolls to an element and moves focus to it without touching `location.hash`, which belongs
- * to the HashRouter on GitHub Pages.
+ * Scrolls to an element and moves focus to it without touching `location.hash`, so in-page
+ * jumps do not add history entries or trigger a router navigation.
  */
 export const scrollToId = (id: string): void => {
   const target = document.getElementById(id);

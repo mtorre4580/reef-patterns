@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://mtorre4580.github.io/reef-patterns/sitemap.xml

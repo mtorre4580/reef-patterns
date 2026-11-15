@@ -5,8 +5,8 @@
       "startServerReadyPattern": "Local",
       "url": [
         "http://localhost:4173/reef-patterns/",
-        "http://localhost:4173/reef-patterns/#/patterns/strategy",
-        "http://localhost:4173/reef-patterns/#/playground"
+        "http://localhost:4173/reef-patterns/patterns/strategy/",
+        "http://localhost:4173/reef-patterns/playground/"
       ],
       "numberOfRuns": 3,
       "settings": {

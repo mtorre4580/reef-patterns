@@ -25,7 +25,7 @@ which wins whenever the two disagree.
 | Persistence | localStorage | Progress, drafts per challenge, locale and sound preference. |
 | Content domain | Real-world development scenarios | Checkout, payments, API clients, feature flags… Nobody needs domain knowledge to understand an exercise. The nautical theme stays in the design. |
 | i18n | Custom Context + typed dictionaries | English by default, plus Spanish and Brazilian Portuguese, with no extra dependencies. |
-| Deploy | GitHub Pages + `HashRouter` | Free static hosting next to the repo; hash routes avoid 404s on refresh. |
+| Deploy | GitHub Pages + `createBrowserRouter` | Free static hosting next to the repo; real URLs are indexable, a build-time prerender gives each route its own HTML file. |
 
 ## Visual identity
 

@@ -6,16 +6,16 @@ const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
 const views: { name: string; path: string; disableRules?: string[] }[] = [
   { name: 'catalog', path: './' },
-  { name: 'pattern detail', path: './#/patterns/strategy' },
+  { name: 'pattern detail', path: './patterns/strategy' },
   {
     name: 'helm',
-    path: './#/playground',
+    path: './playground',
     // The wheel draws pattern names on its sectors inside an aria-hidden SVG. They decorate the
     // control, they are not its label, so "Spin the helm" cannot contain them.
     disableRules: ['label-content-name-mismatch'],
   },
-  { name: 'playground', path: './#/playground?challenge=observer-1' },
-  { name: '404', path: './#/no-such-page' },
+  { name: 'playground', path: './playground?challenge=observer-1' },
+  { name: '404', path: './no-such-page' },
 ];
 
 async function audit(page: Page, disableRules: string[] = []) {
@@ -38,13 +38,15 @@ test.beforeEach(async ({ page }) => {
 for (const view of views) {
   test(`${view.name} has no WCAG 2.2 AA violations`, async ({ page }) => {
     await page.goto(view.path);
+    // Audit the app, not the prerendered static markup it replaces on load
+    await expect(page.locator('[data-prerender]')).toHaveCount(0);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     expect(await audit(page, view.disableRules)).toEqual([]);
   });
 }
 
 test('the helm spins from the keyboard and opens a challenge', async ({ page }) => {
-  await page.goto('./#/playground');
+  await page.goto('./playground');
   const helm = page.getByRole('button', { name: 'Spin the helm' });
   await helm.focus();
   await expect(helm).toBeFocused();
@@ -54,4 +56,19 @@ test('the helm spins from the keyboard and opens a challenge', async ({ page }) 
   await expect(start).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/challenge=[a-z0-9-]+/);
+});
+
+test('legacy hash links redirect to real URLs', async ({ page }) => {
+  await page.goto('./#/patterns/strategy');
+  await expect(page).toHaveURL(/\/reef-patterns\/patterns\/strategy\/?$/);
+  await expect(page.getByRole('heading', { level: 1, name: /Strategy/ })).toBeVisible();
+});
+
+test('a pattern page opened directly ships its own metadata', async ({ page }) => {
+  await page.goto('./patterns/observer/');
+  await expect(page).toHaveTitle(/Observer/);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    'https://mtorre4580.github.io/reef-patterns/patterns/observer/',
+  );
 });
