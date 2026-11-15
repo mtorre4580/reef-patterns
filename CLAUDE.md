@@ -40,6 +40,7 @@ knowledge to understand an exercise.
 | Static checks | acorn + acorn-walk | Per-challenge AST rules |
 | Tests | Vitest + React Testing Library + `@testing-library/user-event` + jsdom | |
 | Lint/format | ESLint (flat config) + Prettier | |
+| Git hooks | husky + commitlint (`@commitlint/config-conventional`) | `.husky/pre-push` runs `pnpm lint`; `.husky/commit-msg` validates the message |
 | CI | GitHub Actions | lint, typecheck, validate content, unit tests, build + bundle budget, `pnpm audit`, dependency review, Playwright + axe (both themes), Lighthouse CI, CodeQL |
 | Browser tests | Playwright + `@axe-core/playwright` | `e2e/`, runs against the production build |
 | Performance | Lighthouse CI (`lighthouserc.json`) + `bundle-budget.json` | Gzip limits per chunk |
@@ -277,7 +278,10 @@ register it in `content/challenges/index.ts`; run `pnpm validate:content`.
 ## Git
 
 - Main branch `main`. Branches `feat/…`, `fix/…`, `content/…`, `docs/…`, `chore/…`.
-- Conventional commits: `feat:`, `fix:`, `content:`, `test:`, `chore:`, `docs:`.
+- Conventional commits: `feat:`, `fix:`, `content:`, `test:`, `chore:`, `docs:` (also `refactor`, `perf`,
+  `style`, `ci`, `build`, `revert`). Enforced by the `commit-msg` hook (`commitlint.config.js`).
+- Hooks are installed by `pnpm install` (`prepare: husky`). `pre-push` runs `pnpm lint` and blocks the
+  push if it fails. Do not skip hooks with `--no-verify`.
 - One PR per iteration. When PRs are stacked, retarget each one to `main` before merging it.
 - Update the “Status” section of this file when closing each phase.
 
