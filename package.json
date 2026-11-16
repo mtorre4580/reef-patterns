@@ -53,7 +53,7 @@
     "fuse.js": "^7.5.0",
     "lucide-react": "^1.72.0",
     "monaco-editor": "^0.57.0",
-    "motion": "^14.13.0",
+    "motion": "^14.14.0",
     "radix-ui": "^1.8.1",
     "react": "19.3.1",
     "react-dom": "19.3.1",
